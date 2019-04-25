@@ -5,8 +5,9 @@ import com.luxoft.falcon.dao.SpiderDbConnector;
 import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.ConfigDataSpider;
 import com.luxoft.falcon.model.Pon;
-import com.luxoft.falcon.model.SpiderError;
+import com.luxoft.falcon.model.MapError;
 import lombok.extern.slf4j.Slf4j;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -24,12 +25,10 @@ public class ServletAnalyseService {
     private static Connection con = null;
 
 
-
-    public static LinkedList<SpiderError> processSpider(
-            Checklist checklist, Pon pon) {
+    public static LinkedList<MapError> processSpider(Checklist checklist, Pon pon) {
 
 //        StringBuilder result = new StringBuilder();
-        LinkedList<SpiderError> spiderErrors = new LinkedList<>();
+        LinkedList<MapError> spiderErrors = new LinkedList<>();
 
         log.info("**** in ServletAnalyseService.processSpider() ****");
 
@@ -41,18 +40,18 @@ public class ServletAnalyseService {
 
             /* Iterate over SPIDER*/
             for (Map.Entry<String, Boolean> entry : checklist.getSpiderSteps().entrySet()) {
-                log.info(String.format("*** Iterate over spider steps [{}:{}] ***"), entry.getKey(), entry.getValue().toString());
+                log.info(String.format("*** Iterate over spider steps [{}:{}] ***"),
+                        entry.getKey(), entry.getValue().toString());
 
                 PreparedStatement pstmt;
                 ResultSet resultSet;
 
 
-
                 try {
-                    if(pon.getAutocomplete()) {
+                    if (pon.getAutocomplete()) {
                         pstmt = con.prepareStatement(configDataSpider.getQueryLike());
                         pstmt.setString(1, "%" + pon.getName() + "%");
-                    }else{
+                    } else {
                         pstmt = con.prepareStatement(configDataSpider.getQueryAccurate());
                         pstmt.setString(1, pon.getName());
                     }
@@ -63,40 +62,43 @@ public class ServletAnalyseService {
 
 
                     /* Save query to display it in browser*/
-                    configDataSpider.setQueryFinal(pstmt.toString());
+                    //configDataSpider.setQueryFinal(pstmt.toString());
                     pon.setQueryFull(pstmt.toString());
-                    log.info("SQL = " + pstmt.toString());
+                    //log.info("SQL = " + pstmt.toString());
 
 
                     resultSet = pstmt.executeQuery();
 
 
+
                     /* Extracts data from resultSet and appends ErrorList to spiderData entity (by arguments)*/
                     //DataExtractor.getData(resultSet, spiderData);
 
-                    if (!resultSet.next()){
-                        break;
+                    if (!resultSet.isBeforeFirst()) {
+                        log.info("***************************** There is no Spider errors *****************");
+                        pon.setNoSpiderErrorsPresent(true);
 
-                    } else {
-                        while (resultSet.next()) {
+                    }
 
-
-                            String fullName = resultSet.getString("Task");
-                            String javaClassError = resultSet.getString("JAVA_CLASS_ERROR");
+                    while (resultSet.next()) {
 
 
+                        String fullName = resultSet.getString("Task");
+                        String javaClassError = resultSet.getString("JAVA_CLASS_ERROR");
+                        String fullQuery = pstmt.toString();
 
-                            SpiderError spiderError = new SpiderError(fullName, javaClassError);
-                            spiderErrors.add(spiderError);
-                        }
+
+                        MapError spiderError = new MapError(fullName, javaClassError, fullQuery);
+                        spiderErrors.add(spiderError);
                     }
 
 
-
-
                     resultSet.close();
+
+
                     pstmt.close();
                 } catch (Exception e) {
+                    log.error(String.format("!!!!!!!!!! Execute Query failed on (%s)", pon.getQueryFull()));
                     log.error(e.getMessage());
                 }
 
@@ -114,15 +116,6 @@ public class ServletAnalyseService {
 
         return spiderErrors;
     }
-
-
-
-
-
-
-
-
-
 
 
 }

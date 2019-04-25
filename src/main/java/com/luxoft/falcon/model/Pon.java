@@ -24,10 +24,18 @@ public final class Pon {
 
     @Getter
     @Setter
-    private LinkedList<SpiderError> spiderErrors;
+    private LinkedList<MapError> spiderErrors;
     @Getter
     @Setter
-    private Map<String, Boolean> birt;
+    private Boolean noSpiderErrorsPresent = false;
+
+    @Getter
+    @Setter
+    private LinkedList<MapError> birt;
+    @Getter
+    @Setter
+    private Boolean noBirtErrorsPresent = false;
+
     @Getter
     @Setter
     private Map<String, Boolean> nds;

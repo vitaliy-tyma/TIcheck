@@ -55,7 +55,7 @@ It breaks mark-up - cause is not detected!!!
     body {
     min-height: 100%;
     overflow-y: scroll;
-    min-width: 700px;
+    min-width: 500px;
     background-color: #F5F6F7;
     }
 

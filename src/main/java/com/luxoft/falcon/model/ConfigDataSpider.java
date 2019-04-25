@@ -41,9 +41,9 @@ public class ConfigDataSpider {
             "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
             "        LIMIT ?";
 
-    @Getter
-    @Setter
-    private String queryFinal = "";
+//    @Getter
+//    @Setter
+//    private String queryFinal = "";
 
 
 

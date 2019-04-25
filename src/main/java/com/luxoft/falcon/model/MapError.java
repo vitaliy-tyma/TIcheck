@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
-public class SpiderError{
+public class MapError {
     @Getter
     private String fullName;
     @Getter
     private String javaClassError;
+    @Getter
+    private String queryFull;
 }

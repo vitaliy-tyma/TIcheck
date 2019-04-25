@@ -1,8 +1,8 @@
 package com.luxoft.falcon.model;
 
 import lombok.*;
-
-/** Entity/Data/POJO to connect to the sources */
+/* NOT USED HERE!!!!!!!!!!!!!!*/
+/* Entity/Data/POJO to connect to the sources */
 @Getter
 @Setter
 @NoArgsConstructor
