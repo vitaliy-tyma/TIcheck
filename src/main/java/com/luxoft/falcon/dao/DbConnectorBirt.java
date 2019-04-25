@@ -1,9 +1,12 @@
 package com.luxoft.falcon.dao;
 
+import com.luxoft.falcon.model.ConfigDataBirt;
 import com.luxoft.falcon.model.ConfigDataSpider;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 /**
  * Contains method to get data from Spider database
@@ -22,15 +25,15 @@ import java.sql.*;
  * In case of exception returns text of error in SpiderDataClass.setJdbcError
  */
 @Slf4j
-public class SpiderDbConnector {
+public class DbConnectorBirt {
 
     private static Connection con;
 
-    public static Connection connectDatabase(ConfigDataSpider configData) throws ClassNotFoundException, SQLException {
+    public static Connection connectDatabase(ConfigDataBirt configData) throws ClassNotFoundException, SQLException {
 
         log.debug("********** Run connectDatabase **********");
 
-            Class.forName(configData.getJdbcDriver());
+            //Class.forName(configData.getJdbcDriver());
             con = DriverManager.getConnection(
                     configData.getJdbcUrl(),
                     configData.getJdbcLogin(),

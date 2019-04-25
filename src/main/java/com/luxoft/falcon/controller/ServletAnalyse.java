@@ -4,7 +4,8 @@ import com.luxoft.falcon.config.MainConfig;
 import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.Pon;
 import com.luxoft.falcon.model.MapError;
-import com.luxoft.falcon.service.ServletAnalyseService;
+import com.luxoft.falcon.service.ServiceAnalyseBirt;
+import com.luxoft.falcon.service.ServiceAnalyseSpider;
 import com.luxoft.falcon.util.Loader;
 import lombok.extern.slf4j.Slf4j;
 
@@ -83,12 +84,6 @@ public class ServletAnalyse extends HttpServlet {
 
         Checklist checklist = new Checklist();
         StringBuilder result = new StringBuilder();
-
-
-        LinkedList<MapError> spiderErrors;
-        spiderErrors = ServletAnalyseService.processSpider(checklist, pon);
-        pon.setSpiderErrors(spiderErrors);
-
         result.append("<p><h3>Automated TI checklist analysis results:</h3></p>");
         result.append(
                 String.format(
@@ -96,6 +91,17 @@ public class ServletAnalyse extends HttpServlet {
                         pon.getName(),
                         pon.getIteration(),
                         pon.getAutocomplete()));
+
+
+
+
+
+        /* PROCESS SPIDER ERRORS*/
+        LinkedList<MapError> spiderErrors;
+        spiderErrors = ServiceAnalyseSpider.processSpider(checklist, pon);
+        pon.setSpiderErrors(spiderErrors);
+
+
 
         result.append("<p>1) Spider check</p>");
 
@@ -124,7 +130,10 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
-
+        /* PROCESS BIRT ERRORS*/
+        LinkedList<MapError> birtErrors;
+        birtErrors = ServiceAnalyseBirt.processBirt(checklist, pon);
+        pon.setSpiderErrors(birtErrors);
 
 
 

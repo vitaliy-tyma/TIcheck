@@ -1,11 +1,9 @@
 package com.luxoft.falcon.service;
 
 import com.luxoft.falcon.config.MainConfig;
-import com.luxoft.falcon.dao.SpiderDbConnector;
-import com.luxoft.falcon.model.Checklist;
-import com.luxoft.falcon.model.ConfigDataSpider;
-import com.luxoft.falcon.model.Pon;
-import com.luxoft.falcon.model.MapError;
+import com.luxoft.falcon.dao.DbConnectorBirt;
+import com.luxoft.falcon.dao.DbConnectorSpider;
+import com.luxoft.falcon.model.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -19,28 +17,28 @@ import java.util.Map;
  * Is used to process TI checklist by data source
  */
 @Slf4j
-public class ServletAnalyseService {
+public class ServiceAnalyseBirt {
 
-    private static ConfigDataSpider configDataSpider = new ConfigDataSpider();
+    private static ConfigDataBirt configDataBirt = new ConfigDataBirt();
     private static Connection con = null;
 
 
-    public static LinkedList<MapError> processSpider(Checklist checklist, Pon pon) {
+    public static LinkedList<MapError> processBirt(Checklist checklist, Pon pon) {
 
 //        StringBuilder result = new StringBuilder();
         LinkedList<MapError> spiderErrors = new LinkedList<>();
 
-        log.info("**** in ServletAnalyseService.processSpider() ****");
+        log.info("**** in ServiceAnalyseBirt.processBirt() ****");
 
 
         try {
 
-            con = SpiderDbConnector.connectDatabase(configDataSpider);
+            con = DbConnectorBirt.connectDatabase(configDataBirt);
 
 
-            /* Iterate over SPIDER*/
-            for (Map.Entry<String, Boolean> entry : checklist.getSpiderSteps().entrySet()) {
-                log.info(String.format("*** Iterate over spider steps [{}:{}] ***"),
+            /* Iterate over BIRT*/
+            for (Map.Entry<String, Boolean> entry : checklist.getBirtSteps().entrySet()) {
+                log.info(String.format("*** Iterate over birt steps [{}:{}] ***"),
                         entry.getKey(), entry.getValue().toString());
 
                 PreparedStatement pstmt;
@@ -49,16 +47,16 @@ public class ServletAnalyseService {
 
                 try {
                     if (pon.getAutocomplete()) {
-                        pstmt = con.prepareStatement(configDataSpider.getQueryLike());
-                        pstmt.setString(1, "%" + pon.getName() + "%");
+                        pstmt = con.prepareStatement(configDataBirt.getQueryLike());
+                        pstmt.setString(1, "%" + pon.getName() + "%" + Integer.valueOf(pon.getIteration()));
                     } else {
-                        pstmt = con.prepareStatement(configDataSpider.getQueryAccurate());
-                        pstmt.setString(1, pon.getName());
+                        pstmt = con.prepareStatement(configDataBirt.getQueryAccurate());
+                        pstmt.setString(1, pon.getName()+ "_R" + Integer.valueOf(pon.getIteration()));
                     }
 
-                    pstmt.setInt(2, pon.getIteration());
-                    pstmt.setString(3, entry.getKey());
-                    pstmt.setInt(4, MainConfig.getQUERY_LIMIT());
+                    //pstmt.setInt(2, pon.getIteration());
+                    pstmt.setString(2, entry.getKey());
+                    pstmt.setInt(3, MainConfig.getQUERY_LIMIT());
 
 
                     /* Save query to display it in browser*/
@@ -75,7 +73,7 @@ public class ServletAnalyseService {
                     //DataExtractor.getData(resultSet, spiderData);
 
                     if (!resultSet.isBeforeFirst()) {
-                        log.info("***************************** There is no Spider errors *****************");
+                        log.info("***************************** There is no Birt errors *****************");
                         pon.setNoSpiderErrorsPresent(true);
 
                     }
@@ -84,12 +82,12 @@ public class ServletAnalyseService {
 
 
                         String fullName = resultSet.getString("Task");
-                        String javaClassError = resultSet.getString("JAVA_CLASS_ERROR");
+                        String testName = resultSet.getString("TEST_NAME");
                         String fullQuery = pstmt.toString();
 
 
-                        MapError spiderError = new MapError(fullName, javaClassError, fullQuery);
-                        spiderErrors.add(spiderError);
+                        MapError birtError = new MapError(fullName, testName, fullQuery);
+                        spiderErrors.add(birtError);
                     }
 
 
@@ -98,7 +96,6 @@ public class ServletAnalyseService {
 
                     pstmt.close();
                 } catch (Exception e) {
-                    log.error(String.format("!!!!!!!!!! Execute Query failed on (%s)", pon.getQueryFull()));
                     log.error(e.getMessage());
                 }
 
@@ -111,6 +108,9 @@ public class ServletAnalyseService {
             log.error(e.getMessage());
         } catch (NullPointerException e) {
             log.error(e.getMessage());
+        } finally {
+            log.error(String.format("!!!!!!!!!! Birt connect failed with (%s)", pon.getQueryFull()));
+
         }
 
 
