@@ -1,58 +1,128 @@
 package com.luxoft.falcon.service;
 
-import com.luxoft.falcon.configuration.MainConfig;
-import com.luxoft.falcon.model.ConfigData;
-import com.luxoft.falcon.util.ReadXmlFile;
+import com.luxoft.falcon.config.MainConfig;
+import com.luxoft.falcon.dao.SpiderDbConnector;
+import com.luxoft.falcon.model.Checklist;
+import com.luxoft.falcon.model.ConfigDataSpider;
+import com.luxoft.falcon.model.Pon;
+import com.luxoft.falcon.model.SpiderError;
 import lombok.extern.slf4j.Slf4j;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.LinkedList;
+import java.util.Map;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-/** Is used to process TI checklist */
+/**
+ * Is used to process TI checklist by data source
+ */
 @Slf4j
 public class ServletAnalyseService {
-//    private static final String CONFIG_FILE_NAME = MainConfig.getCONFIG_FILE_NAME();
-    private static final String CONFIG_PATH =
-                    MainConfig.getCONFIG_PATH()+
-                    MainConfig.getCONFIG_FILE_NAME();
 
-    /**Shows only ONE config - must be updated to process whole XML-file!!!!!!!!!!!*/
-    public static String service(String sourceName) {
+    private static ConfigDataSpider configDataSpider = new ConfigDataSpider();
+    private static Connection con = null;
 
-        StringBuilder result = new StringBuilder();
-        ReadXmlFile rXml = new ReadXmlFile();
-        Path currentRelativePath = null;
+
+
+    public static LinkedList<SpiderError> processSpider(
+            Checklist checklist, Pon pon) {
+
+//        StringBuilder result = new StringBuilder();
+        LinkedList<SpiderError> spiderErrors = new LinkedList<>();
+
+        log.info("**** in ServletAnalyseService.processSpider() ****");
+
 
         try {
-            /** Get current path to be displayed in case of error */
-            currentRelativePath = Paths.get("");
 
-            ConfigData configData = rXml.readXmlFile(CONFIG_PATH, sourceName);
+            con = SpiderDbConnector.connectDatabase(configDataSpider);
 
-            /*********************************************/
-            result.append("<p>Data from <b>" + CONFIG_PATH + "</b> and SOURCE <b>" + sourceName + "</b>:</p>");
-            result.append("<p>");
 
-            /** For output in HTML format*/
-            result.append("<b>Run</b> = " + configData.getRun() + "<br/>");
-            result.append("<b>Market</b> = " + configData.getMarket() + "<br/>");
-            result.append("<b>Project</b> = " + configData.getProject() + "<br/>");
-            result.append("<b>Iteration</b> = " + configData.getIteration() + "<br/><br/>");
-            result.append("<b>JdbcDriver</b> = " + configData.getJdbcDriver() + "<br/>");
-            result.append("<b>JdbcUrl</b> = " + configData.getJdbcUrl() + "<br/>");
-            result.append("<b>JdbcLogin</b> = " + configData.getJdbcLogin() + "<br/>");
-            result.append("<b>JdbcPassword</b> = " + configData.getJdbcPassword() + "<br/><br/>");
-            result.append("<b>Query for SPIDER</b> = <font color = green>" + configData.getQuery() + "</font><br/>");
-            result.append("</p>");
+            /* Iterate over SPIDER*/
+            for (Map.Entry<String, Boolean> entry : checklist.getSpiderSteps().entrySet()) {
+                log.info(String.format("*** Iterate over spider steps [{}:{}] ***"), entry.getKey(), entry.getValue().toString());
 
-        } catch (Exception e) {
-            log.error(String.valueOf(e));
+                PreparedStatement pstmt;
+                ResultSet resultSet;
 
-            result.append("<font color = red>" + String.valueOf(e) + "</font>" +
-                    "<br/>" +
-                    "File <b>" + CONFIG_PATH + "</b> must be in <b>" +
-                    currentRelativePath.toAbsolutePath().toString() + "</b>");
+
+
+                try {
+                    if(pon.getAutocomplete()) {
+                        pstmt = con.prepareStatement(configDataSpider.getQueryLike());
+                        pstmt.setString(1, "%" + pon.getName() + "%");
+                    }else{
+                        pstmt = con.prepareStatement(configDataSpider.getQueryAccurate());
+                        pstmt.setString(1, pon.getName());
+                    }
+
+                    pstmt.setInt(2, pon.getIteration());
+                    pstmt.setString(3, entry.getKey());
+                    pstmt.setInt(4, MainConfig.getQUERY_LIMIT());
+
+
+                    /* Save query to display it in browser*/
+                    configDataSpider.setQueryFinal(pstmt.toString());
+                    pon.setQueryFull(pstmt.toString());
+                    log.info("SQL = " + pstmt.toString());
+
+
+                    resultSet = pstmt.executeQuery();
+
+
+                    /* Extracts data from resultSet and appends ErrorList to spiderData entity (by arguments)*/
+                    //DataExtractor.getData(resultSet, spiderData);
+
+                    if (!resultSet.next()){
+                        break;
+
+                    } else {
+                        while (resultSet.next()) {
+
+
+                            String fullName = resultSet.getString("Task");
+                            String javaClassError = resultSet.getString("JAVA_CLASS_ERROR");
+
+
+
+                            SpiderError spiderError = new SpiderError(fullName, javaClassError);
+                            spiderErrors.add(spiderError);
+                        }
+                    }
+
+
+
+
+                    resultSet.close();
+                    pstmt.close();
+                } catch (Exception e) {
+                    log.error(e.getMessage());
+                }
+
+
+            }
+            con.close();
+        } catch (SQLException e) {
+            log.error(e.getMessage());
+        } catch (ClassNotFoundException e) {
+            log.error(e.getMessage());
+        } catch (NullPointerException e) {
+            log.error(e.getMessage());
         }
-        return result.toString();
+
+
+        return spiderErrors;
     }
+
+
+
+
+
+
+
+
+
+
+
 }

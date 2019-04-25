@@ -1,132 +1,129 @@
 package com.luxoft.falcon.controller;
 
-import com.luxoft.falcon.configuration.MainConfig;
+import com.luxoft.falcon.config.MainConfig;
+import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.Pon;
+import com.luxoft.falcon.model.SpiderError;
 import com.luxoft.falcon.service.ServletAnalyseService;
+import com.luxoft.falcon.util.Loader;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.LinkedList;
 
-/** Servlet is launched from web-browser and reads config from XML file */
+/**
+ * Servlet is launched from web-browser and starts all processes
+ */
 @Slf4j
 public class ServletAnalyse extends HttpServlet {
-
-    private Pon pon;
-
-    private static final String SOURCE_NAME = MainConfig.getSOURCE_NAME_SPIDER();
-
-    private static final String PON_NAME_REQUEST_PARAMETER_KEY = "PON_name";
-    public static final String PON_NAME_REQUEST_PARAMETER_VALUE = "PON_name";
+    private Pon pon = new Pon();
 
 
     @Override
     public void init() throws ServletException {
         super.init();
-        pon = Pon.getInstance();
+        Loader loader = new Loader();
+        loader.init();
     }
-
-//    @Override
-//    public void init(ServletConfig config) throws ServletException {
-//        super.init(config);
-////        ServletContext sc = config.getServletContext();
-//
-//
-//    }
 
 
 
     @Override
     public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
-
-        log.info("*** Start doGet");
+            throws IOException {
 
 
-        final String ponName = httpServletRequest.getParameter(PON_NAME_REQUEST_PARAMETER_KEY);
-        log.info(ponName);
-        httpServletRequest.setAttribute(PON_NAME_REQUEST_PARAMETER_VALUE, ponName);
+        log.info("******** ServletAnalyse.doGet() started");
+
+        final String ponName = httpServletRequest.getParameter(MainConfig.getPON_NAME_REQUEST_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getPON_NAME_REQUEST_PARAMETER_VALUE(), ponName);
+
+        final String ponIteration = httpServletRequest.getParameter(MainConfig.getPON_ITERATION_REQUEST_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_REQUEST_PARAMETER_KEY(), ponName);
+
+        final String autocompletePon = httpServletRequest.getParameter(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY(), ponName);
+
+        log.info(
+                String.format(
+                        "******* Processing with the request: name = <b>%s</b>; iteration = <b>%s</b>; autocomplete = <b>%s</b>",
+                        ponName,
+                        ponIteration,
+                        autocompletePon));
+
 
 
         pon.setName(ponName);
+        pon.setIteration(Integer.parseInt(ponIteration));
 
-        pon.setOutput("test out");
-        Map <String, String> m = new HashMap<String, String>() {{
-            put("Step1","Res1");
-            put("Step2","Res2");
-        }};
-
-        pon.setResult(m);
-        log.info(String.format("pon = %s", pon.toString()));
-
-
-//////////////////////////////////////////////////////////////////////////////////////
-//httpServletRequest.getRequestDispatcher("/analyse.jsp").forward(httpServletRequest, httpServletResponse);
-//////////////////////////////////////////////////////////////////////////////////////
-
-
-       httpServletResponse.getWriter().print("resultX");
-
-    }
-
-
-
-
-
-    @Override
-    public void doPost(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
-            throws ServletException, IOException {
-        httpServletRequest.setCharacterEncoding("UTF-8");
-        log.info("*** Start doPost");
-
-
-        String action = httpServletRequest.getParameter("action");
-
-
-        if ("submit".equals(action)) {
-//            pon.setId(Integer.parseInt(request.getParameter("id")));
-            final String ponName = httpServletRequest.getParameter(PON_NAME_REQUEST_PARAMETER_KEY);
-            log.info(ponName);
-
-            pon.setName(ponName);
-//            pon.setSerial(request.getParameter("serial"));
+        if (autocompletePon == null){
+            pon.setAutocomplete(false);
+        } else {
+            //.equals("on")
+            pon.setAutocomplete(true);
         }
-//        assert !Objects.isNull(httpServletRequest) : "Request required for greeting request";
-//        assert !Objects.isNull(httpServletResponse) : "Response required for greeting request";
+
+
+        /* Read all sections to define check steps - fill in Keys*/
+        /* !!!!!!!!!!!!!!!!!!!!!*/
+
+
+        Checklist checklist = new Checklist();
+        StringBuilder result = new StringBuilder();
+
+
+        LinkedList<SpiderError> spiderErrors;
+        spiderErrors = ServletAnalyseService.processSpider(checklist, pon);
+        pon.setSpiderErrors(spiderErrors);
+
+        result.append(
+                String.format(
+                        "<p>Spider TI check for request <b>%s</b>, iteration <b>%s</b>, autocomplete <b>%s</b></p>\n",
+                        pon.getName(),
+                        pon.getIteration(),
+                        pon.getAutocomplete()));
+
+        for (SpiderError spiderError: pon.getSpiderErrors()){
+            result.append(
+                    String.format(
+                            "<p>Full Name = %s, Error = %s</p>\n",
+                            spiderError.getFullName(),
+                            spiderError.getJavaClassError()));
+        }
+
+        /* SQL request in Spoiler*/
+        result.append("<div><details><summary><u>Open to see the Query</u></summary>\n" +
+                        "<i><b><font color = green>");
+        result.append(pon.getQueryFull());
+        result.append("</font></b></i></details></div>\n");
 
 
 
 
-        log.info(pon.getName());
-
-//        final String ponNameValue = String.format("PON value is %s", ponName);
-//        log.info(ponNameValue);
 
 
-
-        httpServletRequest.setAttribute(PON_NAME_REQUEST_PARAMETER_VALUE, pon.getName());
-        httpServletRequest.getRequestDispatcher("/analyse.jsp").forward(httpServletRequest, httpServletResponse);
+        /* To be filled after analysis only*/
 
 
-        ////httpServletRequest.setAttribute(PON_NAME_REQUEST_PARAMETER_VALUE, ponNameValue);
-        //httpServletRequest.getRequestDispatcher
-        // ("/showGreeting.jsp").
-        // forward(httpServletRequest, httpServletResponse);
+        pon.setOutput("Test result is ready to be printed out");
+        log.info(String.format("*************** PROCESSING SPIDER of PON {} HAS FINISHED ******************"), pon.getName());
 
 
 
 
 
 
-//        String result = ServletAnalyseService.service(SOURCE_NAME);
-///**Maven's webapp code*/
-//        httpServletResponse.getWriter().print(result);
+
+
+
+
+        httpServletResponse.getWriter().print(result.toString());
+
     }
+
+
 }

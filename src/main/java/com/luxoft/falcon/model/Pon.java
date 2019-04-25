@@ -2,22 +2,45 @@ package com.luxoft.falcon.model;
 
 import lombok.*;
 
+import java.util.LinkedList;
 import java.util.Map;
 
-@Getter
-@Setter
-@NoArgsConstructor (access = AccessLevel.PRIVATE)
-@AllArgsConstructor
+
+@NoArgsConstructor
+//@AllArgsConstructor
 @ToString
+@EqualsAndHashCode
 public final class Pon {
+    @Getter
+    @Setter
     private String name;
-    private Map<String, String> result;
+    @Getter
+    @Setter
+    private int iteration;
+    @Getter
+    @Setter
+    private Boolean autocomplete = false;
+
+
+    @Getter
+    @Setter
+    private LinkedList<SpiderError> spiderErrors;
+    @Getter
+    @Setter
+    private Map<String, Boolean> birt;
+    @Getter
+    @Setter
+    private Map<String, Boolean> nds;
+
+    @Getter
+    @Setter
     private String output;
 
-    private static Pon ourInstance = new Pon();
-
-    public static Pon getInstance() {
-        return ourInstance;
-    }
+    @Getter
+    @Setter
+    private String queryFull;
 
 }
+
+
+

@@ -6,7 +6,7 @@
 
   <groupId>com.luxoft.falcon</groupId>
   <artifactId>TIcheck</artifactId>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <packaging>war</packaging>
 
   <name>TIcheck Maven Webapp</name>
@@ -51,12 +51,6 @@
           <artifactId>lombok</artifactId>
           <version>1.18.4</version>
           <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>junit</groupId>
-          <artifactId>junit</artifactId>
-          <version>4.11</version>
-          <scope>test</scope>
       </dependency>
 
   </dependencies>

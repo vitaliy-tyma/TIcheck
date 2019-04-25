@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<TIcheck>
+
+<Connect source = "spider">
+    <jdbcDriver>org.postgresql.Driver</jdbcDriver>
+    <jdbcUrl>jdbc:postgresql://himdlxspider01:5432/DBPROD</jdbcUrl>
+    <jdbcLogin>readonly</jdbcLogin>
+    <jdbcPassword>readonly</jdbcPassword>
+    <query>
+        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR
+        FROM spider_bmd.full_task_error_list ftel
+        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id
+        WHERE ftel.task LIKE ?
+        AND ftel.revision = ?
+        AND fcel.java_class_error = ?
+        ORDER BY Task, Revision, JAVA_CLASS_ERROR
+    </query>
+</Connect>
+
+<Connect source = "birt">
+    <jdbcDriver>org.postgresql.Driver</jdbcDriver>
+    <jdbcUrl>jdbc:postgresql://localhost:5432/testdb</jdbcUrl>
+    <jdbcLogin>test</jdbcLogin>
+    <jdbcPassword>test</jdbcPassword>
+	<Query>
+ SELECT *
+ FROM test t
+ WHERE t."Name" = ?
+ OR t."Id" = ?
+ AND t."Set" = ?
+	</Query>
+    </Connect>
+</TIcheck>

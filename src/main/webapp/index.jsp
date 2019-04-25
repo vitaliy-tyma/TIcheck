@@ -5,7 +5,6 @@
 <!--
 CSS from BIRT.
 It breaks mark-up - cause is not detected!!!
-
 <link href="http://himdlxbirt01/birt/static/css/bootstrap.css?v=6" rel="stylesheet" type="text/css">
 <link href="http://himdlxbirt01/birt/static/css/birtstyles.css?v=8" rel="stylesheet" type="text/css">
 -->
@@ -75,9 +74,8 @@ It breaks mark-up - cause is not detected!!!
 <div class="float_container">
 <tr>
 <td>
-<h2>TI checklist web-interface</h2>
+<h2>Automated TI checklist</h2>
 
-<p>Refer to <a href="https://adc.luxoft.com/confluence/pages/viewpage.action?spaceKey=DBPROD&title=07.+TI"> DB production TI checklist</a>
 </p>
 </td>
 </tr>
@@ -88,22 +86,13 @@ It breaks mark-up - cause is not detected!!!
 
 
 
-
-<tr>
-<td>
-<hr align="center" width="80%" size="2" color="#0000ff" />
-</td>
-</tr>
-
-
-
 <tr>
 <td>
 <div class="PON_selector">
 
 
 <fieldset>
-<legend> Select PON</legend>
+<legend> Select PON/iteration</legend>
 
 
 
@@ -118,136 +107,133 @@ It breaks mark-up - cause is not detected!!!
 <div>
 <table class="PON_form">
 <tr>
-<p>
 
-<td class = "left">Search request</td>
+<td class = "left">
+Request</td>
+
 <td class = "center">
-<input type="text" name="PON_name" id="PON_name" placeholder="Enter PON or it's part"
-       tabindex="1" autofocus/></td>
+<input
+type="text"
+name="pon_name"
+placeholder="Enter PON or it's part"
+title="% as wildcard is applied at the end"
+tabindex="1"
+autofocus/>
+</td>
+
+<td>
+<input
+type="checkbox"
+name="autocomplete_pon"
+checked
+title="Query for requested name will be used with LIKE + heading and tailing %"
+tabindex="4">
+Autocomplete
+</checkbox>
+</td>
+</tr>
+
+<tr>
+<td class = "left">
+Iteration
+</td>
+
+<td class = "center">
+<input
+type="text"
+name="pon_iteration" value="1"
+placeholder="Enter PON's iteration"
+title="Replace with the actual value"
+tabindex="2"/>
+</td>
+</tr>
+
+<tr>
 <td class = "right">
-
-        <!--class="btn btn-primary fact-stat-add-ts-btn"-->
-
-
-
-
-
-
+</td>
+<td class = "center"
 <!-********************************MAIN BUTTON*********************-->
-<!--
-<input type="submit" value="Analyse (form)" class = "PON_filter"
-       title="Click to start TI analysis" tabindex="2">
--->
-
-<button class = "PON_filter" type="submit"
-        title="Enter PON (or it's part) and press button to start TI analisys" tabindex="2">
-        Analyse (get)
+<button
+class = "PON_filter"
+type="submit"
+title="Enter PON (or it's part) and press button to start TI analysis"
+tabindex="3">
+Analyse
 </button>
+</td>
 
-
-
-
-        </td>
-        <td>
-        <input type="checkbox" name="autosearch_PON" id = "autosearch_PON" checked
-               title="Auto search for PON while entering" tabindex="3"> Autocomplete</checkbox>
-        </td>
-</p>
 </tr>
-<p>
+
+
 <tr>
-<td class = "left">Regression check</td>
-<td class = "center"><input type="text" id="prev_PON_filter" placeholder="(Optional) previous PON/part"
-    tabindex="4"/></td>
+<td class = "left">
+(Optional) Regression
+</td>
+
+<td class = "center">
+<input
+type="text"
+name="prev_pon_name"
+placeholder="Previous PON/part"
+title="Use % as wildcard"
+tabindex="5"/>
+</td>
+
 <td class = "right">
-
-
-<!--
-<button class = "PON_filter" type="submit"
-        title="Enter PON (or it's part) and press button to start TI analisys" tabindex="4">
-        <strike>Analyse (js)</strike>
-</button>
-
-
-
-
-
-
-<button type="button" class="btn btn-primary fact-stat-add-ts-btn"
-        title="Enter previous PON (or it's part) and press button to check for regression (optional)"
-        tabindex="5">Select previous PON</button>
--->
+<input
+type="checkbox"
+name="autocomplete_prev_pon"
+checked
+title="Query for requested name will be used with LIKE + heading and tailing %"
+tabindex="7">
+Autocomplete
+</checkbox>
 </td>
-        <td>
-<input type="checkbox" name="autosearch_prev_PON" id="autosearch_prev_PON" checked
-       title="Auto search for previous PON while entering" tabindex="6"> Autocomplete</checkbox>
-        </td>
 </tr>
-</p>
+
+<tr>
+<td class = "left">
+(Optional) Iteration
+</td>
+
+<td class = "center">
+<input
+type="text"
+name="prev_pon_iteration"
+placeholder="Previous PON iteration"
+title="Enter the actual value"
+tabindex="6"/>
+</td>
+
+</tr>
+
 </table>
+
 </div>
+
 </form>
+
 </fieldset>
+
 </div>
-
-
-
-
-
-
-
-
-<!--
-<div class="float_container">
-                <div class="testcase_statistics_control">
-                    <p>Search In</p>
-                    <select class="dbtype_filter" id="testcase_statistics_search_db">
-                        <option value="ndsreport">Production</option>
-                        <option value="ndsreport_jenkins">Jenkins</option>
-                    </select>
-                </div>
-                <div class="testcase_statistics_control">
-                    <p>Testsuite name/PON/Test DB number</p>
-                    <input type="text" id="tc_stat_testsuite_filter">
-                </div>
-                <div class="testcase_statistics_control">
-                    <p>Branch</p>
-                    <input type="text" id="testcase_branch_field">
-                </div>
-            </div>
-
-
-<div class="testcase_branch_field_wrap">
-                <button type="button" class="btn btn-primary fact-stat-add-ts-btn" data-group="first">
-                    Add
-                    testsuites to first group
-                </button>
-                <button type="button" class="btn btn-primary fact-stat-add-ts-btn" data-group="second">
-                    Add
-                    testsuites to second group
-                </button>
-                <div class="ajax_image_wrap">
-                    <img src="../static/images/processing4.gif" class="ajax_loading" id="tc_ajax_image">
-                </div>
-            </div>
--->
-
-
 </td>
 </tr>
-
-
-
 
 
 
 <tr>
 <td>
-<p>For testing purposes only - to be used after deploy</p>
-<a href="http://172.30.136.166:889/TIcheck/">http://172.30.136.166:8889/TIcheck/</a>
+<hr align="center" width="80%" size="2" color="#0000ff" />
 </td>
 </tr>
 
+<tr>
+<td>
+Steps are described in <a href="https://adc.luxoft.com/confluence/pages/viewpage.action?spaceKey=DBPROD&title=07.+TI"> DB production TI checklist</a><br/>
+Implemented not fully!!!
+Refer to checklist log
+</td>
+</tr>
 
 <tr>
 <td>
@@ -256,40 +242,13 @@ It breaks mark-up - cause is not detected!!!
 </tr>
 <tr>
 
-
 <tr>
 <td>
-<p><a href="ServletLocalhost">Get data from Localhost</a></p>
+<p>Testing area - to be used only after deploy</p>
+<a href="http://172.30.136.166:8889/TIcheck/">http://172.30.136.166:8889/TIcheck/</a>
 </td>
 </tr>
 
-<tr>
-<td>
-<p><a href="ServletSpider">Get data from Spider</a></p>
-</td>
-</tr>
-<tr>
-<td>
-<hr align="center" width="80%" size="2" color="#ff0000" />
-</td>
-</tr>
-
-
-
-
-<tr>
-<td>
-<p><a href="ServletConfig">Show <b>spiderconnector.xml</b> - used for configuration</a><br/></p>
-</td>
-</tr>
-
-<tr>
-<td>
-<!--
-<p><a href="spiderconnector.xml"><font size=-2 color= gray>DOESN&rsquo;T WORK - Open <b>spiderconnector.xml</b> directly</font></a></p>
--->
-</td>
-</tr>
 
 
 
