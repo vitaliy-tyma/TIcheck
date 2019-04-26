@@ -19,8 +19,8 @@ public class Checklist {
 
 
 
-        birtSteps.put("ti.TmcLocationTableIdTest.locationTableIdCountTest", Boolean.FALSE);
-        birtSteps.put("ti.TmcLocationExporterTest.tmcNameTableTest", Boolean.FALSE);
+        birtSteps.put("anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest", Boolean.FALSE);
+        birtSteps.put("anaconda.inds.ti.TmcLocationExporterTest.tmcNameTableTest", Boolean.FALSE);
         birtSteps.put("anaconda.inds.ti.TmcLocationNameTest.locationNameCountTest", Boolean.FALSE);
         birtSteps.put("anaconda.inds.ti.TmcLocationNameTest.nndbTmcNamesExportTest", Boolean.FALSE);
         birtSteps.put("anaconda.inds.ti.TmcStringTableTest.stringCountTest", Boolean.FALSE);

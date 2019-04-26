@@ -8,7 +8,7 @@ public class MapError {
     @Getter
     private String fullName;
     @Getter
-    private String javaClassError;
+    private String error;
     @Getter
     private String queryFull;
 }

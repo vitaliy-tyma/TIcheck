@@ -32,13 +32,14 @@ public class ServletAnalyse extends HttpServlet {
     }
 
 
-
     @Override
     public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws IOException {
 
 
-        log.info("******** ServletAnalyse.doGet() started *********");
+        log.info("******** NEW REQUEST STARTED ***************** ServletAnalyse.doGet() **********");
+        log.info("***********************************************************************************************************");
+        log.info("********************************************************************************");
         Pon pon = new Pon();
 
         final String ponName =
@@ -54,23 +55,20 @@ public class ServletAnalyse extends HttpServlet {
         httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY(), ponName);
 
 
-
-
         log.info(
                 String.format(
-                        "******* Processing with the request: name = <b>%s</b>;" +
-                        " iteration = <b>%s</b>; autocomplete = <b>%s</b>",
+                        "******* Processing with the request: name = %s;" +
+                                " iteration = %s; autocomplete = %s",
                         ponName,
                         ponIteration,
                         autocompletePon));
-
 
 
         pon.setName(ponName);
         pon.setIteration(Integer.parseInt(ponIteration));
 
 
-        if (autocompletePon == null){
+        if (autocompletePon == null) {
             pon.setAutocomplete(false);
         } else {
             //.equals("on")
@@ -102,43 +100,86 @@ public class ServletAnalyse extends HttpServlet {
         pon.setSpiderErrors(spiderErrors);
 
 
-
         result.append("<p>1) Spider check</p>");
 
-        StringBuilder queryFull = new StringBuilder();
-        queryFull.append("<details><summary><u>See query</u></summary>\n");
-        queryFull.append("<i><b><font color = green>");
-        queryFull.append(pon.getQueryFull());
-        queryFull.append("</font></b></i></details>\n");
 
-        if (pon.getNoSpiderErrorsPresent()){
+
+/*        if (pon.getNoSpiderErrorsPresent()) {
             result.append(String.format("<p>No spider errors are present. %s</p>", queryFull.toString()));
-        }
+        }*/
 
-        for (MapError spiderError: pon.getSpiderErrors()){
+        for (MapError spiderError : pon.getSpiderErrors()) {
             /* Put SQL request in Spoiler*/
+            StringBuilder queryFull = new StringBuilder();
+            queryFull.append("<details><summary><u>See query</u></summary>\n");
+            queryFull.append("<i><b><font color = green>");
+            queryFull.append(spiderError.getQueryFull());
+            queryFull.append("</font></b></i></details>\n");
 
             result.append(
                     String.format(
                             "<div><p>Full Name = %s, Error = %s. %s</p></div>\n",
                             spiderError.getFullName(),
-                            spiderError.getJavaClassError(),
+                            spiderError.getError(),
                             queryFull.toString()));
         }
-        pon.setOutput("Spider errors checklist result - XX");
-        log.info(String.format("*************** PROCESSING SPIDER of PON {} HAS FINISHED ******************"), pon.getName());
+//        pon.setOutput("Spider errors checklist result - XX");
+        if (pon.getOutput() != null) {
+            result.append(
+                    String.format(
+                            "<div><p><font color=red>%s<font></p></div>\n", pon.getOutput()));
+        }
+
+
+        log.info(String.format("********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"), pon.getName());
+
+
+
+
+
+
+
 
 
 
         /* PROCESS BIRT ERRORS*/
         LinkedList<MapError> birtErrors;
         birtErrors = ServiceAnalyseBirt.processBirt(checklist, pon);
-        pon.setSpiderErrors(birtErrors);
+        pon.setBirtErrors(birtErrors);
 
 
+        result.append("<p>2) Birt check</p>");
 
 
+/*
+        if (pon.getNoBirtErrorsPresent()) {
+            result.append(String.format("<p>No BIRT errors are present. %s</p>", queryFull.toString()));
+        }
+*/
 
+        for (MapError birtError : pon.getBirtErrors()) {
+            /* Put SQL request in Spoiler*/
+            StringBuilder queryFull = new StringBuilder();
+            queryFull.append("<details><summary><u>See query</u></summary>\n");
+            queryFull.append("<i><b><font color = green>");
+            queryFull.append(birtError.getQueryFull());
+            queryFull.append("</font></b></i></details>\n");
+
+            result.append(
+                    String.format(
+                            "<div><p>Full Name = %s, Error = %s. %s</p></div>\n",
+                            birtError.getFullName(),
+                            birtError.getError(),
+                            queryFull.toString()));
+        }
+//        pon.setOutput("Spider errors checklist result - XX");
+        if (pon.getOutput() != null) {
+            result.append(
+                    String.format(
+                            "<div><p><font color=red>%s<font></p></div>\n", pon.getOutput()));
+        }
+
+        log.info(String.format("****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"), pon.getName());
 
 
 

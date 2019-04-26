@@ -40,8 +40,8 @@ public class ServiceAnalyseSpider {
 
             /* Iterate over SPIDER*/
             for (Map.Entry<String, Boolean> entry : checklist.getSpiderSteps().entrySet()) {
-                log.info(String.format("*** Iterate over spider steps [{}:{}] ***"),
-                        entry.getKey(), entry.getValue().toString());
+//                log.info(String.format("*** Iterate over spider steps [{}:{}] ***"),
+//                        entry.getKey(), entry.getValue().toString());
 
                 PreparedStatement pstmt;
                 ResultSet resultSet;
@@ -63,32 +63,32 @@ public class ServiceAnalyseSpider {
 
                     /* Save query to display it in browser*/
                     //configDataSpider.setQueryFinal(pstmt.toString());
-                    pon.setQueryFull(pstmt.toString());
+                    //-pon.setQueryFull(pstmt.toString());
                     //log.info("SQL = " + pstmt.toString());
 
 
                     resultSet = pstmt.executeQuery();
-
+                    log.info(String.format("************************* Spider query executed(%s)", pstmt.toString()));
 
 
                     /* Extracts data from resultSet and appends ErrorList to spiderData entity (by arguments)*/
                     //DataExtractor.getData(resultSet, spiderData);
 
-                    if (!resultSet.isBeforeFirst()) {
+                    /*if (!resultSet.isBeforeFirst()) {
                         log.info("***************************** There is no Spider errors *****************");
                         pon.setNoSpiderErrorsPresent(true);
 
-                    }
+                    }*/
 
                     while (resultSet.next()) {
 
 
                         String fullName = resultSet.getString("Task");
-                        String javaClassError = resultSet.getString("JAVA_CLASS_ERROR");
+                        String error = resultSet.getString("JAVA_CLASS_ERROR");
                         String fullQuery = pstmt.toString();
 
 
-                        MapError spiderError = new MapError(fullName, javaClassError, fullQuery);
+                        MapError spiderError = new MapError(fullName, error, fullQuery);
                         spiderErrors.add(spiderError);
                     }
 
@@ -106,12 +106,14 @@ public class ServiceAnalyseSpider {
             con.close();
         } catch (SQLException e) {
             log.error(e.getMessage());
+            //-log.error(String.format("!!!!!!!!!!!!!!!!!!!!!!!!! Spider request failed with (%s)", pon.getQueryFull()));
+            pon.setOutput(e.getMessage());
         } catch (ClassNotFoundException e) {
             log.error(e.getMessage());
+            pon.setOutput(e.getMessage());
         } catch (NullPointerException e) {
             log.error(e.getMessage());
-        } finally {
-            log.error(String.format("!!!!!!!!!! Execute Query failed on (%s)", pon.getQueryFull()));
+            pon.setOutput(e.getMessage());
         }
 
 

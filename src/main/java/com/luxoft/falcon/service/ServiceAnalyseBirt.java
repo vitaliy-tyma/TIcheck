@@ -25,8 +25,7 @@ public class ServiceAnalyseBirt {
 
     public static LinkedList<MapError> processBirt(Checklist checklist, Pon pon) {
 
-//        StringBuilder result = new StringBuilder();
-        LinkedList<MapError> spiderErrors = new LinkedList<>();
+        LinkedList<MapError> birtErrors = new LinkedList<>();
 
         log.info("**** in ServiceAnalyseBirt.processBirt() ****");
 
@@ -38,8 +37,8 @@ public class ServiceAnalyseBirt {
 
             /* Iterate over BIRT*/
             for (Map.Entry<String, Boolean> entry : checklist.getBirtSteps().entrySet()) {
-                log.info(String.format("*** Iterate over birt steps [{}:{}] ***"),
-                        entry.getKey(), entry.getValue().toString());
+//                log.info(String.format("*** Iterate over birt steps [{}:{}] ***"),
+//                        entry.getKey(), entry.getValue().toString());
 
                 PreparedStatement pstmt;
                 ResultSet resultSet;
@@ -61,22 +60,23 @@ public class ServiceAnalyseBirt {
 
                     /* Save query to display it in browser*/
                     //configDataSpider.setQueryFinal(pstmt.toString());
-                    pon.setQueryFull(pstmt.toString());
+                    //-pon.setQueryFull(pstmt.toString());
                     //log.info("SQL = " + pstmt.toString());
 
 
                     resultSet = pstmt.executeQuery();
+                    log.info(String.format("************************* Birt query executed(%s)", pstmt.toString()));
 
 
 
                     /* Extracts data from resultSet and appends ErrorList to spiderData entity (by arguments)*/
                     //DataExtractor.getData(resultSet, spiderData);
 
-                    if (!resultSet.isBeforeFirst()) {
+                    /*if (!resultSet.isBeforeFirst()) {
                         log.info("***************************** There is no Birt errors *****************");
-                        pon.setNoSpiderErrorsPresent(true);
+                        pon.setNoBirtErrorsPresent(true);
 
-                    }
+                    }*/
 
                     while (resultSet.next()) {
 
@@ -87,7 +87,7 @@ public class ServiceAnalyseBirt {
 
 
                         MapError birtError = new MapError(fullName, testName, fullQuery);
-                        spiderErrors.add(birtError);
+                        birtErrors.add(birtError);
                     }
 
 
@@ -104,17 +104,18 @@ public class ServiceAnalyseBirt {
             con.close();
         } catch (SQLException e) {
             log.error(e.getMessage());
+            //-log.error(String.format("!!!!!!!!!! Birt request failed with (%s)", pon.getQueryFull()));
+            pon.setOutput(e.getMessage());
         } catch (ClassNotFoundException e) {
             log.error(e.getMessage());
+            pon.setOutput(e.getMessage());
         } catch (NullPointerException e) {
             log.error(e.getMessage());
-        } finally {
-            log.error(String.format("!!!!!!!!!! Birt connect failed with (%s)", pon.getQueryFull()));
-
+            pon.setOutput(e.getMessage());
         }
 
 
-        return spiderErrors;
+        return birtErrors;
     }
 
 

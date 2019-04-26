@@ -31,7 +31,7 @@ public final class Pon {
 
     @Getter
     @Setter
-    private LinkedList<MapError> birt;
+    private LinkedList<MapError> birtErrors;
     @Getter
     @Setter
     private Boolean noBirtErrorsPresent = false;
@@ -44,9 +44,9 @@ public final class Pon {
     @Setter
     private String output;
 
-    @Getter
-    @Setter
-    private String queryFull;
+//    @Getter
+//    @Setter
+//    private String queryFull;
 
 }
 
