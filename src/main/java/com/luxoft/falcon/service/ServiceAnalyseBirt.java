@@ -13,7 +13,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 
-import static com.luxoft.falcon.model.QueryToCheckGeneration.*;
+import com.luxoft.falcon.model.QueryToCheckGeneration;
 
 /**
  * Is used to process TI checklist by data source
@@ -24,6 +24,7 @@ public class ServiceAnalyseBirt {
     private static Connection con = null;
     private static ConfigDataBirt2010 configDataBirt2010 = new ConfigDataBirt2010();
     private static ConfigDataBirt2020 configDataBirt2020 = new ConfigDataBirt2020();
+    private static QueryToCheckGeneration queryToCheckGeneration = new QueryToCheckGeneration();
 
 
     public static LinkedList<MapError> processBirt(Checklist checklist, Pon pon) {
@@ -51,12 +52,12 @@ public class ServiceAnalyseBirt {
 
 //2010
 
-            String queryToCheck = G2010.getQueryToChechGeneration();
+            String queryToCheck = queryToCheckGeneration.getG2010();
             pstmtChecker = con.prepareStatement(queryToCheck);
             pstmtChecker.setString(1, "%" + pon.getName() + "%");
             pstmtChecker.setInt(2, MainConfig.getQUERY_LIMIT());
             resultSetChecker = pstmtChecker.executeQuery();
-            if (!resultSetChecker.isBeforeFirst()) {
+            if (resultSetChecker.isBeforeFirst()) {
                 log.info("***************************** Use Birt 2010 *****************");
                 queryLike = configDataBirt2010.getQueryLike();
                 queryAccurate = configDataBirt2010.getQueryAccurate();
@@ -77,12 +78,12 @@ public class ServiceAnalyseBirt {
 
 //            PreparedStatement pstmtChecker;
 //            ResultSet resultSetChecker;
-            queryToCheck = G2020.getQueryToChechGeneration();
+            queryToCheck = queryToCheckGeneration.getG2020();
             pstmtChecker = con.prepareStatement(queryToCheck);
             pstmtChecker.setString(1, "%" + pon.getName() + "%");
             pstmtChecker.setInt(2, MainConfig.getQUERY_LIMIT());
             resultSetChecker = pstmtChecker.executeQuery();
-            if (!resultSetChecker.isBeforeFirst()) {
+            if (resultSetChecker.isBeforeFirst()) {
                 log.info("***************************** Use Birt 2020 *****************");
                 queryLike = configDataBirt2020.getQueryLike();
                 queryAccurate = configDataBirt2020.getQueryAccurate();
