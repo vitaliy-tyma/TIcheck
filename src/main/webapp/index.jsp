@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>TI checklist web-interface</title>
+<title>Automated TI checklist</title>
 <!--
 CSS from BIRT.
 It breaks mark-up - cause is not detected!!!

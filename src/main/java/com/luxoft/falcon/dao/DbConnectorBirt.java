@@ -1,7 +1,6 @@
 package com.luxoft.falcon.dao;
 
-import com.luxoft.falcon.model.ConfigDataBirt;
-import com.luxoft.falcon.model.ConfigDataSpider;
+import com.luxoft.falcon.model.ConfigDataBirt2010;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -29,16 +28,13 @@ public class DbConnectorBirt {
 
     private static Connection con;
 
-    public static Connection connectDatabase(ConfigDataBirt configData) throws ClassNotFoundException, SQLException {
+    public static Connection connectDatabase(String url, String login, String password) throws ClassNotFoundException, SQLException {
 
         log.debug("********** Run connectDatabase **********");
 
             //Class.forName(configData.getJdbcDriver());
-            con = DriverManager.getConnection(
-                    configData.getJdbcUrl(),
-                    configData.getJdbcLogin(),
-                    configData.getJdbcPassword());
-            log.info("********** Connection to " + configData.getJdbcUrl() + " has been established **********");
+            con = DriverManager.getConnection( url, login, password);
+            log.info("********** Connection to " + url + " has been established **********");
 
 
 

@@ -42,7 +42,7 @@ public final class Pon {
 
     @Getter
     @Setter
-    private String output;
+    private String outputOfErrors;
 
 //    @Getter
 //    @Setter

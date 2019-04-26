@@ -10,5 +10,5 @@ public class MapError {
     @Getter
     private String error;
     @Getter
-    private String queryFull;
+    private String usedQuery;
 }

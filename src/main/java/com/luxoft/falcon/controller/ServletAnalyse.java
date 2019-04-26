@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * Servlet is launched from web-browser and starts all processes
@@ -100,8 +101,7 @@ public class ServletAnalyse extends HttpServlet {
         pon.setSpiderErrors(spiderErrors);
 
 
-        result.append("<p>1) Spider check</p>");
-
+        result.append("<p><h4>1) Check SPIDER</h4></p>");
 
 
 /*        if (pon.getNoSpiderErrorsPresent()) {
@@ -113,7 +113,7 @@ public class ServletAnalyse extends HttpServlet {
             StringBuilder queryFull = new StringBuilder();
             queryFull.append("<details><summary><u>See query</u></summary>\n");
             queryFull.append("<i><b><font color = green>");
-            queryFull.append(spiderError.getQueryFull());
+            queryFull.append(spiderError.getUsedQuery());
             queryFull.append("</font></b></i></details>\n");
 
             result.append(
@@ -123,15 +123,19 @@ public class ServletAnalyse extends HttpServlet {
                             spiderError.getError(),
                             queryFull.toString()));
         }
-//        pon.setOutput("Spider errors checklist result - XX");
-        if (pon.getOutput() != null) {
+//        pon.setOutputOfErrors("Spider errors checklist result - XX");
+        if (pon.getOutputOfErrors() != null) {
             result.append(
                     String.format(
-                            "<div><p><font color=red>%s<font></p></div>\n", pon.getOutput()));
+                            "<div><p><font color=red>%s<font></p></div>\n", pon.getOutputOfErrors()));
         }
 
 
         log.info(String.format("********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"), pon.getName());
+
+
+
+
 
 
 
@@ -148,7 +152,7 @@ public class ServletAnalyse extends HttpServlet {
         pon.setBirtErrors(birtErrors);
 
 
-        result.append("<p>2) Birt check</p>");
+        result.append("<p><h4>2) Check BIRT</h4></p>");
 
 
 /*
@@ -162,7 +166,7 @@ public class ServletAnalyse extends HttpServlet {
             StringBuilder queryFull = new StringBuilder();
             queryFull.append("<details><summary><u>See query</u></summary>\n");
             queryFull.append("<i><b><font color = green>");
-            queryFull.append(birtError.getQueryFull());
+            queryFull.append(birtError.getUsedQuery());
             queryFull.append("</font></b></i></details>\n");
 
             result.append(
@@ -172,17 +176,65 @@ public class ServletAnalyse extends HttpServlet {
                             birtError.getError(),
                             queryFull.toString()));
         }
-//        pon.setOutput("Spider errors checklist result - XX");
-        if (pon.getOutput() != null) {
+//        pon.setOutputOfErrors("Spider errors checklist result - XX");
+        if (pon.getOutputOfErrors() != null) {
             result.append(
                     String.format(
-                            "<div><p><font color=red>%s<font></p></div>\n", pon.getOutput()));
+                            "<div><p><font color=red>%s<font></p></div>\n", pon.getOutputOfErrors()));
         }
 
         log.info(String.format("****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"), pon.getName());
 
 
 
+
+
+
+
+
+
+        /* Checklist log*/
+        StringBuilder checklistMonitor = new StringBuilder();
+        int i = 0;
+        checklistMonitor.append("<details><summary><u>See steps of checklist</u></summary>\n");
+        checklistMonitor.append("<b><font color = green>");
+        for (Map.Entry<String, Boolean> entry : checklist.getSpiderSteps().entrySet()) {
+            if (entry.getValue()) {
+                i++;
+                checklistMonitor.append(
+                        String.format("<p>%d) %s has been checked</p>",
+                                i,
+                                entry.getKey()
+                        ));
+            } else {
+                i++;
+                checklistMonitor.append(
+                        String.format("<p><font color = red>%d) %s has NOT been checked</font></p>",
+                                i,
+                                entry.getKey()
+                        ));
+            }
+        }
+        for (Map.Entry<String, Boolean> entry : checklist.getBirtSteps().entrySet()) {
+            if (entry.getValue()) {
+                i++;
+                checklistMonitor.append(
+                        String.format("<p>%d) %s has been checked</p>",
+                                i,
+                                entry.getKey()
+                        ));
+            } else {
+                i++;
+                checklistMonitor.append(
+                        String.format("<p><font color = red>%d) %s has NOT been checked</font></p>",
+                                i,
+                                entry.getKey()
+                        ));
+            }
+        }
+        checklistMonitor.append("</font></b></details>\n");
+
+        result.append(checklistMonitor.toString());
 
 
 

@@ -70,6 +70,8 @@ public class ServiceAnalyseSpider {
                     resultSet = pstmt.executeQuery();
                     log.info(String.format("************************* Spider query executed(%s)", pstmt.toString()));
 
+                    /* Mark the item in checklist if query has been executed!*/
+                    entry.setValue(true);
 
                     /* Extracts data from resultSet and appends ErrorList to spiderData entity (by arguments)*/
                     //DataExtractor.getData(resultSet, spiderData);
@@ -90,6 +92,12 @@ public class ServiceAnalyseSpider {
 
                         MapError spiderError = new MapError(fullName, error, fullQuery);
                         spiderErrors.add(spiderError);
+
+
+
+
+
+
                     }
 
 
@@ -106,14 +114,14 @@ public class ServiceAnalyseSpider {
             con.close();
         } catch (SQLException e) {
             log.error(e.getMessage());
-            //-log.error(String.format("!!!!!!!!!!!!!!!!!!!!!!!!! Spider request failed with (%s)", pon.getQueryFull()));
-            pon.setOutput(e.getMessage());
+            //-log.error(String.format("!!!!!!!!!!!!!!!!!!!!!!!!! Spider request failed with (%s)", pon.getUsedQuery()));
+            pon.setOutputOfErrors(e.getMessage());
         } catch (ClassNotFoundException e) {
             log.error(e.getMessage());
-            pon.setOutput(e.getMessage());
+            pon.setOutputOfErrors(e.getMessage());
         } catch (NullPointerException e) {
             log.error(e.getMessage());
-            pon.setOutput(e.getMessage());
+            pon.setOutputOfErrors(e.getMessage());
         }
 
 

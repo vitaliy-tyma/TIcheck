@@ -8,6 +8,8 @@ import java.util.Map;
 /** Entity/Data/POJO to connect to the SPIDER */
 @Data
 public class Checklist {
+
+    /* Structure: 1) Error to be checked - 2) step has passed */
     private Map<String, Boolean> spiderSteps = new HashMap<>();
 
     private Map<String, Boolean> birtSteps = new HashMap<>();
