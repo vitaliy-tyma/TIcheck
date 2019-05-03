@@ -5,6 +5,7 @@ import com.luxoft.falcon.model.Pon;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+/*NOT IN USE*/
 @Slf4j
 @Getter
 public class Loader {
@@ -12,12 +13,12 @@ public class Loader {
     private MainConfig mainConfig;
 
     public void init() {
-        mainConfig = new MainConfig();
-
-        /* LOAD CONFIGS*/
-        log.info("**** In Loader - load mainConfig!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-
-        log.info("mainConfig is ok = " + mainConfig.toString());
+//        mainConfig = new MainConfig();
+//
+//        /* LOAD CONFIGS*/
+//        log.info("**** In Loader - load mainConfig!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+//
+//        log.info("mainConfig is ok = " + mainConfig.toString());
 
     }
 

@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @AllArgsConstructor
-public class MapError {
+public class ErrorRecord {
     @Getter
     private String fullName;
     @Getter

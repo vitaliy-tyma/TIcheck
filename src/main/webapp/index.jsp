@@ -1,15 +1,14 @@
 <html>
 
 <head>
-<title>Automated TI checklist</title>
+<title>Automated checklist analyser</title>
 <!--
 CSS from BIRT.
 It breaks mark-up - cause is not detected!!!
 <link href="http://himdlxbirt01/birt/static/css/bootstrap.css?v=6" rel="stylesheet" type="text/css">
 <link href="http://himdlxbirt01/birt/static/css/birtstyles.css?v=8" rel="stylesheet" type="text/css">
--->
-
 <script src="http://himdlxbirt01/birt/static/js/jquery.js" type="text/javascript"></script>
+-->
 
   <style type="text/css">
    table.common {
@@ -62,6 +61,16 @@ It breaks mark-up - cause is not detected!!!
      input[type=checkbox]{
      -webkit-transform: scale(2);
      }
+
+     select {
+         width: 100%;
+        }
+
+
+
+
+
+
   </style>
 </head>
 
@@ -74,8 +83,8 @@ It breaks mark-up - cause is not detected!!!
 <div class="float_container">
 <tr>
 <td>
-<h2>Automated TI checklist</h2>
-
+<h2>Automated checklist analyser</h2>
+<hr align="center" width="80%" size="2" color="#0000ff" />
 </p>
 </td>
 </tr>
@@ -92,13 +101,13 @@ It breaks mark-up - cause is not detected!!!
 
 
 <fieldset>
-<legend> Select PON/iteration</legend>
+<legend> Select PON name and iteration</legend>
 
 
 
 
 <!--***********FORM ACTION*************-->
-<form action="/analyse?action=submit" method="get">
+<form action="/analyse?action=submit" method="get" id="checklist">
 
 
 
@@ -116,8 +125,10 @@ Request</td>
 type="text"
 name="pon_name"
 placeholder="Enter PON or it's part"
-title="% as wildcard is applied at the end"
+title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on Autocomplete checkbox"
 tabindex="1"
+maxlength="30"
+size="20"
 autofocus/>
 </td>
 
@@ -127,7 +138,7 @@ type="checkbox"
 name="autocomplete_pon"
 checked
 title="Query for requested name will be used with LIKE + heading and tailing %"
-tabindex="4">
+tabindex="9">
 Autocomplete
 </checkbox>
 </td>
@@ -144,7 +155,21 @@ type="text"
 name="pon_iteration" value="1"
 placeholder="Enter PON's iteration"
 title="Replace with the actual value"
+maxlength="2"
 tabindex="2"/>
+</td>
+</tr>
+
+<tr>
+<td class = "left">
+Checklist
+</td>
+<td class = "center">
+<select name = "checklists" form="checklist" width = 100% tabindex="3">
+            <option value = "TI" selected>TI</option>
+            <option value = "2">2 (not impl.)</option>
+            <option value = "3">3 (not impl.)</option>
+         </select>
 </td>
 </tr>
 
@@ -157,7 +182,7 @@ tabindex="2"/>
 class = "PON_filter"
 type="submit"
 title="Enter PON (or it's part) and press button to start TI analysis"
-tabindex="3">
+tabindex="4">
 Analyse
 </button>
 </td>
@@ -175,8 +200,11 @@ Analyse
 type="text"
 name="prev_pon_name"
 placeholder="Previous PON/part"
-title="Use % as wildcard"
-tabindex="5"/>
+title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on Autocomplete checkbox"
+maxlength="30"
+size="20"
+disabled
+tabindex="10"/>
 </td>
 
 <td class = "right">
@@ -184,8 +212,9 @@ tabindex="5"/>
 type="checkbox"
 name="autocomplete_prev_pon"
 checked
+disabled
 title="Query for requested name will be used with LIKE + heading and tailing %"
-tabindex="7">
+tabindex="11">
 Autocomplete
 </checkbox>
 </td>
@@ -202,7 +231,9 @@ type="text"
 name="prev_pon_iteration"
 placeholder="Previous PON iteration"
 title="Enter the actual value"
-tabindex="6"/>
+maxlength="2"
+disabled
+tabindex="12"/>
 </td>
 
 </tr>
@@ -221,31 +252,25 @@ tabindex="6"/>
 
 
 
-<tr>
-<td>
-<hr align="center" width="80%" size="2" color="#0000ff" />
-</td>
-</tr>
+
 
 <tr>
 <td>
-Steps are described in <a href="https://adc.luxoft.com/confluence/pages/viewpage.action?spaceKey=DBPROD&title=07.+TI"> DB production TI checklist</a><br/>
-Implemented not fully!!!
-Refer to checklist log
+Steps for TI are described in <a href="https://adc.luxoft.com/confluence/pages/viewpage.action?spaceKey=DBPROD&title=07.+TI"> DB production TI checklist</a><br/>
+<font color=red>Not all steps are Implemented!!!</font>
+Refer to the actual checklist log.
 </td>
 </tr>
+
+
 
 <tr>
 <td>
 <hr align="center" width="80%" size="2" color="#ff0000" />
-</td>
-</tr>
-<tr>
-
-<tr>
-<td>
-<p>Testing area - to be used only after deploy</p>
+<p>
+Testing area - to be used only after deploy:
 <a href="http://172.30.136.166:8889/TIcheck/">http://172.30.136.166:8889/TIcheck/</a>
+</p>
 </td>
 </tr>
 

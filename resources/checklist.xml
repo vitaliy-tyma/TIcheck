@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 
-<checklist>
+<checklistTI>
     <spider>
         <step>
             NndbTmcNamesBuilderTarget:118
@@ -43,4 +43,4 @@
         </step>
     </nds>
 
-</checklist>
+</checklistTI>

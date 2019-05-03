@@ -30,6 +30,11 @@ public class MainConfig {
     @Getter
     private static final String AUTOCOMPLETE_PON_REQUEST_PARAMETER_VALUE = "autocomplete_pon";
 
+    @Getter
+    private static final String CHECKLISTS_REQUEST_PARAMETER_KEY = "checklists";
+    @Getter
+    private static final String CHECKLISTS_REQUEST_PARAMETER_VALUE = "checklists";
+
 
 
     @Getter
@@ -41,5 +46,26 @@ public class MainConfig {
 
     @Getter
     private static final int QUERY_LIMIT = 1000;
+
+
+
+    @Getter
+    private static final String SPIDER_TASK_COL_NAME = "Task";
+    @Getter
+    private static final String SPIDER_JAVA_CLASS_ERROR_COL_NAME = "JAVA_CLASS_ERROR";
+
+
+    @Getter
+    private static final String BIRT_TASK_COL_NAME = "Task";
+    @Getter
+    private static final String BIRT_TEST_COL_NAME = "TEST_NAME";
+
+
+    @Getter
+    private static final String CHECKLISTS_NAME_TI = "TI";
+
+    @Getter
+    private static final String CHECKLISTS_NAME_UNDEF = "Undefined";
+
 
 }

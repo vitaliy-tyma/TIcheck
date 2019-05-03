@@ -2,10 +2,7 @@ package com.luxoft.falcon.service;
 
 import com.luxoft.falcon.config.MainConfig;
 import com.luxoft.falcon.dao.DbConnectorSpider;
-import com.luxoft.falcon.model.Checklist;
-import com.luxoft.falcon.model.ConfigDataSpider;
-import com.luxoft.falcon.model.Pon;
-import com.luxoft.falcon.model.MapError;
+import com.luxoft.falcon.model.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -13,10 +10,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.Map;
+
 
 /**
- * Is used to process TI checklist by data source
+ * Is used to process TI checklist for SPIDER
  */
 @Slf4j
 public class ServiceAnalyseSpider {
@@ -25,24 +22,16 @@ public class ServiceAnalyseSpider {
     private static Connection con = null;
 
 
-    public static LinkedList<MapError> processSpider(Checklist checklist, Pon pon) {
+    public static LinkedList<ErrorRecord> processSpider(ChecklistTI checklistTI, Pon pon) {
 
-//        StringBuilder result = new StringBuilder();
-        LinkedList<MapError> spiderErrors = new LinkedList<>();
-
+        LinkedList<ErrorRecord> spiderErrors = new LinkedList<>();
         log.info("**** in ServiceAnalyseSpider.processSpider() ****");
 
-
         try {
-
             con = DbConnectorSpider.connectDatabase(configDataSpider);
 
-
             /* Iterate over SPIDER*/
-            for (Map.Entry<String, Boolean> entry : checklist.getSpiderSteps().entrySet()) {
-//                log.info(String.format("*** Iterate over spider steps [{}:{}] ***"),
-//                        entry.getKey(), entry.getValue().toString());
-
+            for (ChecklistTiEntry entry : checklistTI.getSpiderSteps()) {
                 PreparedStatement pstmt;
                 ResultSet resultSet;
 
@@ -57,76 +46,40 @@ public class ServiceAnalyseSpider {
                     }
 
                     pstmt.setInt(2, pon.getIteration());
-                    pstmt.setString(3, entry.getKey());
+                    pstmt.setString(3, entry.getNameOfError());
                     pstmt.setInt(4, MainConfig.getQUERY_LIMIT());
 
-
-                    /* Save query to display it in browser*/
-                    //configDataSpider.setQueryFinal(pstmt.toString());
-                    //-pon.setQueryFull(pstmt.toString());
-                    //log.info("SQL = " + pstmt.toString());
-
-
                     resultSet = pstmt.executeQuery();
+
                     log.info(String.format("************************* Spider query executed(%s)", pstmt.toString()));
 
-                    /* Mark the item in checklist if query has been executed!*/
-                    entry.setValue(true);
-
-                    /* Extracts data from resultSet and appends ErrorList to spiderData entity (by arguments)*/
-                    //DataExtractor.getData(resultSet, spiderData);
-
-                    /*if (!resultSet.isBeforeFirst()) {
-                        log.info("***************************** There is no Spider errors *****************");
-                        pon.setNoSpiderErrorsPresent(true);
-
-                    }*/
+                    /* Mark the item in checklistTI if query has been executed!*/
+                    entry.setStepIsChecked(true);
+                    entry.setFullQuery(pstmt.toString());
 
                     while (resultSet.next()) {
-
-
-                        String fullName = resultSet.getString("Task");
-                        String error = resultSet.getString("JAVA_CLASS_ERROR");
+                        String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
+                        String error = resultSet.getString(MainConfig.getSPIDER_JAVA_CLASS_ERROR_COL_NAME());
                         String fullQuery = pstmt.toString();
 
-
-                        MapError spiderError = new MapError(fullName, error, fullQuery);
+                        ErrorRecord spiderError = new ErrorRecord(fullName, error, fullQuery);
                         spiderErrors.add(spiderError);
 
-
-
-
-
-
+                        entry.setResultOfCheckIsNOK(true);
                     }
 
-
                     resultSet.close();
-
-
                     pstmt.close();
                 } catch (Exception e) {
                     log.error(e.getMessage());
+                    pon.setOutputOfErrors(e.getMessage());
                 }
-
-
             }
             con.close();
-        } catch (SQLException e) {
-            log.error(e.getMessage());
-            //-log.error(String.format("!!!!!!!!!!!!!!!!!!!!!!!!! Spider request failed with (%s)", pon.getUsedQuery()));
-            pon.setOutputOfErrors(e.getMessage());
-        } catch (ClassNotFoundException e) {
-            log.error(e.getMessage());
-            pon.setOutputOfErrors(e.getMessage());
-        } catch (NullPointerException e) {
+        } catch (Exception e) {
             log.error(e.getMessage());
             pon.setOutputOfErrors(e.getMessage());
         }
-
-
         return spiderErrors;
     }
-
-
 }

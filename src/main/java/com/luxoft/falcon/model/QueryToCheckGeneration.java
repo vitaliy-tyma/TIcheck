@@ -2,7 +2,7 @@ package com.luxoft.falcon.model;
 
 import lombok.Getter;
 
-
+/* NOT IN USE*/
 public class QueryToCheckGeneration {
     @Getter
     private String g2010 = " SELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?";
