@@ -1,4 +1,4 @@
-package com.luxoft.falcon.model;
+package com.luxoft.falcon.config;
 
 import lombok.*;
 
@@ -6,7 +6,7 @@ import lombok.*;
  * To be loaded from XML-file*/
 
 @Data
-public class ConfigDataSpider {
+public class ConfigAndQueryForSpider {
     @Getter
     private String jdbcDriver = "org.postgresql.Driver";
     @Getter

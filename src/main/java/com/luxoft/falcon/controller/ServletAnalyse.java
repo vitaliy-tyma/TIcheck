@@ -1,10 +1,7 @@
 package com.luxoft.falcon.controller;
 
 import com.luxoft.falcon.config.MainConfig;
-import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.ChecklistTI;
-import com.luxoft.falcon.model.Pon;
-import com.luxoft.falcon.model.ErrorRecord;
 import com.luxoft.falcon.service.ServiceAnalyseBirt;
 import com.luxoft.falcon.service.ServiceAnalyseSpider;
 import com.luxoft.falcon.util.ChecklistMonitor;
@@ -15,7 +12,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.LinkedList;
 
 /**
  * Servlet is launched from web-browser's form and starts processes of checklists analysis
@@ -24,6 +20,8 @@ import java.util.LinkedList;
 public class ServletAnalyse extends HttpServlet {
     //    private Pon pon = new Pon();
     private Boolean analyseRegression = Boolean.FALSE;
+    private Boolean nokOnlyBool = Boolean.FALSE;
+
 
 
     @Override
@@ -61,6 +59,9 @@ public class ServletAnalyse extends HttpServlet {
                 httpServletRequest.getParameter(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_KEY());
         httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_KEY(), checklistRequestName);
 
+        final String nokOnly =
+                httpServletRequest.getParameter(MainConfig.getGET_NOK_REQUEST_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getGET_NOK_REQUEST_PARAMETER_VALUE(), nokOnly);
 
         final String prevPonName =
                 httpServletRequest.getParameter(MainConfig.getPON_NAME_PREV_REQUEST_PARAMETER_KEY());
@@ -75,6 +76,10 @@ public class ServletAnalyse extends HttpServlet {
         httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY(), autocompletePrevPon);
 
 
+        if ((nokOnly != null) && (nokOnly.equals("on"))) {
+            nokOnlyBool = Boolean.TRUE;
+        }
+
         if ((prevPonName != null) && (prevPonIteration != null)) {
             analyseRegression = Boolean.TRUE;
         }
@@ -83,32 +88,23 @@ public class ServletAnalyse extends HttpServlet {
         if (checklistRequestName.equals(MainConfig.getCHECKLISTS_NAME_TI())) {
             log.info("****************************************** TI CHECKLIST IS BEING PROCESSED *****************************************");
             ChecklistTI checklist = new ChecklistTI();
-            Pon pon = new Pon();// TO BE DELETED
 
             log.info(
                     String.format(
                             "******* Processing checklist %s with the request: name = %s;" +
-                                    " iteration = %s; autocomplete = %s",
+                                    " iteration = %s; autocomplete = %s, NOK only = %s",
                             checklistRequestName,
                             ponName,
                             ponIteration,
-                            autocompletePon));
-
-            //-
-            pon.setName(ponName);
-            pon.setIteration(Integer.parseInt(ponIteration));//validate!!!
-            pon.setChecklistName(checklistRequestName);
-            if (autocompletePon.equals("on")) {
-                pon.setAutocomplete(Boolean.TRUE);
-            } else {
-                pon.setAutocomplete(Boolean.FALSE);
-            }
+                            autocompletePon,
+                            nokOnlyBool));
 
 
-            //+
+
             checklist.setName(ponName);
             checklist.setIteration(Integer.parseInt(ponIteration));//validate!!!
             checklist.setChecklistName(checklistRequestName);
+            checklist.setNokOnly(nokOnlyBool);
             if (autocompletePon.equals("on")) {
                 checklist.setAutocomplete(Boolean.TRUE);
             } else {
@@ -126,14 +122,6 @@ public class ServletAnalyse extends HttpServlet {
                                 prevPonIteration,
                                 autocompletePrevPon));
 
-                //-
-                pon.setPrevName(prevPonName);
-                pon.setPrevIteration(Integer.parseInt(prevPonIteration));//validate!!!
-                if (autocompletePrevPon.equals("on")) {
-                    pon.setPrevAutocomplete(Boolean.TRUE);
-                } else {
-                    pon.setPrevAutocomplete(Boolean.FALSE);
-                }
 
                 //+
                 checklist.setPrevName(prevPonName);
@@ -166,45 +154,37 @@ public class ServletAnalyse extends HttpServlet {
                             checklistRequestName));
             result.append(
                     String.format(
-                            "Name = <b>%s</b>, iteration = <b>%s</b>, autocomplete = <b>%s</b>.</p>\n",
+                            "Name = <b>%s</b>, iteration = <b>%s</b>, autocomplete = <b>%s</b>, limit = <b>%s</b>.</p>\n",
                             checklist.getName(),
                             checklist.getIteration(),
-                            checklist.getAutocomplete()));
+                            checklist.getAutocomplete(),
+                            MainConfig.getQUERY_LIMIT()));
 
 
 
             if (analyseRegression) {
                 result.append(
                         String.format(
-                                "PrevPonName = <b>%s</b>, prevIteration = <b>%s</b>, prevAutocomplete = <b>%s</b>.</p>\n",
+                                "PrevPonName = <b>%s</b>, prevIteration = <b>%s</b>, prevAutocomplete = <b>%s</b>, limit = <b>%s</b>.</p>\n",
                                 checklist.getPrevName(),
                                 checklist.getPrevIteration(),
-                                checklist.getPrevAutocomplete()));
+                                checklist.getPrevAutocomplete(),
+                                MainConfig.getQUERY_LIMIT()));
             }
 
 
 
 
             /* PROCESS SPIDER ERRORS*/
-            //-
-//            LinkedList<ErrorRecord> spiderErrors0 = ServiceAnalyseSpider.processSpider(checklist, pon, analyseRegression);
-//            pon.setSpiderErrors(spiderErrors0);
-
-            //+
-            ServiceAnalyseSpider.processSpiderChecklist(checklist, analyseRegression);
-
-
-            log.info(String.format("********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"), pon.getName());
+            ServiceAnalyseSpider.processSpiderChecklist(checklist, analyseRegression, nokOnlyBool);
+            log.info(String.format("********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"), checklist.getName());
 
 
 
 
             /* PROCESS BIRT ERRORS*/
-//            LinkedList<ErrorRecord> birtErrors = ServiceAnalyseBirt.processBirt(checklist, pon, analyseRegression);
-//            pon.setBirtErrors(birtErrors);
-
-            ServiceAnalyseBirt.processBirtChecklist(checklist, analyseRegression);
-            log.info(String.format("****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"), pon.getName());
+            ServiceAnalyseBirt.processBirtChecklist(checklist, analyseRegression, nokOnlyBool);
+            log.info(String.format("****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"), checklist.getName());
 
 
 

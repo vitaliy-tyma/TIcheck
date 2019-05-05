@@ -186,7 +186,18 @@ tabindex="4">
 Analyse
 </button>
 </td>
-
+<!--
+<td class = "right">
+<input
+type="checkbox"
+name="get_NOK_only"
+checked
+title="Get only NOK results"
+tabindex="10">
+NOK Only
+</checkbox>
+</td>
+-->
 </tr>
 
 

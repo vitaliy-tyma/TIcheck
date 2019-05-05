@@ -9,6 +9,19 @@ public class ChecklistEntry {
         this.nameOfErrorToCheckFor = nameOfErrorToCheckFor;
     }
 
+    public ChecklistEntry(String nameOfErrorToCheckFor,
+                          Boolean stepIsChecked,
+                          Boolean resultOfCheckIsNOK,
+                          String fullQuery,
+                          String fullNameOfPon,
+                          String isRegression) {
+        this.nameOfErrorToCheckFor = nameOfErrorToCheckFor;
+        this.stepIsChecked = stepIsChecked;
+        this.resultOfCheckIsNOK = resultOfCheckIsNOK;
+        this.fullQuery = fullQuery;
+        this.fullNameOfPon = fullNameOfPon;
+        this.isRegression = isRegression;
+    }
 
     @Getter
     private String nameOfErrorToCheckFor;

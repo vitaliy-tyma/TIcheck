@@ -1,6 +1,6 @@
 package com.luxoft.falcon.dao;
 
-import com.luxoft.falcon.model.ConfigDataSpider;
+import com.luxoft.falcon.config.ConfigAndQueryForSpider;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.*;
@@ -26,7 +26,7 @@ public class DbConnectorSpider {
 
     private static Connection con;
 
-    public static Connection connectDatabase(ConfigDataSpider configData) throws ClassNotFoundException, SQLException {
+    public static Connection connectDatabase(ConfigAndQueryForSpider configData) throws ClassNotFoundException, SQLException {
 
         log.debug("********** Run connectDatabase **********");
 

@@ -1,4 +1,4 @@
-package com.luxoft.falcon.model;
+package com.luxoft.falcon.config;
 
 import lombok.Data;
 import lombok.Getter;
@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 
 @Data
-public class ConfigDataBirt2020 {
+public class ConfigAndQueryForBirt2020 {
     @Getter
     private String jdbcDriver = "com.mysql.jdbc.Driver";
 

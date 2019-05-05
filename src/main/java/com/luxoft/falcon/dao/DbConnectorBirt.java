@@ -1,6 +1,5 @@
 package com.luxoft.falcon.dao;
 
-import com.luxoft.falcon.model.ConfigDataBirt2010;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;

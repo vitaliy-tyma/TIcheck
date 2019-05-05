@@ -92,6 +92,9 @@ public class ChecklistTI {
     @Setter
     private Boolean autocomplete = false;
 
+    @Getter
+    @Setter
+    private Boolean nokOnly;
 
     @Getter
     private String prevName;
@@ -138,6 +141,7 @@ public class ChecklistTI {
             this.checklistName = MainConfig.getCHECKLISTS_NAME_UNDEF();
         }
     }
+
 
 
 }

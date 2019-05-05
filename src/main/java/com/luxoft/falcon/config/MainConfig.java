@@ -51,6 +51,10 @@ public class MainConfig {
     @Getter
     private static final String AUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_VALUE = "autocomplete_prev_pon";
 
+    @Getter
+    private static final String GET_NOK_REQUEST_PARAMETER_KEY = "get_NOK_only";
+    @Getter
+    private static final String GET_NOK_REQUEST_PARAMETER_VALUE = "get_NOK_only";
 
 
 

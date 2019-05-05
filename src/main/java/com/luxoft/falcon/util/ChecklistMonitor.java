@@ -2,8 +2,6 @@ package com.luxoft.falcon.util;
 
 import com.luxoft.falcon.model.ChecklistTI;
 import com.luxoft.falcon.model.ChecklistEntry;
-import com.luxoft.falcon.model.ErrorRecord;
-import com.luxoft.falcon.model.Pon;
 
 import java.util.LinkedList;
 
@@ -12,12 +10,10 @@ import java.util.LinkedList;
 public class ChecklistMonitor {
 
 
-
-    private static Integer i = 0;
+    private static Integer i;
 
 
     public static String getDataFromChecklist(ChecklistTI checklist) {
-
 
 
         StringBuilder checklistMonitor = new StringBuilder();
@@ -36,15 +32,12 @@ public class ChecklistMonitor {
         checklistMonitor.append("<th>Regression</th>");
         checklistMonitor.append("</tr>");
 
-
-        checklistMonitor.append(getRowsFromChecklist("SPIDER", checklist.getSpiderSteps(), checklist.getName()));
-        checklistMonitor.append(getRowsFromChecklist("BIRT", checklist.getBirtSteps(), checklist.getName()));
+        i = 0;
+        checklistMonitor.append(getRowsFromChecklist("SPIDER", checklist.getSpiderSteps(), checklist.getIteration()));
+        checklistMonitor.append(getRowsFromChecklist("BIRT", checklist.getBirtSteps(), checklist.getIteration()));
 
         checklistMonitor.append("</table>");
         checklistMonitor.append("</div>");
-
-
-
 
 
         if (checklist.getLogOfErrors().size() != 0) {
@@ -62,9 +55,7 @@ public class ChecklistMonitor {
     }
 
 
-
-
-    private static String getRowsFromChecklist(String serviceName, LinkedList<ChecklistEntry> steps, String name) {
+    private static String getRowsFromChecklist(String serviceName, LinkedList<ChecklistEntry> steps, int iteration) {
 
         StringBuilder checklistMonitor = new StringBuilder();
 
@@ -83,19 +74,23 @@ public class ChecklistMonitor {
                             i));
 
 
-            if (entry.getFullNameOfPon() != null) {
-                String addThreeDots = "";
-                if (entry.getFullNameOfPon() != name) {
-                    addThreeDots = "...";
-                }
-                checklistMonitor.append(
-                        String.format("<td align=center>" +
-                                        "<div class=\"tooltip_for_name\">%s" +
-                                        "<span class=\"tooltiptext\">%s</span>" +
-                                        "</div></td>",
-                                name + addThreeDots,
-                                entry.getFullNameOfPon()));//FullName
-            } else checklistMonitor.append("<td></td>");
+//            if (entry.getFullNameOfPon() != null) {
+//                String addThreeDots = "";
+//                if (entry.getFullNameOfPon() != name) {
+//                    addThreeDots = "...";
+//                }
+//                checklistMonitor.append(
+//                        String.format("<td align=center>" +
+//                                        "<div class=\"tooltip_for_name\">%s" +
+//                                        "<span class=\"tooltiptext\">%s</span>" +
+//                                        "</div></td>",
+//                                name + addThreeDots,
+//                                entry.getFullNameOfPon()));//FullName
+//            } else checklistMonitor.append("<td></td>");
+            checklistMonitor.append(
+                    String.format("<td>%s (%s)</td>",
+                            entry.getFullNameOfPon(),
+                            iteration));
 
 
             checklistMonitor.append(
@@ -129,9 +124,15 @@ public class ChecklistMonitor {
                                     " alt=\"Query\"><span class=\"tooltiptext\">%s</span></div></td>",
                             entry.getFullQuery()));//query
 
-            checklistMonitor.append(
-                    String.format("<td>%s</td>",
-                            entry.getIsRegression()));
+            if (entry.getIsRegression().equals("Yes")) {
+                checklistMonitor.append(
+                        String.format("<td align = center><font color = red>%s</font></td>",
+                                entry.getIsRegression()));
+            } else {
+                checklistMonitor.append(
+                        String.format("<td align = center>%s</td>",
+                                entry.getIsRegression()));
+            }
 
             checklistMonitor.append("</tr>");
         }

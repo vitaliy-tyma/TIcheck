@@ -1,7 +1,6 @@
 package com.luxoft.falcon.util;
 
 import com.luxoft.falcon.config.MainConfig;
-import com.luxoft.falcon.model.Pon;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -9,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 public class Loader {
-    private Pon pon;
+//    private Pon pon;
     private MainConfig mainConfig;
 
     public void init() {
