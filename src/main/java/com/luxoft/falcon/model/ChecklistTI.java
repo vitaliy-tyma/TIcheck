@@ -1,52 +1,56 @@
 package com.luxoft.falcon.model;
 
+import com.luxoft.falcon.config.MainConfig;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.LinkedList;
 
-/** Entity/Data/POJO to connect to the SPIDER */
+
+/** Entity/Data/POJO  */
 @Data
 public class ChecklistTI {
 
-    /* Structure: 1) Error to be checked. 2) step has passed. 3) result of check is NOK (field = true)*/
-//    private Map<String, Boolean> spiderSteps = new HashMap<>();
-//    private Map<String, Boolean> birtSteps = new HashMap<>();
-//    private Map<String, Boolean> ndsSteps = new HashMap<>();
 
-    private ArrayList<ChecklistTiEntry> spiderSteps = new ArrayList<>();
-    private ArrayList<ChecklistTiEntry> birtSteps = new ArrayList<>();
-    private ArrayList<ChecklistTiEntry> ndsSteps = new ArrayList<>();
+
+
+
+
+
+
+
+
+
+
+
+
+    private LinkedList<ChecklistEntry> spiderSteps = new LinkedList<>();
+    private LinkedList<ChecklistEntry> birtSteps = new LinkedList<>();
+    private LinkedList<ChecklistEntry> ndsSteps = new LinkedList<>();
+
 
     public ChecklistTI(){
-//        spiderSteps.put("NndbTmcNamesBuilderTarget:118", Boolean.FALSE);
-//        spiderSteps.put("NndbCountriesBuilderTarget:227", Boolean.FALSE);
-        spiderSteps.add(new ChecklistTiEntry("NndbTmcNamesBuilderTarget:118", Boolean.FALSE, Boolean.FALSE, null));
-        spiderSteps.add(new ChecklistTiEntry("NndbCountriesBuilderTarget:227", Boolean.FALSE, Boolean.FALSE, null));
+
+        spiderSteps.add(new ChecklistEntry("NndbTmcNamesBuilderTarget:118"));
+        spiderSteps.add(new ChecklistEntry("NndbCountriesBuilderTarget:227"));
 
 
 
-//        birtSteps.put("anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest", Boolean.FALSE);
-//        birtSteps.put("anaconda.inds.ti.TmcLocationExporterTest.tmcNameTableTest", Boolean.FALSE);
-//        birtSteps.put("anaconda.inds.ti.TmcLocationNameTest.locationNameCountTest", Boolean.FALSE);
-//        birtSteps.put("anaconda.inds.ti.TmcLocationNameTest.nndbTmcNamesExportTest", Boolean.FALSE);
-//        birtSteps.put("anaconda.inds.ti.TmcStringTableTest.stringCountTest", Boolean.FALSE);
-//        birtSteps.put("anaconda.inds.ti.TmcStringTableTest.tmcStringTest", Boolean.FALSE);
-        birtSteps.add(new ChecklistTiEntry("anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest", Boolean.FALSE, Boolean.FALSE, null));
-        birtSteps.add(new ChecklistTiEntry("anaconda.inds.ti.TmcLocationExporterTest.tmcNameTableTest", Boolean.FALSE, Boolean.FALSE, null));
-        birtSteps.add(new ChecklistTiEntry("anaconda.inds.ti.TmcLocationNameTest.locationNameCountTest", Boolean.FALSE, Boolean.FALSE, null));
-        birtSteps.add(new ChecklistTiEntry("anaconda.inds.ti.TmcLocationNameTest.nndbTmcNamesExportTest", Boolean.FALSE, Boolean.FALSE, null));
-        birtSteps.add(new ChecklistTiEntry("anaconda.inds.ti.TmcStringTableTest.stringCountTest", Boolean.FALSE, Boolean.FALSE, null));
-        birtSteps.add(new ChecklistTiEntry("anaconda.inds.ti.TmcStringTableTest.tmcStringTest", Boolean.FALSE, Boolean.FALSE, null));
+        birtSteps.add(new ChecklistEntry("anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest"));
+        birtSteps.add(new ChecklistEntry("anaconda.inds.ti.TmcLocationExporterTest.tmcNameTableTest"));
+        birtSteps.add(new ChecklistEntry("anaconda.inds.ti.TmcLocationNameTest.locationNameCountTest"));
+        birtSteps.add(new ChecklistEntry("anaconda.inds.ti.TmcLocationNameTest.nndbTmcNamesExportTest"));
+        birtSteps.add(new ChecklistEntry("anaconda.inds.ti.TmcStringTableTest.stringCountTest"));
+        birtSteps.add(new ChecklistEntry("anaconda.inds.ti.TmcStringTableTest.tmcStringTest"));
 
 
 
-//        ndsSteps.put("0MXXX.NDS tmcLocationTableIdTable", Boolean.FALSE);
-        ndsSteps.add(new ChecklistTiEntry("0MXXX.NDS tmcLocationTableIdTable", Boolean.FALSE, Boolean.FALSE, null));
+        ndsSteps.add(new ChecklistEntry("0MXXX.NDS tmcLocationTableIdTable"));
 
-        /* !!!!!!!!!!!!!!NOT IMPLEMENTED!!!!!!!!!!!!!!!!!!!!
+        /* !!!!!!!!!!!!!!NOT IMPLEMENTED - MAP IS NOT USED ANY MORE !!!!!!!!!!!!!!!!!!!!
         ndsSteps.put("NHXXX.NDS tmcLocationTableIdTable", Boolean.FALSE); //Many files!!!!
+
         ndsSteps.put("TI version tmcLocationTableIdTable", Boolean.FALSE); //Define what versions are current!!!
         */
 
@@ -58,5 +62,82 @@ public class ChecklistTI {
         * TI Browser - TI icons and messages are present for TMC and TPEG_TEC
         * */
     }
+
+
+
+
+
+    @Getter
+    private String name;
+    public void setName(String name){
+        String result = name.trim();
+        result = result.replaceAll("[^A-Za-z0-9_%]", "");
+        if (!result.equals(name)) {
+            this.logOfErrors.add("\nSome extra symbols have been removed from the PON name!\n");
+        }
+
+        if (result.length() > 30) {
+            result = result.substring(0, 30);
+            this.logOfErrors.add("\nLength of the PON name has been reduced to 30 symbols!\n");
+        }
+        this.name = result;
+    }
+
+    @Getter
+    @Setter
+    private int iteration;
+
+
+    @Getter
+    @Setter
+    private Boolean autocomplete = false;
+
+
+    @Getter
+    private String prevName;
+    public void setPrevName(String name){
+        String result = name.trim();
+        result = result.replaceAll("[^A-Za-z0-9_%]", "");
+        if (!result.equals(name)) {
+            this.logOfErrors.add("\nSome extra symbols have been removed from the prevPON name!\n");
+        }
+
+        if (result.length() > 30) {
+            result = result.substring(0, 30);
+            this.logOfErrors.add("\nLength of the prevPON name has been reduced to 30 symbols!\n");
+        }
+        this.prevName = result;
+    }
+
+    @Getter
+    @Setter
+    private int prevIteration;
+
+    @Getter
+    @Setter
+    private Boolean prevAutocomplete = false;
+
+
+
+
+    @Getter
+    @Setter
+    private LinkedList<String> logOfErrors = new LinkedList<>();
+
+    public void addLogOfErrors(String string){
+        this.logOfErrors.add(string);
+    }
+
+    @Getter
+    private String checklistName;
+    public void setChecklistName(String checklistName){
+        if (checklistName.equals(MainConfig.getCHECKLISTS_NAME_TI()) ||
+                false){//add more checks
+            this.checklistName = checklistName;
+        } else {
+            this.checklistName = MainConfig.getCHECKLISTS_NAME_UNDEF();
+        }
+    }
+
 
 }

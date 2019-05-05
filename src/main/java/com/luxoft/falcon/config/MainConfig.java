@@ -38,6 +38,24 @@ public class MainConfig {
 
 
     @Getter
+    private static final String PON_NAME_PREV_REQUEST_PARAMETER_KEY = "prev_pon_name";
+    @Getter
+    private static final String PON_NAME_PREV_REQUEST_PARAMETER_VALUE = "prev_pon_name";
+    @Getter
+    private static final String PON_ITERATION_PREV_REQUEST_PARAMETER_KEY = "prev_pon_iteration";
+    @Getter
+    private static final String PON_ITERATION_PREV_REQUEST_PARAMETER_VALUE = "prev_pon_iteration";
+
+    @Getter
+    private static final String AUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY = "autocomplete_prev_pon";
+    @Getter
+    private static final String AUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_VALUE = "autocomplete_prev_pon";
+
+
+
+
+
+    @Getter
     private static final String SOURCE_NAME_SPIDER = "spider";
     @Getter
     private static final String SOURCE_NAME_BIRT = "birt";

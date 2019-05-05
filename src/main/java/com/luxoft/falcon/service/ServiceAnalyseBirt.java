@@ -8,9 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedList;
-import java.util.Map;
 
 
 import com.luxoft.falcon.model.QueryToCheckGeneration;
@@ -26,8 +24,10 @@ public class ServiceAnalyseBirt {
     private static ConfigDataBirt2020 configDataBirt2020 = new ConfigDataBirt2020();
     private static QueryToCheckGeneration queryToCheckGeneration = new QueryToCheckGeneration();
 
+    private static PreparedStatement pstmtChecker;
+    private static ResultSet resultSetChecker;
 
-    public static LinkedList<ErrorRecord> processBirt(ChecklistTI checklistTI, Pon pon) {
+    public static LinkedList<ErrorRecord> processBirtChecklist(ChecklistTI checklist, Boolean analyseRegression) {
 
         LinkedList<ErrorRecord> birtErrors = new LinkedList<>();
         String queryLike = null;
@@ -43,13 +43,12 @@ public class ServiceAnalyseBirt {
                     configDataBirt2010.getJdbcLogin(),
                     configDataBirt2010.getJdbcPassword());
 
-            PreparedStatement pstmtChecker;
-            ResultSet resultSetChecker;
+
 
 //2010
             String queryToCheck = queryToCheckGeneration.getG2010();
             pstmtChecker = con.prepareStatement(queryToCheck);
-            pstmtChecker.setString(1, "%" + pon.getName() + "%");
+            pstmtChecker.setString(1, "%" + checklist.getName() + "%");
             pstmtChecker.setInt(2, MainConfig.getQUERY_LIMIT());
             resultSetChecker = pstmtChecker.executeQuery();
             if (resultSetChecker.isBeforeFirst()) {
@@ -70,7 +69,7 @@ public class ServiceAnalyseBirt {
                     configDataBirt2020.getJdbcPassword());
             queryToCheck = queryToCheckGeneration.getG2020();
             pstmtChecker = con.prepareStatement(queryToCheck);
-            pstmtChecker.setString(1, "%" + pon.getName() + "%");
+            pstmtChecker.setString(1, "%" + checklist.getName() + "%");
             pstmtChecker.setInt(2, MainConfig.getQUERY_LIMIT());
             resultSetChecker = pstmtChecker.executeQuery();
             if (resultSetChecker.isBeforeFirst()) {
@@ -82,23 +81,29 @@ public class ServiceAnalyseBirt {
             resultSetChecker.close();
             pstmtChecker.close();
 
+
+
+
+
             /* Iterate over BIRT*/
             if (isGenDefined) {
-                for (ChecklistTiEntry entry : checklistTI.getBirtSteps()) {
-                    PreparedStatement pstmt;
-                    ResultSet resultSet;
+                PreparedStatement pstmt = null;
+                ResultSet resultSet = null;
+
+                for (ChecklistEntry entry : checklist.getBirtSteps()) {
+
 
                     try {
-                        if (pon.getAutocomplete()) {
+                        if (checklist.getAutocomplete()) {
                             pstmt = con.prepareStatement(queryLike);
-                            pstmt.setString(1, "%" + pon.getName() + "%R" + Integer.valueOf(pon.getIteration()));
+                            pstmt.setString(1, "%" + checklist.getName() + "%R" + Integer.valueOf(checklist.getIteration()));
                         } else {
                             pstmt = con.prepareStatement(queryAccurate);
-                            pstmt.setString(1, pon.getName() + "_R" + Integer.valueOf(pon.getIteration()));
+                            pstmt.setString(1, checklist.getName() + "_R" + Integer.valueOf(checklist.getIteration()));
                         }
 
                         //pstmt.setInt(2, pon.getIteration());
-                        pstmt.setString(2, entry.getNameOfError());
+                        pstmt.setString(2, entry.getNameOfErrorToCheckFor());
                         pstmt.setInt(3, MainConfig.getQUERY_LIMIT());
 
                         resultSet = pstmt.executeQuery();
@@ -117,20 +122,28 @@ public class ServiceAnalyseBirt {
                             birtErrors.add(birtError);
 
                             entry.setResultOfCheckIsNOK(true);
+                            entry.setFullNameOfPon(fullName);
                         }
-                        resultSet.close();
-                        pstmt.close();
+
                     } catch (Exception e) {
                         log.error(e.getMessage());
-                        pon.setOutputOfErrors(e.getMessage());
+                        checklist.addLogOfErrors(e.getMessage());
                     }
                 }
+
+                resultSet.close();
+                pstmt.close();
             }
             con.close();
         } catch (Exception e) {
             log.error(e.getMessage());
-            pon.setOutputOfErrors(e.getMessage());
+            checklist.addLogOfErrors(e.getMessage());
         }
         return birtErrors;
     }
+
+
+
+
+
 }

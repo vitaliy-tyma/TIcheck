@@ -1,8 +1,8 @@
 package com.luxoft.falcon.controller;
 
 import com.luxoft.falcon.config.MainConfig;
+import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.ChecklistTI;
-import com.luxoft.falcon.model.ChecklistTiEntry;
 import com.luxoft.falcon.model.Pon;
 import com.luxoft.falcon.model.ErrorRecord;
 import com.luxoft.falcon.service.ServiceAnalyseBirt;
@@ -16,14 +16,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.LinkedList;
-import java.util.Map;
 
 /**
  * Servlet is launched from web-browser's form and starts processes of checklists analysis
  */
 @Slf4j
 public class ServletAnalyse extends HttpServlet {
-//    private Pon pon = new Pon();
+    //    private Pon pon = new Pon();
+    private Boolean analyseRegression = Boolean.FALSE;
 
 
     @Override
@@ -38,12 +38,12 @@ public class ServletAnalyse extends HttpServlet {
     public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws IOException {
 
-        Pon pon = new Pon();
+
 
         log.info("*********************** NEW REQUEST STARTED ** ServletAnalyse.doGet() ****************************************");
         log.info("***********************************************************************************************************");
         log.info("**************************************************************************************************************");
-
+        StringBuilder result = new StringBuilder();
 
         final String ponName =
                 httpServletRequest.getParameter(MainConfig.getPON_NAME_REQUEST_PARAMETER_KEY());
@@ -57,101 +57,180 @@ public class ServletAnalyse extends HttpServlet {
                 httpServletRequest.getParameter(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY());
         httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY(), autocompletePon);
 
-        final String setChecklist =
+        final String checklistRequestName =
                 httpServletRequest.getParameter(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_KEY());
-        httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_KEY(), setChecklist);
-
-        log.info(
-                String.format(
-                        "******* Processing checklistTI %s with the request: name = %s;" +
-                                " iteration = %s; autocomplete = %s",
-                        setChecklist,
-                        ponName,
-                        ponIteration,
-                        autocompletePon));
+        httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_KEY(), checklistRequestName);
 
 
-        pon.setName(ponName);
-        pon.setIteration(Integer.parseInt(ponIteration));
-        pon.setChecklistName(setChecklist);
+        final String prevPonName =
+                httpServletRequest.getParameter(MainConfig.getPON_NAME_PREV_REQUEST_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getPON_NAME_PREV_REQUEST_PARAMETER_VALUE(), prevPonName);
 
-        if (autocompletePon == null) {
-            pon.setAutocomplete(false);
-        } else {
-            //.equals("on")
-            pon.setAutocomplete(true);
+        final String prevPonIteration =
+                httpServletRequest.getParameter(MainConfig.getPON_ITERATION_PREV_REQUEST_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_PREV_REQUEST_PARAMETER_KEY(), prevPonIteration);
+
+        final String autocompletePrevPon =
+                httpServletRequest.getParameter(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY(), autocompletePrevPon);
+
+
+        if ((prevPonName != null) && (prevPonIteration != null)) {
+            analyseRegression = Boolean.TRUE;
         }
 
-
-
-
-
-
-        /* Read all sections to define check steps - fill in Keys*/
-        /* !!!!!!!!!!!!!!!!!!!!!*/
-        StringBuilder result = new StringBuilder();
-
-
-        result.append(getHeader());
-        result.append("<body>");
-        result.append("<div align=center>");
-        result.append(
-                String.format("<p><h3>Automated %s checklist analysis results for the request:</h3>",
-                        setChecklist));
-        result.append(
-                String.format(
-                        "Name = <b>%s</b>, iteration = <b>%s</b>, autocomplete = <b>%s</b>.</p>\n",
-                        pon.getName(),
-                        pon.getIteration(),
-                        pon.getAutocomplete()));
-
-
-
-
-
         /* Check the name of checklist. If = TI proceed*/
-        if (setChecklist.equals(MainConfig.getCHECKLISTS_NAME_TI())) {
+        if (checklistRequestName.equals(MainConfig.getCHECKLISTS_NAME_TI())) {
             log.info("****************************************** TI CHECKLIST IS BEING PROCESSED *****************************************");
-            ChecklistTI checklistTI = new ChecklistTI();
+            ChecklistTI checklist = new ChecklistTI();
+            Pon pon = new Pon();// TO BE DELETED
 
-            /* PROCESS SPIDER ERRORS*/
-            LinkedList<ErrorRecord> spiderErrors;
-            spiderErrors = ServiceAnalyseSpider.processSpider(checklistTI, pon);
-            pon.setSpiderErrors(spiderErrors);
-            log.info(String.format("********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"), pon.getName());
+            log.info(
+                    String.format(
+                            "******* Processing checklist %s with the request: name = %s;" +
+                                    " iteration = %s; autocomplete = %s",
+                            checklistRequestName,
+                            ponName,
+                            ponIteration,
+                            autocompletePon));
 
-            /* PROCESS BIRT ERRORS*/
-            LinkedList<ErrorRecord> birtErrors;
-            birtErrors = ServiceAnalyseBirt.processBirt(checklistTI, pon);
-            pon.setBirtErrors(birtErrors);
-            log.info(String.format("****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"), pon.getName());
-
-            /* OUTPUT */
-            /* ChecklistTI log*/
-            result.append(ChecklistMonitor.getData(checklistTI, pon));
-
-            if (pon.getOutputOfErrors() != null) {
-                result.append(
-                        String.format(
-                                "<div><p><font color=red>%s</font></p></div>\n", pon.getOutputOfErrors()));
+            //-
+            pon.setName(ponName);
+            pon.setIteration(Integer.parseInt(ponIteration));//validate!!!
+            pon.setChecklistName(checklistRequestName);
+            if (autocompletePon.equals("on")) {
+                pon.setAutocomplete(Boolean.TRUE);
+            } else {
+                pon.setAutocomplete(Boolean.FALSE);
             }
 
 
-            result.append("<br/>Notes:<br/>");
-            /* DISPLAY SPIDER ERRORS*/
-            result.append(ChecklistMonitor.getSpiderErrorsData(checklistTI, pon));
+            //+
+            checklist.setName(ponName);
+            checklist.setIteration(Integer.parseInt(ponIteration));//validate!!!
+            checklist.setChecklistName(checklistRequestName);
+            if (autocompletePon.equals("on")) {
+                checklist.setAutocomplete(Boolean.TRUE);
+            } else {
+                checklist.setAutocomplete(Boolean.FALSE);
+            }
 
 
-            /* DISPLAY BIRT ERRORS*/
-            result.append(ChecklistMonitor.getBirtErrorsData(checklistTI, pon));
 
-        }
+            if (analyseRegression) {
+                log.info(
+                        String.format(
+                                "******* Processing regression check with the request: name = %s;" +
+                                        " iteration = %s; autocomplete = %s",
+                                prevPonName,
+                                prevPonIteration,
+                                autocompletePrevPon));
+
+                //-
+                pon.setPrevName(prevPonName);
+                pon.setPrevIteration(Integer.parseInt(prevPonIteration));//validate!!!
+                if (autocompletePrevPon.equals("on")) {
+                    pon.setPrevAutocomplete(Boolean.TRUE);
+                } else {
+                    pon.setPrevAutocomplete(Boolean.FALSE);
+                }
+
+                //+
+                checklist.setPrevName(prevPonName);
+                checklist.setPrevIteration(Integer.parseInt(prevPonIteration));//validate!!!
+                if (autocompletePrevPon.equals("on")) {
+                    checklist.setPrevAutocomplete(Boolean.TRUE);
+                } else {
+                    checklist.setPrevAutocomplete(Boolean.FALSE);
+                }
+            }
+
+
+
+
+
+
+
+
+
+            /* Read all sections to define check steps - fill in Keys*/
+            /* !!!!!!!!!!!!!!!!!!!!!*/
+
+
+
+            result.append(getHeader());
+            result.append("<body>");
+            result.append("<div align=center>");
+            result.append(
+                    String.format("<p><h3>Automated %s checklist analysis results for the request:</h3>",
+                            checklistRequestName));
+            result.append(
+                    String.format(
+                            "Name = <b>%s</b>, iteration = <b>%s</b>, autocomplete = <b>%s</b>.</p>\n",
+                            checklist.getName(),
+                            checklist.getIteration(),
+                            checklist.getAutocomplete()));
+
+
+
+            if (analyseRegression) {
+                result.append(
+                        String.format(
+                                "PrevPonName = <b>%s</b>, prevIteration = <b>%s</b>, prevAutocomplete = <b>%s</b>.</p>\n",
+                                checklist.getPrevName(),
+                                checklist.getPrevIteration(),
+                                checklist.getPrevAutocomplete()));
+            }
+
+
+
+
+            /* PROCESS SPIDER ERRORS*/
+            //-
+//            LinkedList<ErrorRecord> spiderErrors0 = ServiceAnalyseSpider.processSpider(checklist, pon, analyseRegression);
+//            pon.setSpiderErrors(spiderErrors0);
+
+            //+
+            ServiceAnalyseSpider.processSpiderChecklist(checklist, analyseRegression);
+
+
+            log.info(String.format("********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"), pon.getName());
+
+
+
+
+            /* PROCESS BIRT ERRORS*/
+//            LinkedList<ErrorRecord> birtErrors = ServiceAnalyseBirt.processBirt(checklist, pon, analyseRegression);
+//            pon.setBirtErrors(birtErrors);
+
+            ServiceAnalyseBirt.processBirtChecklist(checklist, analyseRegression);
+            log.info(String.format("****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"), pon.getName());
+
+
+
+
+
+
+
+
+
+            /* OUTPUT */
+            /* Checklist report*/
+            //-
+//            result.append(ChecklistMonitor.getData(checklist, pon));
+            //+
+            result.append(ChecklistMonitor.getDataFromChecklist(checklist));
+
+
+
 
         result.append("</div>");
         result.append("</body>");
 
 
-
+        } else {
+            result.append("Checklist name is not correct. Not possible to proceed.");
+        }
         /* To be sent as reply after analysis only*/
         httpServletResponse.getWriter().print(result.toString());
     }
@@ -161,27 +240,41 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
+
+
+
+
+
+
+
     private static String getHeader() {
 
-        String header = "<head>"+
+        String header = "<head>" +
                 "<style>\n" +
 //                "<link href=\"/lib/css/tooltip.css?v=8\" rel=\"stylesheet\" type=\"text/css\">" +
+
                 "/* Tooltip container */\n" +
-                ".tooltip {\n" +
+
+                ".tooltip_for_query {\n" +
                 "  position: relative;\n" +
                 "  display: inline-block;\n" +
                 "  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */\n" +
                 "}\n" +
+                ".tooltip_for_name {\n" +
+                "  position: relative;\n" +
+                "  display: inline-block;\n" +
+                "  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */\n" +
+                "}\n" +
+
                 "\n" +
                 "/* Tooltip text */\n" +
-                ".tooltip .tooltiptext {\n" +
+                ".tooltip_for_query .tooltiptext {\n" +
                 "  visibility: hidden;\n" +
                 "  width: 500px;\n" +
                 "  bottom: 100%;\n" +
                 "  left: 50%; \n" +
                 "  margin-left: -400px; /* Use shift, to center the tooltip */" +
-                ""+
-//                "  width: 1000px;\n" +
+                "" +
                 "  background-color: black;\n" +
                 "  color: #fff;\n" +
                 "  text-align: center;\n" +
@@ -192,12 +285,42 @@ public class ServletAnalyse extends HttpServlet {
                 "  position: absolute;\n" +
                 "  z-index: 1;\n" +
                 "}\n" +
+
+
+                "\n" +
+                "/* Tooltip text */\n" +
+                ".tooltip_for_name .tooltiptext {\n" +
+                "  visibility: hidden;\n" +
+                "  width: 200px;\n" +
+                "  bottom: 100%;\n" +
+                "  left: 50%; \n" +
+                "  margin-left: -100px; /* Use shift, to center the tooltip */" +
+                "  background-color: black;\n" +
+                "  color: #fff;\n" +
+                "  text-align: center;\n" +
+                "  padding: 5px 0;\n" +
+                "  border-radius: 6px;\n" +
+                " \n" +
+                "  /* Position the tooltip text - see examples below! */\n" +
+                "  position: absolute;\n" +
+                "  z-index: 1;\n" +
+                "}\n" +
+                "" +
+
                 "\n" +
                 "/* Show the tooltip text when you mouse over the tooltip container */\n" +
-                ".tooltip:hover .tooltiptext {\n" +
+                ".tooltip_for_query:hover .tooltiptext {\n" +
                 "  visibility: visible;\n" +
-                "}"+
-                "</style></head>\n";
+                "}" +
+
+                "\n" +
+                "/* Show the tooltip text when you mouse over the tooltip container */\n" +
+                ".tooltip_for_name:hover .tooltiptext {\n" +
+                "  visibility: visible;\n" +
+                "}" +
+
+                "</style>" +
+                "</head>\n";
         return header;
     }
 

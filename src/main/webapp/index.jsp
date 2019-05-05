@@ -203,7 +203,7 @@ placeholder="Previous PON/part"
 title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on Autocomplete checkbox"
 maxlength="30"
 size="20"
-disabled
+
 tabindex="10"/>
 </td>
 
@@ -212,7 +212,7 @@ tabindex="10"/>
 type="checkbox"
 name="autocomplete_prev_pon"
 checked
-disabled
+
 title="Query for requested name will be used with LIKE + heading and tailing %"
 tabindex="11">
 Autocomplete
@@ -229,10 +229,10 @@ Autocomplete
 <input
 type="text"
 name="prev_pon_iteration"
-placeholder="Previous PON iteration"
-title="Enter the actual value"
+value="1"
+title="Enter the previous PON iteration number"
 maxlength="2"
-disabled
+
 tabindex="12"/>
 </td>
 

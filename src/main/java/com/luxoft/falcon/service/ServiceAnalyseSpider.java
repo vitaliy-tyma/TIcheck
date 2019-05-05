@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedList;
 
 
@@ -20,42 +19,55 @@ public class ServiceAnalyseSpider {
 
     private static ConfigDataSpider configDataSpider = new ConfigDataSpider();
     private static Connection con = null;
+    private static PreparedStatement pstmt = null;
+    private static ResultSet resultSet = null;
+
+    private static LinkedList<ErrorRecord> spiderErrors = new LinkedList<>();
+    private static LinkedList<ErrorRecord> spiderErrorsRegression = new LinkedList<>();
 
 
-    public static LinkedList<ErrorRecord> processSpider(ChecklistTI checklistTI, Pon pon) {
 
-        LinkedList<ErrorRecord> spiderErrors = new LinkedList<>();
-        log.info("**** in ServiceAnalyseSpider.processSpider() ****");
+
+    public static void processSpiderChecklist(ChecklistTI checklist, Boolean analyseRegression) {
+
+
+
+
+        log.info("**** in ServiceAnalyseSpider.processSpiderChecklist() ****");
 
         try {
             con = DbConnectorSpider.connectDatabase(configDataSpider);
 
+
+
+
+
+
             /* Iterate over SPIDER*/
-            for (ChecklistTiEntry entry : checklistTI.getSpiderSteps()) {
-                PreparedStatement pstmt;
-                ResultSet resultSet;
-
-
+            for (ChecklistEntry entry : checklist.getSpiderSteps()) {
                 try {
-                    if (pon.getAutocomplete()) {
+                    if (checklist.getAutocomplete()) {
                         pstmt = con.prepareStatement(configDataSpider.getQueryLike());
-                        pstmt.setString(1, "%" + pon.getName() + "%");
+                        pstmt.setString(1, "%" + checklist.getName() + "%");
                     } else {
                         pstmt = con.prepareStatement(configDataSpider.getQueryAccurate());
-                        pstmt.setString(1, pon.getName());
+                        pstmt.setString(1, checklist.getName());
                     }
 
-                    pstmt.setInt(2, pon.getIteration());
-                    pstmt.setString(3, entry.getNameOfError());
+                    pstmt.setInt(2, checklist.getIteration());
+                    pstmt.setString(3, entry.getNameOfErrorToCheckFor());
                     pstmt.setInt(4, MainConfig.getQUERY_LIMIT());
 
                     resultSet = pstmt.executeQuery();
 
                     log.info(String.format("************************* Spider query executed(%s)", pstmt.toString()));
 
-                    /* Mark the item in checklistTI if query has been executed!*/
+                    /* Mark the item in checklist if query has been executed!*/
                     entry.setStepIsChecked(true);
                     entry.setFullQuery(pstmt.toString());
+
+
+
 
                     while (resultSet.next()) {
                         String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
@@ -66,20 +78,42 @@ public class ServiceAnalyseSpider {
                         spiderErrors.add(spiderError);
 
                         entry.setResultOfCheckIsNOK(true);
+                        entry.setFullNameOfPon(fullName);
                     }
 
-                    resultSet.close();
-                    pstmt.close();
+
+
+
                 } catch (Exception e) {
                     log.error(e.getMessage());
-                    pon.setOutputOfErrors(e.getMessage());
+                    checklist.addLogOfErrors(e.getMessage());
                 }
+
             }
+
+
+
+
+
+
+
+
+
+
+
+
+            resultSet.close();
+            pstmt.close();
             con.close();
         } catch (Exception e) {
             log.error(e.getMessage());
-            pon.setOutputOfErrors(e.getMessage());
+            checklist.addLogOfErrors(e.getMessage());
         }
-        return spiderErrors;
+
+
+
+
+
+
     }
 }
