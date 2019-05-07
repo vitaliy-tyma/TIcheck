@@ -51,10 +51,7 @@ public class MainConfig {
     @Getter
     private static final String AUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_VALUE = "autocomplete_prev_pon";
 
-    @Getter
-    private static final String GET_NOK_REQUEST_PARAMETER_KEY = "get_NOK_only";
-    @Getter
-    private static final String GET_NOK_REQUEST_PARAMETER_VALUE = "get_NOK_only";
+
 
 
 
@@ -67,7 +64,9 @@ public class MainConfig {
     private static final String SOURCE_NAME_NDS = "nds";
 
     @Getter
-    private static final int QUERY_LIMIT = 1000;
+    private static final String QUERY_LIMIT_KEY = "limit";
+    @Getter
+    private static final String QUERY_LIMIT_VALUE = "limit";
 
 
 
@@ -81,13 +80,14 @@ public class MainConfig {
     private static final String BIRT_TASK_COL_NAME = "Task";
     @Getter
     private static final String BIRT_TEST_COL_NAME = "TEST_NAME";
-
+    @Getter
+    private static final String BIRT_TEST_RESULT_NAME = "TEST_RESULT";
 
     @Getter
     private static final String CHECKLISTS_NAME_TI = "TI";
 
     @Getter
-    private static final String CHECKLISTS_NAME_UNDEF = "Undefined";
+    private static final String CHECKLISTS_NAME_UNDEF = CHECKLISTS_NAME_TI;
 
 
 }

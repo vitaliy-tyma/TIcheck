@@ -166,7 +166,7 @@ Checklist
 </td>
 <td class = "center">
 <select name = "checklists" form="checklist" width = 100% tabindex="3">
-            <option value = "TI" selected>TI</option>
+            <option value = "TI" selected>TI (Default)</option>
             <option value = "2">2 (not impl.)</option>
             <option value = "3">3 (not impl.)</option>
          </select>
@@ -186,18 +186,17 @@ tabindex="4">
 Analyse
 </button>
 </td>
-<!--
+
+
 <td class = "right">
-<input
-type="checkbox"
-name="get_NOK_only"
-checked
-title="Get only NOK results"
-tabindex="10">
-NOK Only
-</checkbox>
+<select name = "limit" form="checklist" width = 100% tabindex="5">
+            <option value = "10" selected>10</option>
+            <option value = "100">100</option>
+            <option value = "1000">1000</option>
+            <option value = "10000">10000</option>
+         </select>
 </td>
--->
+
 </tr>
 
 

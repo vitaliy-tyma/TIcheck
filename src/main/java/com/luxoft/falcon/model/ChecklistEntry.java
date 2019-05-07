@@ -13,15 +13,15 @@ public class ChecklistEntry {
                           Boolean stepIsChecked,
                           Boolean resultOfCheckIsNOK,
                           String fullQuery,
-                          String fullNameOfPon,
-                          String isRegression) {
+                          String fullNameOfPon) {
         this.nameOfErrorToCheckFor = nameOfErrorToCheckFor;
         this.stepIsChecked = stepIsChecked;
         this.resultOfCheckIsNOK = resultOfCheckIsNOK;
         this.fullQuery = fullQuery;
         this.fullNameOfPon = fullNameOfPon;
-        this.isRegression = isRegression;
     }
+
+
 
     @Getter
     private String nameOfErrorToCheckFor;
@@ -30,7 +30,11 @@ public class ChecklistEntry {
     private Boolean stepIsChecked = Boolean.FALSE; //Set after step has been checked
     @Getter
     @Setter
-    private Boolean resultOfCheckIsNOK = Boolean.FALSE; // Set in case of founded error
+    private Boolean resultOfCheckIsNOK = Boolean.FALSE; // Set TRUE in case of error founded
+
+    @Getter
+    @Setter
+    private String resultOfCheckText; // For BIRT (in case of SKIPPED TEST)
 
     @Getter
     @Setter
@@ -39,24 +43,11 @@ public class ChecklistEntry {
     @Getter
     @Setter
     private String fullNameOfPon = null;
-//    public String getFullNameOfPon(){
-//        if (this.fullNameOfPon == null) {
-//            return "";
-//        }
-//        return this.fullNameOfPon;
-//    }
 
 
+    @Getter
     @Setter
-    private String isRegression = null;
-    public String getIsRegression(){
-        if (this.isRegression == null) {
-            return "Not analysed";
-        }
-        return this.isRegression;
-    }
-
-
+    private String isRegression = "Not analysed";
 
 
 }

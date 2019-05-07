@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.LinkedList;
+import java.util.List;
 
 
 import com.luxoft.falcon.config.QueryToCheckGeneration;
@@ -29,7 +30,7 @@ public class ServiceAnalyseBirt {
     private static PreparedStatement pstmtChecker;
     private static ResultSet resultSetChecker;
 
-    public static void processBirtChecklist(ChecklistTI checklist, Boolean analyseRegression, Boolean nokOnlyBool) {
+    public static void processBirtChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
 
 //        LinkedList<ErrorRecord> birtErrors = new LinkedList<>();
         String queryLike = null;
@@ -50,8 +51,8 @@ public class ServiceAnalyseBirt {
 //2010
             String queryToCheck = queryToCheckGeneration.getG2010();
             pstmtChecker = con.prepareStatement(queryToCheck);
-            pstmtChecker.setString(1, "%" + checklist.getName() + "%");
-            pstmtChecker.setInt(2, MainConfig.getQUERY_LIMIT());
+            pstmtChecker.setString(1, "%" + report.getName() + "%");
+            pstmtChecker.setInt(2, report.getLimit());
             resultSetChecker = pstmtChecker.executeQuery();
             if (resultSetChecker.isBeforeFirst()) {
                 log.info("***************************** Use Birt 2010 *****************");
@@ -71,8 +72,8 @@ public class ServiceAnalyseBirt {
                     configAndQueryForBirt2020.getJdbcPassword());
             queryToCheck = queryToCheckGeneration.getG2020();
             pstmtChecker = con.prepareStatement(queryToCheck);
-            pstmtChecker.setString(1, "%" + checklist.getName() + "%");
-            pstmtChecker.setInt(2, MainConfig.getQUERY_LIMIT());
+            pstmtChecker.setString(1, "%" + report.getName() + "%");
+            pstmtChecker.setInt(2, report.getLimit());
             resultSetChecker = pstmtChecker.executeQuery();
             if (resultSetChecker.isBeforeFirst()) {
                 log.info("***************************** Use Birt 2020 *****************");
@@ -88,65 +89,79 @@ public class ServiceAnalyseBirt {
 
 
             /* Iterate over BIRT*/
-            LinkedList<ChecklistEntry> birtErrors = new LinkedList<>();
+            List<ChecklistEntry> fillBirtErrors = new LinkedList<>();
             if (isGenDefined) {
                 PreparedStatement pstmt = null;
                 ResultSet resultSet = null;
 
-                for (ChecklistEntry entry : checklist.getBirtSteps()) {
+                for (String errorToCheck : checklist.getBirtSteps()) {
 
 
                     try {
-                        if (checklist.getAutocomplete()) {
+                        if (report.getAutocomplete()) {
                             pstmt = con.prepareStatement(queryLike);
-                            pstmt.setString(1, "%" + checklist.getName() + "%R" + Integer.valueOf(checklist.getIteration()));
+                            pstmt.setString(1, "%" + report.getName() + "%R" + report.getIteration());
                         } else {
                             pstmt = con.prepareStatement(queryAccurate);
-                            pstmt.setString(1, checklist.getName() + "_R" + Integer.valueOf(checklist.getIteration()));
+                            pstmt.setString(1, report.getName() + "_R" + report.getIteration());
                         }
 
                         //pstmt.setInt(2, pon.getIteration());
-                        pstmt.setString(2, entry.getNameOfErrorToCheckFor());
-                        pstmt.setInt(3, MainConfig.getQUERY_LIMIT());
+                        pstmt.setString(2, errorToCheck);
+                        pstmt.setInt(3, report.getLimit());
 
+                        String fullQuery = pstmt.toString();
                         resultSet = pstmt.executeQuery();
 
-                        log.info(String.format("************************* Birt query has been executed(%s)", pstmt.toString()));
-                        /* Mark the item in checklistTI if query has been executed!*/
-                        entry.setStepIsChecked(true);
-                        entry.setFullQuery(pstmt.toString());
+                        log.info(String.format("************************* Birt query has been executed (%s)", fullQuery));
+                        /* Mark the item in checklist if query has been executed!*/
 
 
 
 
                         if (!resultSet.isBeforeFirst()){
-                            entry.setResultOfCheckIsNOK(false);
-                            birtErrors.add(new ChecklistEntry(entry.getNameOfErrorToCheckFor(), true, false,
-                                    entry.getFullQuery(), checklist.getName(), "Not analysed"));
+                            fillBirtErrors.add(
+                                    new ChecklistEntry(
+                                            errorToCheck,
+                                            true,
+                                            false,
+                                            fullQuery,
+                                            report.getName()));
                         }
 
 
                         while (resultSet.next()) {
                             String fullName = resultSet.getString(MainConfig.getBIRT_TASK_COL_NAME());
                             String testName = resultSet.getString(MainConfig.getBIRT_TEST_COL_NAME());
-                            String fullQuery = pstmt.toString();
-
-//                            ErrorRecord birtError = new ErrorRecord(fullName, testName, fullQuery);
-//                            birtErrors.add(birtError);
-                            birtErrors.add(new ChecklistEntry(testName, true, true, fullQuery, fullName, "Not analysed"));
+                            String resultOfTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
 
 
-                            entry.setResultOfCheckIsNOK(true);
+                            ChecklistEntry entry = new ChecklistEntry(testName);
+
+                            entry.setStepIsChecked(Boolean.TRUE);
+                            entry.setFullQuery(fullQuery);
                             entry.setFullNameOfPon(fullName);
+
+                            if (resultOfTest.toUpperCase().equals("NOK")) {
+                                entry.setResultOfCheckIsNOK(Boolean.TRUE);
+                            } else {
+                                entry.setResultOfCheckIsNOK(Boolean.FALSE);
+                            }
+                            entry.setResultOfCheckText(resultOfTest);
+
+                            fillBirtErrors.add(entry);
+                            log.info(String.format("************************* BIRT resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
+
                         }
 
                     } catch (Exception e) {
                         log.error(e.getMessage());
-                        checklist.addLogOfErrors(e.getMessage());
+                        report.addLogOfErrors(e.getMessage());
                     }
                 }
 
-                checklist.setBirtSteps(birtErrors);
+                /* Store items in report*/
+                report.setBirtSteps(fillBirtErrors);
 
 
 
@@ -160,31 +175,29 @@ public class ServiceAnalyseBirt {
 
 
                 /* CHECK FOR REGRESSION */
-                if (analyseRegression) {
+               /* if (analyseRegression) {
 
 
                     for (ChecklistEntry entry : checklist.getBirtSteps()) {
 
 
                         try {
-                            if (checklist.getAutocomplete()) {
+                            if (checklist.getPrevAutocomplete()) {
                                 pstmt = con.prepareStatement(queryLike);
-                                pstmt.setString(1, "%" + checklist.getName() + "%R" + Integer.valueOf(checklist.getIteration()));
+                                pstmt.setString(1, "%" + checklist.getPrevName() + "%R" + checklist.getPrevIteration());
                             } else {
                                 pstmt = con.prepareStatement(queryAccurate);
-                                pstmt.setString(1, checklist.getName() + "_R" + Integer.valueOf(checklist.getIteration()));
+                                pstmt.setString(1, checklist.getPrevName() + "_R" + checklist.getPrevIteration());
                             }
 
-                            //pstmt.setInt(2, pon.getIteration());
+                            //pstmt.setInt(2, pon.getIteration());//No used for BIRT in this way!
                             pstmt.setString(2, entry.getNameOfErrorToCheckFor());
                             pstmt.setInt(3, MainConfig.getQUERY_LIMIT());
 
                             resultSet = pstmt.executeQuery();
 
-                            log.info(String.format("************************* Birt query for regression check has been executed(%s)", pstmt.toString()));
-                            /* Mark the item in checklistTI if query has been executed!*/
-                            entry.setStepIsChecked(true);
-                            entry.setFullQuery(pstmt.toString());
+                            log.info(String.format("************************* Birt query for regression check has been executed (%s)", pstmt.toString()));
+
 
 
 
@@ -194,16 +207,24 @@ public class ServiceAnalyseBirt {
                                 entry.setIsRegression("Yes");
                             }
 
-                            if (!entry.getResultOfCheckIsNOK()){
+                            if (analyseRegression && !entry.getResultOfCheckIsNOK()){
                                 entry.setIsRegression("No");
                             }
 
                             while (resultSet.next()) {
                                 String fullName = resultSet.getString(MainConfig.getBIRT_TASK_COL_NAME());
 
-                                if (entry.getFullNameOfPon().equals(fullName)) {
+
+                                String restOfOriginalName = entry.getFullNameOfPon().replace(checklist.getName(),"");
+                                String restOfPrevName = fullName.replace(checklist.getPrevName(),"");
+
+
+                                if (restOfOriginalName.equals(restOfPrevName)) {
                                     entry.setIsRegression("No");
                                 }
+
+
+
 
                             }
 
@@ -229,8 +250,8 @@ public class ServiceAnalyseBirt {
 
 
 
+                }*/
 
-                }
 
 
 
@@ -241,7 +262,7 @@ public class ServiceAnalyseBirt {
             con.close();
         } catch (Exception e) {
             log.error(e.getMessage());
-            checklist.addLogOfErrors(e.getMessage());
+            report.addLogOfErrors(e.getMessage());
         }
 
 

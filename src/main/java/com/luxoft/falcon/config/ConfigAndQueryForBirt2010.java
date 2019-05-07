@@ -25,26 +25,26 @@ public class ConfigAndQueryForBirt2010 {
 
     @Getter
     private String queryLike = " " +
-            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult  FROM ndsreport.test t\n" +
+            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT FROM ndsreport.test t\n" +
             " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
             " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
             " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
             " WHERE s.testsuitename LIKE ?\n" +//ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
             //NO ITERATION/REVISION IN SEPARATE COLUMN!!!!!!!!!!!!!!
             " AND td.name = ?\n" +
-            " AND tr.testresult = 'NOK'\n" +
+//            " AND tr.testresult = 'NOK'\n" +
             " LIMIT ?";
 
 
     @Getter
     private String queryAccurate = " " +
-            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult  FROM ndsreport.test t\n" +
+            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT FROM ndsreport.test t\n" +
             " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
             " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
             " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
             " WHERE s.testsuitename = ?\n" +
             " AND td.name = ?\n" +
-            " AND tr.testresult = 'NOK'\n" +
+//            " AND tr.testresult = 'NOK'\n" +
             " LIMIT ?";
 }
 

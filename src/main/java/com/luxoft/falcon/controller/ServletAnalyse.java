@@ -1,7 +1,8 @@
 package com.luxoft.falcon.controller;
 
 import com.luxoft.falcon.config.MainConfig;
-import com.luxoft.falcon.model.ChecklistTI;
+import com.luxoft.falcon.model.Checklist;
+import com.luxoft.falcon.model.Report;
 import com.luxoft.falcon.service.ServiceAnalyseBirt;
 import com.luxoft.falcon.service.ServiceAnalyseSpider;
 import com.luxoft.falcon.util.ChecklistMonitor;
@@ -18,10 +19,10 @@ import java.io.IOException;
  */
 @Slf4j
 public class ServletAnalyse extends HttpServlet {
-    //    private Pon pon = new Pon();
-    private Boolean analyseRegression = Boolean.FALSE;
-    private Boolean nokOnlyBool = Boolean.FALSE;
 
+    private Checklist checklist;
+    private Report report;
+    private Boolean analyseRegression = Boolean.FALSE;
 
 
     @Override
@@ -37,7 +38,6 @@ public class ServletAnalyse extends HttpServlet {
             throws IOException {
 
 
-
         log.info("*********************** NEW REQUEST STARTED ** ServletAnalyse.doGet() ****************************************");
         log.info("***********************************************************************************************************");
         log.info("**************************************************************************************************************");
@@ -49,19 +49,21 @@ public class ServletAnalyse extends HttpServlet {
 
         final String ponIteration =
                 httpServletRequest.getParameter(MainConfig.getPON_ITERATION_REQUEST_PARAMETER_KEY());
-        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_REQUEST_PARAMETER_KEY(), ponIteration);
+        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_REQUEST_PARAMETER_VALUE(), ponIteration);
 
         final String autocompletePon =
                 httpServletRequest.getParameter(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY());
-        httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY(), autocompletePon);
+        httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_REQUEST_PARAMETER_VALUE(), autocompletePon);
 
         final String checklistRequestName =
                 httpServletRequest.getParameter(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_KEY());
-        httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_KEY(), checklistRequestName);
+        httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REQUEST_PARAMETER_VALUE(), checklistRequestName);
 
-        final String nokOnly =
-                httpServletRequest.getParameter(MainConfig.getGET_NOK_REQUEST_PARAMETER_KEY());
-        httpServletRequest.setAttribute(MainConfig.getGET_NOK_REQUEST_PARAMETER_VALUE(), nokOnly);
+        final String limitValue =
+                httpServletRequest.getParameter(MainConfig.getQUERY_LIMIT_KEY());
+        httpServletRequest.setAttribute(MainConfig.getQUERY_LIMIT_VALUE(), limitValue);
+
+
 
         final String prevPonName =
                 httpServletRequest.getParameter(MainConfig.getPON_NAME_PREV_REQUEST_PARAMETER_KEY());
@@ -69,67 +71,60 @@ public class ServletAnalyse extends HttpServlet {
 
         final String prevPonIteration =
                 httpServletRequest.getParameter(MainConfig.getPON_ITERATION_PREV_REQUEST_PARAMETER_KEY());
-        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_PREV_REQUEST_PARAMETER_KEY(), prevPonIteration);
+        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_PREV_REQUEST_PARAMETER_VALUE(), prevPonIteration);
 
         final String autocompletePrevPon =
                 httpServletRequest.getParameter(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY());
-        httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY(), autocompletePrevPon);
+        httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_VALUE(), autocompletePrevPon);
 
 
-        if ((nokOnly != null) && (nokOnly.equals("on"))) {
-            nokOnlyBool = Boolean.TRUE;
-        }
 
-        if ((prevPonName != null) && (prevPonIteration != null)) {
+
+        if ((prevPonName != "") && (prevPonIteration != "")) {
             analyseRegression = Boolean.TRUE;
         }
 
-        /* Check the name of checklist. If = TI proceed*/
-        if (checklistRequestName.equals(MainConfig.getCHECKLISTS_NAME_TI())) {
-            log.info("****************************************** TI CHECKLIST IS BEING PROCESSED *****************************************");
-            ChecklistTI checklist = new ChecklistTI();
 
-            log.info(
-                    String.format(
+
+
+        /* Check the name of checklist. If = TI proceed*/
+            log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
+//            result.append("\nCHECKLIST IS BEING PROCESSED\n");
+            checklist = new Checklist(checklistRequestName);// Load checklist by it's name - to be developed later
+
+
+
+            report = new Report();
+
+            log.debug(String.format(
                             "******* Processing checklist %s with the request: name = %s;" +
-                                    " iteration = %s; autocomplete = %s, NOK only = %s",
+                                    " iteration = %s; autocomplete = %s",
                             checklistRequestName,
                             ponName,
                             ponIteration,
-                            autocompletePon,
-                            nokOnlyBool));
+                            autocompletePon));
+
+
+            report.setName(ponName);
+            report.setIteration(ponIteration);
+            report.setLimit(limitValue);
 
 
 
-            checklist.setName(ponName);
-            checklist.setIteration(Integer.parseInt(ponIteration));//validate!!!
-            checklist.setChecklistName(checklistRequestName);
-            checklist.setNokOnly(nokOnlyBool);
             if (autocompletePon.equals("on")) {
-                checklist.setAutocomplete(Boolean.TRUE);
+                report.setAutocomplete(Boolean.TRUE);
             } else {
-                checklist.setAutocomplete(Boolean.FALSE);
+                report.setAutocomplete(Boolean.FALSE);
             }
 
 
-
             if (analyseRegression) {
-                log.info(
-                        String.format(
-                                "******* Processing regression check with the request: name = %s;" +
-                                        " iteration = %s; autocomplete = %s",
-                                prevPonName,
-                                prevPonIteration,
-                                autocompletePrevPon));
-
-
-                //+
-                checklist.setPrevName(prevPonName);
-                checklist.setPrevIteration(Integer.parseInt(prevPonIteration));//validate!!!
+                report.setPrevName(prevPonName);
+                report.setPrevIteration(prevPonIteration);
                 if (autocompletePrevPon.equals("on")) {
-                    checklist.setPrevAutocomplete(Boolean.TRUE);
+                    report.setPrevAutocomplete(Boolean.TRUE);
                 } else {
-                    checklist.setPrevAutocomplete(Boolean.FALSE);
+                    report.setPrevAutocomplete(Boolean.FALSE);
                 }
             }
 
@@ -142,49 +137,26 @@ public class ServletAnalyse extends HttpServlet {
 
 
             /* Read all sections to define check steps - fill in Keys*/
-            /* !!!!!!!!!!!!!!!!!!!!!*/
-
-
-
             result.append(getHeader());
-            result.append("<body>");
-            result.append("<div align=center>");
-            result.append(
-                    String.format("<p><h3>Automated %s checklist analysis results for the request:</h3>",
-                            checklistRequestName));
-            result.append(
-                    String.format(
-                            "Name = <b>%s</b>, iteration = <b>%s</b>, autocomplete = <b>%s</b>, limit = <b>%s</b>.</p>\n",
-                            checklist.getName(),
-                            checklist.getIteration(),
-                            checklist.getAutocomplete(),
-                            MainConfig.getQUERY_LIMIT()));
-
-
-
-            if (analyseRegression) {
-                result.append(
-                        String.format(
-                                "PrevPonName = <b>%s</b>, prevIteration = <b>%s</b>, prevAutocomplete = <b>%s</b>, limit = <b>%s</b>.</p>\n",
-                                checklist.getPrevName(),
-                                checklist.getPrevIteration(),
-                                checklist.getPrevAutocomplete(),
-                                MainConfig.getQUERY_LIMIT()));
-            }
+            result.append(getBodyFirstPart(checklistRequestName, checklist, report));
 
 
 
 
             /* PROCESS SPIDER ERRORS*/
-            ServiceAnalyseSpider.processSpiderChecklist(checklist, analyseRegression, nokOnlyBool);
-            log.info(String.format("********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"), checklist.getName());
+            ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
+            log.info(String.format(
+                    "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
+                    report.getName());
 
 
 
 
             /* PROCESS BIRT ERRORS*/
-            ServiceAnalyseBirt.processBirtChecklist(checklist, analyseRegression, nokOnlyBool);
-            log.info(String.format("****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"), checklist.getName());
+            ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
+            log.info(String.format(
+                    "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
+                    report.getName());
 
 
 
@@ -194,23 +166,15 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
-            /* OUTPUT */
-            /* Checklist report*/
-            //-
-//            result.append(ChecklistMonitor.getData(checklist, pon));
-            //+
-            result.append(ChecklistMonitor.getDataFromChecklist(checklist));
+            /* OUTPUT of checklist report*/
+            result.append(ChecklistMonitor.getDataFromreport(report));
+
+            result.append(getBodyLastPart());
 
 
 
 
-        result.append("</div>");
-        result.append("</body>");
 
-
-        } else {
-            result.append("Checklist name is not correct. Not possible to proceed.");
-        }
         /* To be sent as reply after analysis only*/
         httpServletResponse.getWriter().print(result.toString());
     }
@@ -224,9 +188,59 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
+    /* Display the first part of the body*/
+    private String getBodyFirstPart(String checklistRequestName, Checklist checklist, Report report) {
+
+        StringBuilder result = new StringBuilder();
+
+        result.append("<body>\n");
+        result.append("<div align=center>\n");
+        result.append(
+                String.format("<p><h3>Automated %s checklist analysis results for the request:</h3>\n",
+                        checklistRequestName));
+        result.append("<table border=1>");
+        result.append("<tr><th>Request</th><th>Name</th><th>Iteration</th><th>Autocomplete</th><th>Limit</th></tr>\n");
+        result.append("<tr><td>Actual</td>\n");
+
+        result.append(
+                String.format(
+                        "<td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td></p>\n",
+                        report.getName(),
+                        report.getIteration(),
+                        report.getAutocomplete(),
+                        report.getLimit()));
+        result.append("</tr>\n");
 
 
+        if (analyseRegression) {
+            result.append("<tr><td>Previous</td>");
+            result.append(
+                    String.format(
+                            "<td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td></p>\n",
+                            report.getPrevName(),
+                            report.getPrevIteration(),
+                            report.getPrevAutocomplete(),
+                            report.getLimit()));
+            result.append("</tr>\n");
+        }
+        result.append("</table>\n");
+        result.append("<br/>");
 
+
+        return result.toString();
+    }
+
+
+    /* Display the last part of the body*/
+    private String getBodyLastPart() {
+        StringBuilder result = new StringBuilder();
+        result.append("</div>");
+        result.append("</body>");
+        return result.toString();
+    }
+
+
+    /* Make header with CSS to display tooltip container*/
     private static String getHeader() {
 
         String header = "<head>" +
