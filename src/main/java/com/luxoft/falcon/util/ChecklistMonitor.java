@@ -39,6 +39,9 @@ public class ChecklistMonitor {
         checklistMonitor.append(getRowsFromChecklist("SPIDER", report));
         checklistMonitor.append(getRowsFromChecklist("BIRT", report));
 
+
+
+
         checklistMonitor.append("</table>");
         checklistMonitor.append("</div>");
 
@@ -49,8 +52,8 @@ public class ChecklistMonitor {
             checklistMonitor.append(
                     String.format(
                             "<div><p><font color=red>%s</font></p></div>\n",
-//                            checklist.getLogOfErrors().toString()));
-                            Arrays.toString(report.getLogOfErrors().toArray())));
+                            report.getLogOfErrors().toString()));
+//                            Arrays.toString(report.getLogOfErrors().toArray())));
             checklistMonitor.append("</b></details>\n");
             checklistMonitor.append("</div>");
         }
@@ -72,11 +75,13 @@ public class ChecklistMonitor {
 
         List<ChecklistEntry> steps = new LinkedList<>();
 
-        switch (serviceName){
-            case "SPIDER": steps = report.getSpiderSteps();
-            break;
-            case "BIRT": steps = report.getBirtSteps();
-            break;
+        switch (serviceName) {
+            case "SPIDER":
+                steps = report.getSpiderSteps();
+                break;
+            case "BIRT":
+                steps = report.getBirtSteps();
+                break;
         }
 
         for (ChecklistEntry entry : steps) {
@@ -85,7 +90,6 @@ public class ChecklistMonitor {
             checklistMonitor.append(
                     String.format("<td align=center>%2d</td>",
                             i));
-
 
 
             checklistMonitor.append(
@@ -110,17 +114,31 @@ public class ChecklistMonitor {
             }
 
 
+            String stringNOK_OK;
+            String color;
             if (entry.getResultOfCheckIsNOK()) {
-                checklistMonitor.append(
-                        String.format("<td align=center><font color = red>%s</font></td>",
-                                "NOK " +
-                                entry.getResultOfCheckText()));
+                stringNOK_OK = "NOK";
+                color = "red";
             } else {
-                checklistMonitor.append(
-                        String.format("<td align=center><font color = green>%s</font></td>",
-                                "OK " +
-                                entry.getResultOfCheckText()));
+                stringNOK_OK = "OK";
+                if (entry.getResultOfCheckText().equals("OK")){
+                    color = "green";
+                } else {
+                    color = "blue";
+                }
             }
+
+
+
+
+            checklistMonitor.append(
+                    String.format("<td align=center><div class=\"tooltip_for_name\">" +
+                                    "<font color = %s>%s</font>" +
+                                    "<span class=\"tooltiptext\">%s</span>" +
+                                    "</div></td>",
+                            color,
+                            stringNOK_OK,
+                            entry.getResultOfCheckText()));
 
 
             checklistMonitor.append(
@@ -130,20 +148,6 @@ public class ChecklistMonitor {
 
 
 
-//            if (entry.getFullNameOfPon() != null) {
-//                String addThreeDots = "";
-//                if (entry.getFullNameOfPon() != name) {
-//                    addThreeDots = "...";
-//                }
-//                checklistMonitor.append(
-//                        String.format("<td align=center>" +
-//                                        "<div class=\"tooltip_for_name\">%s" +
-//                                        "<span class=\"tooltiptext\">%s</span>" +
-//                                        "</div></td>",
-//                                name + addThreeDots,
-//                                entry.getFullNameOfPon()));//FullName
-//            } else checklistMonitor.append("<td></td>");
-
 
             if (entry.getIsRegression().equals("Yes")) {
                 checklistMonitor.append(
@@ -151,26 +155,15 @@ public class ChecklistMonitor {
                                         "<div class=\"tooltip_for_name\">%s" +
                                         "<span class=\"tooltiptext\">%s</span>" +
                                         "</div></font></td>",
-                                        entry.getIsRegression(),
-                                        "To " +
-                                                report.getPrevName()+
-                                        " (" + report.getPrevIteration() + ")"));
-
-//                        String.format("<td align = center><font color = red>%s</font></td>",
-//                                entry.getIsRegression()+
-//                                        " " +
-//                                        checklist.getPrevName()+
-//                                        " (" +
-//                                        checklist.getPrevIteration() +
-//                                        ")"
-//                        ));
+                                entry.getIsRegression(),
+                                "To " +
+                                        entry.getFullNameOfRegressionPon() +
+                                        " (iteration " + report.getPrevIteration() + ")"));
             } else {
                 checklistMonitor.append(
                         String.format("<td align = center>%s</td>",
                                 entry.getIsRegression()));
             }
-
-
 
 
             checklistMonitor.append("</tr>");

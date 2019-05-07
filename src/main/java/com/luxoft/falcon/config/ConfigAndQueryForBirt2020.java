@@ -40,7 +40,7 @@ public class ConfigAndQueryForBirt2020 {
             " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
             " WHERE s.name = ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
             //NO ITERATION/REVISION IN SEPARATE COLUMN!!!!!!!!!!!!!!
-//            " AND t.name = ?\n" +
+            " AND t.name = ?\n" +
             " LIMIT ?";
 }
 

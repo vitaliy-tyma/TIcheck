@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -24,9 +23,7 @@ public class ServiceAnalyseSpider {
     private static ResultSet resultSet = null;
 
 
-
-
-    public static void processSpiderChecklist(Checklist checklist, Report report,  Boolean analyseRegression) {
+    public static void processSpiderChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
 
 
         log.info("**** in ServiceAnalyseSpider.processSpiderChecklist() ****");
@@ -63,15 +60,16 @@ public class ServiceAnalyseSpider {
                     log.info(String.format("************************* Spider query has been executed (%s)", fullQuery));
 
 
-                    /*If ResultSet is empty create one new item in List of Spider Errors*/
+                    /*If ResultSet is empty create one new item in List of Spider Errors with step os checked Flag*/
                     if (!resultSet.isBeforeFirst()) {
                         fillSpiderErrors.add(
                                 new ChecklistEntry(
                                         errorToCheck,
-                                        true,
-                                        false,
+                                        Boolean.TRUE,
+                                        Boolean.FALSE,
                                         fullQuery,
-                                        report.getName()));
+                                        report.getName(),
+                                        "Not found"));
                     }
 
 
@@ -90,7 +88,8 @@ public class ServiceAnalyseSpider {
                                         true,
                                         true,
                                         fullQuery,
-                                        fullName));
+                                        fullName,
+                                        "NOK"));
 
                         log.info(String.format("************************* Spider resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
                     }
@@ -116,60 +115,9 @@ public class ServiceAnalyseSpider {
 
 
             /* CHECK FOR REGRESSION */
-          /*  if (analyseRegression) {
-
-                for (String entry : checklist.getSpiderSteps()) {
-
-                    try {
-                        if (report.getPrevAutocomplete()) {
-                            pstmt = con.prepareStatement(configAndQueryForSpider.getQueryLike());
-                            pstmt.setString(1, "%" + report.getPrevName() + "%");
-                        } else {
-                            pstmt = con.prepareStatement(configAndQueryForSpider.getQueryAccurate());
-                            pstmt.setString(1, report.getPrevName());
-                        }
-
-                        pstmt.setInt(2, report.getPrevIteration());
-                        pstmt.setString(3, entry.getNameOfErrorToCheckFor());
-                        pstmt.setInt(4, report.getLimit());
-
-                        resultSet = pstmt.executeQuery();
-
-                        log.info(String.format("************************* Spider query for regression check has been executed (%s)", pstmt.toString()));
-
-
-                        if (!resultSet.isBeforeFirst() && entry.getResultOfCheckIsNOK()) {
-                            entry.setIsRegression("Yes");
-                        }
-
-                        if (analyseRegression && !entry.getResultOfCheckIsNOK()){
-                            entry.setIsRegression("No");
-                        }
-
-                        while (resultSet.next()) {
-                            String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
-
-                            String restOfOriginalName = entry.getFullNameOfPon().replace(report.getName(),"");
-                            String restOfPrevName = fullName.replace(report.getPrevName(),"");
-
-
-                            if (restOfOriginalName.equals(restOfPrevName)) {
-                                entry.setIsRegression("No");
-                            }
-
-                        }
-
-
-
-                    } catch (Exception e) {
-                        log.error(e.getMessage());
-                        report.addLogOfErrors(e.getMessage());
-                    }
-                }
+            if (analyseRegression) {
+                analyseRegression(report);
             }
-*/
-
-
 
 
             resultSet.close();
@@ -184,8 +132,77 @@ public class ServiceAnalyseSpider {
     }
 
 
+    private static void analyseRegression(Report report) {
 
 
+        for (ChecklistEntry entry : report.getSpiderSteps()) {
+
+            try {
+
+//                String restOfOriginalName = entry.getFullNameOfPon().replace(report.getName(), "");
+
+                String[] restOfOriginalNameArray = entry.getFullNameOfPon().split(report.getName(), 2);
+                String nameToCheck;
+                try{
+                    nameToCheck = restOfOriginalNameArray[0] + report.getPrevName() + restOfOriginalNameArray[1];
+                } catch (Exception e){
+                    nameToCheck = report.getPrevName();
+                    log.error(String.format("Regression check - error while converting names - work with %s", nameToCheck));
+                    report.addLogOfErrors(
+                            String.format("Regression check - error while converting names - work with %s. Error is [%s]",
+                                    nameToCheck,
+                                    e.getMessage()));
+                }
+
+
+                if (report.getPrevAutocomplete()) {
+                    pstmt = con.prepareStatement(configAndQueryForSpider.getQueryLike());
+                    pstmt.setString(1, "%" + nameToCheck.trim() + "%");
+                } else {
+                    pstmt = con.prepareStatement(configAndQueryForSpider.getQueryAccurate());
+                    pstmt.setString(1, nameToCheck.trim());
+                }
+
+                pstmt.setInt(2, report.getPrevIteration());
+                pstmt.setString(3, entry.getNameOfErrorToCheckFor());
+                pstmt.setInt(4, report.getLimit());
+                String fullQuery = pstmt.toString();
+
+                resultSet = pstmt.executeQuery();
+
+                log.info(
+                        String.format(
+                                "************************* Spider query for regression check has been executed (%s)",
+                                fullQuery));
+
+
+                if (!resultSet.isBeforeFirst() && entry.getResultOfCheckIsNOK()) {
+                    entry.setIsRegression("Yes");
+                    entry.setFullNameOfRegressionPon(nameToCheck);
+                }
+
+//                if (analyseRegression && !entry.getResultOfCheckIsNOK()) {
+//                    entry.setIsRegression("No");
+//                }
+
+                while (resultSet.next()) {
+                    String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
+                    String restOfPrevName = fullName.replace(report.getPrevName(), "");
+                    String restOfOriginalName = entry.getFullNameOfPon().replace(report.getName(), "");
+
+                    if (restOfOriginalName.equals(restOfPrevName)) {
+                        entry.setIsRegression("No");
+                    }
+
+                }
+
+
+            } catch (Exception e) {
+                log.error(e.getMessage());
+                report.addLogOfErrors(e.getMessage());
+            }
+        }
+    }
 
 
 }

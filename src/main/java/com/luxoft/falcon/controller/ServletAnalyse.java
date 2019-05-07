@@ -64,7 +64,6 @@ public class ServletAnalyse extends HttpServlet {
         httpServletRequest.setAttribute(MainConfig.getQUERY_LIMIT_VALUE(), limitValue);
 
 
-
         final String prevPonName =
                 httpServletRequest.getParameter(MainConfig.getPON_NAME_PREV_REQUEST_PARAMETER_KEY());
         httpServletRequest.setAttribute(MainConfig.getPON_NAME_PREV_REQUEST_PARAMETER_VALUE(), prevPonName);
@@ -78,8 +77,6 @@ public class ServletAnalyse extends HttpServlet {
         httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_VALUE(), autocompletePrevPon);
 
 
-
-
         if ((prevPonName != "") && (prevPonIteration != "")) {
             analyseRegression = Boolean.TRUE;
         }
@@ -88,45 +85,51 @@ public class ServletAnalyse extends HttpServlet {
 
 
         /* Check the name of checklist. If = TI proceed*/
-            log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
+        log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
 //            result.append("\nCHECKLIST IS BEING PROCESSED\n");
-            checklist = new Checklist(checklistRequestName);// Load checklist by it's name - to be developed later
+        checklist = new Checklist(checklistRequestName);// Load checklist by it's name - to be developed later
 
 
+        report = new Report();
 
-            report = new Report();
-
-            log.debug(String.format(
-                            "******* Processing checklist %s with the request: name = %s;" +
-                                    " iteration = %s; autocomplete = %s",
-                            checklistRequestName,
-                            ponName,
-                            ponIteration,
-                            autocompletePon));
-
-
-            report.setName(ponName);
-            report.setIteration(ponIteration);
-            report.setLimit(limitValue);
+        log.debug(String.format(
+                "******* Processing checklist %s with the request: name = %s;" +
+                        " iteration = %s; autocomplete = %s",
+                checklistRequestName,
+                ponName,
+                ponIteration,
+                autocompletePon));
 
 
+        report.setName(ponName);
+        report.setIteration(ponIteration);
+        report.setLimit(limitValue);
 
+
+        if (autocompletePon == null) {
+            report.setAutocomplete(Boolean.FALSE);
+        } else {
             if (autocompletePon.equals("on")) {
                 report.setAutocomplete(Boolean.TRUE);
             } else {
                 report.setAutocomplete(Boolean.FALSE);
             }
+        }
 
 
-            if (analyseRegression) {
-                report.setPrevName(prevPonName);
-                report.setPrevIteration(prevPonIteration);
+        if (analyseRegression) {
+            report.setPrevName(prevPonName);
+            report.setPrevIteration(prevPonIteration);
+            if (autocompletePrevPon == null) {
+                report.setPrevAutocomplete(Boolean.FALSE);
+            } else {
                 if (autocompletePrevPon.equals("on")) {
                     report.setPrevAutocomplete(Boolean.TRUE);
                 } else {
                     report.setPrevAutocomplete(Boolean.FALSE);
                 }
             }
+        }
 
 
 
@@ -136,27 +139,27 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
-            /* Read all sections to define check steps - fill in Keys*/
-            result.append(getHeader());
-            result.append(getBodyFirstPart(checklistRequestName, checklist, report));
+        /* Read all sections to define check steps - fill in Keys*/
+        result.append(getHeader());
+        result.append(getBodyFirstPart(checklistRequestName, checklist, report));
 
 
 
 
-            /* PROCESS SPIDER ERRORS*/
-            ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
-            log.info(String.format(
-                    "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
-                    report.getName());
+        /* PROCESS SPIDER ERRORS*/
+        ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
+        log.info(String.format(
+                "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
+                report.getName());
 
 
 
 
-            /* PROCESS BIRT ERRORS*/
-            ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
-            log.info(String.format(
-                    "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
-                    report.getName());
+        /* PROCESS BIRT ERRORS*/
+        ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
+        log.info(String.format(
+                "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
+                report.getName());
 
 
 
@@ -166,10 +169,10 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
-            /* OUTPUT of checklist report*/
-            result.append(ChecklistMonitor.getDataFromreport(report));
+        /* OUTPUT of checklist report*/
+        result.append(ChecklistMonitor.getDataFromreport(report));
 
-            result.append(getBodyLastPart());
+        result.append(getBodyLastPart());
 
 
 
@@ -178,14 +181,6 @@ public class ServletAnalyse extends HttpServlet {
         /* To be sent as reply after analysis only*/
         httpServletResponse.getWriter().print(result.toString());
     }
-
-
-
-
-
-
-
-
 
 
     /* Display the first part of the body*/

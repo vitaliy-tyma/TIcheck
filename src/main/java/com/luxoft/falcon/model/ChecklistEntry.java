@@ -13,12 +13,14 @@ public class ChecklistEntry {
                           Boolean stepIsChecked,
                           Boolean resultOfCheckIsNOK,
                           String fullQuery,
-                          String fullNameOfPon) {
+                          String fullNameOfPon,
+                          String resultOfCheckText) {
         this.nameOfErrorToCheckFor = nameOfErrorToCheckFor;
         this.stepIsChecked = stepIsChecked;
         this.resultOfCheckIsNOK = resultOfCheckIsNOK;
         this.fullQuery = fullQuery;
         this.fullNameOfPon = fullNameOfPon;
+        this.resultOfCheckText = resultOfCheckText;
     }
 
 
@@ -49,5 +51,7 @@ public class ChecklistEntry {
     @Setter
     private String isRegression = "Not analysed";
 
-
+    @Getter
+    @Setter
+    private String fullNameOfRegressionPon = null;
 }
