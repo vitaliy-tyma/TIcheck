@@ -6,7 +6,7 @@
 
   <groupId>com.luxoft.falcon</groupId>
   <artifactId>TIcheck</artifactId>
-  <version>0.2.0</version>
+  <version>0.3.1</version>
   <packaging>war</packaging>
 
   <name>TIcheck Maven Webapp</name>
