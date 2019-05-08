@@ -23,24 +23,27 @@ public class ConfigAndQueryForBirt2020 {
 
 
     @Getter
-    private String queryLike = " " +
-            " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT FROM ndsreport_new.tests_results tr\n" +
+    private String queryLike = " \n" +
+            " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT \n" +
+            " FROM ndsreport_new.tests_results tr\n" +
             " JOIN ndsreport_new.suites s ON s.id = tr.suite_id\n" +
             " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
             " WHERE s.name LIKE ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
-            //NO ITERATION/REVISION IN SEPARATE COLUMN!!!!!!!!!!!!!!
             " AND t.name = ?\n" +
-//            " AND tr.result = 'NOK'\n" +
+            " AND tr.exit_code = 0\n" +
+            " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";
 
     @Getter
-    private String queryAccurate = " " +
-            " SELECT s.name, t.name, tr.result TEST_RESULT FROM ndsreport_new.tests_results tr\n" +
+    private String queryAccurate = " \n" +
+            " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT \n" +
+            " FROM ndsreport_new.tests_results tr\n" +
             " JOIN ndsreport_new.suites s ON s.id = tr.suite_id\n" +
             " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
             " WHERE s.name = ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
-            //NO ITERATION/REVISION IN SEPARATE COLUMN!!!!!!!!!!!!!!
             " AND t.name = ?\n" +
+            " AND tr.exit_code = 0\n" +
+            " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";
 }
 

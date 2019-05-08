@@ -27,6 +27,7 @@ public class ChecklistEntry {
 
     @Getter
     private String nameOfErrorToCheckFor;
+
     @Getter
     @Setter
     private Boolean stepIsChecked = Boolean.FALSE; //Set after step has been checked

@@ -21,26 +21,19 @@ public class ServiceAnalyseSpider {
     private static Connection con = null;
     private static PreparedStatement pstmt = null;
     private static ResultSet resultSet = null;
+    private static int requestsCount;
 
-
-    public static void processSpiderChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
-
-
-        log.info("**** in ServiceAnalyseSpider.processSpiderChecklist() ****");
+    public static int processSpiderChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
+        requestsCount = 0;
+        log.debug("**** in ServiceAnalyseSpider.processSpiderChecklist() ****");
 
         try {
             con = DbConnectorSpider.connectDatabase(configAndQueryForSpider);
 
-
-
-
-
-
-            /* Iterate over SPIDER*/
             List<ChecklistEntry> fillSpiderErrors = new LinkedList<>();
 
+            /* Iterate over SPIDER*/
             for (String errorToCheck : checklist.getSpiderSteps()) {
-
                 try {
                     if (report.getAutocomplete()) {
                         pstmt = con.prepareStatement(configAndQueryForSpider.getQueryLike());
@@ -56,11 +49,12 @@ public class ServiceAnalyseSpider {
                     String fullQuery = pstmt.toString();
 
                     resultSet = pstmt.executeQuery();
+                    requestsCount++;
 
-                    log.info(String.format("************************* Spider query has been executed (%s)", fullQuery));
+                    log.debug(String.format("************************* Spider query has been executed (%s)", fullQuery));
 
 
-                    /*If ResultSet is empty create one new item in List of Spider Errors with step os checked Flag*/
+                    /*If ResultSet is empty create one new item in List of Spider Errors with step and checked Flag*/
                     if (!resultSet.isBeforeFirst()) {
                         fillSpiderErrors.add(
                                 new ChecklistEntry(
@@ -91,7 +85,7 @@ public class ServiceAnalyseSpider {
                                         fullName,
                                         "NOK"));
 
-                        log.info(String.format("************************* Spider resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
+                        log.debug(String.format("************************* Spider resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
                     }
 
 
@@ -102,23 +96,13 @@ public class ServiceAnalyseSpider {
 
             }
 
-
             /* Store items in report*/
             report.setSpiderSteps(fillSpiderErrors);
-
-
-
-
-
-
-
-
 
             /* CHECK FOR REGRESSION */
             if (analyseRegression) {
                 analyseRegression(report);
             }
-
 
             resultSet.close();
             pstmt.close();
@@ -129,18 +113,14 @@ public class ServiceAnalyseSpider {
         }
 
 
+        return requestsCount;
     }
 
 
+    /* Make regression analysis*/
     private static void analyseRegression(Report report) {
-
-
         for (ChecklistEntry entry : report.getSpiderSteps()) {
-
             try {
-
-//                String restOfOriginalName = entry.getFullNameOfPon().replace(report.getName(), "");
-
                 String[] restOfOriginalNameArray = entry.getFullNameOfPon().split(report.getName(), 2);
                 String nameToCheck;
                 try{
@@ -169,8 +149,9 @@ public class ServiceAnalyseSpider {
                 String fullQuery = pstmt.toString();
 
                 resultSet = pstmt.executeQuery();
+                requestsCount++;
 
-                log.info(
+                log.debug(
                         String.format(
                                 "************************* Spider query for regression check has been executed (%s)",
                                 fullQuery));
@@ -181,9 +162,6 @@ public class ServiceAnalyseSpider {
                     entry.setFullNameOfRegressionPon(nameToCheck);
                 }
 
-//                if (analyseRegression && !entry.getResultOfCheckIsNOK()) {
-//                    entry.setIsRegression("No");
-//                }
 
                 while (resultSet.next()) {
                     String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
@@ -203,6 +181,5 @@ public class ServiceAnalyseSpider {
             }
         }
     }
-
 
 }

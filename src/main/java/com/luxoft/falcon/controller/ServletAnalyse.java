@@ -84,10 +84,13 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
-        /* Check the name of checklist. If = TI proceed*/
+
+        long start = System.currentTimeMillis();
+        int requestsCount = 0;
         log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
-//            result.append("\nCHECKLIST IS BEING PROCESSED\n");
-        checklist = new Checklist(checklistRequestName);// Load checklist by it's name - to be developed later
+
+        // Load checklist by it's name - to be developed later
+        checklist = new Checklist(checklistRequestName);
 
 
         report = new Report();
@@ -138,7 +141,6 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
-
         /* Read all sections to define check steps - fill in Keys*/
         result.append(getHeader());
         result.append(getBodyFirstPart(checklistRequestName, checklist, report));
@@ -147,8 +149,8 @@ public class ServletAnalyse extends HttpServlet {
 
 
         /* PROCESS SPIDER ERRORS*/
-        ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
-        log.info(String.format(
+        requestsCount += ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
+        log.debug(String.format(
                 "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
                 report.getName());
 
@@ -156,12 +158,19 @@ public class ServletAnalyse extends HttpServlet {
 
 
         /* PROCESS BIRT ERRORS*/
-        ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
-        log.info(String.format(
+        requestsCount += ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
+        log.debug(String.format(
                 "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
                 report.getName());
 
 
+        /*calculate statistics - time and requests*/
+        long end = System.currentTimeMillis();
+        float sec = (end - start) / 1000F;
+        log.info("Elapsed: " + sec + " seconds");
+        log.info("Requests Count: " + requestsCount);
+        report.setElapsedTime(sec);
+        report.setRequestsCount(requestsCount);
 
 
 
@@ -170,7 +179,8 @@ public class ServletAnalyse extends HttpServlet {
 
 
         /* OUTPUT of checklist report*/
-        result.append(ChecklistMonitor.getDataFromreport(report));
+        result.append(ChecklistMonitor.getDataFromReport(report));
+
 
         result.append(getBodyLastPart());
 
@@ -181,6 +191,13 @@ public class ServletAnalyse extends HttpServlet {
         /* To be sent as reply after analysis only*/
         httpServletResponse.getWriter().print(result.toString());
     }
+
+
+
+
+
+
+
 
 
     /* Display the first part of the body*/

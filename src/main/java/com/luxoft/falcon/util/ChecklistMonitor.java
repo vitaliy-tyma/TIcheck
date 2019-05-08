@@ -1,11 +1,7 @@
 package com.luxoft.falcon.util;
 
-import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.Report;
-
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 
@@ -15,9 +11,8 @@ public class ChecklistMonitor {
 
     private static Integer i;
 
-
-    public static String getDataFromreport(Report report) {
-
+    public static String getDataFromReport(Report report) {
+        i = 0;
 
         StringBuilder checklistMonitor = new StringBuilder();
 
@@ -35,9 +30,15 @@ public class ChecklistMonitor {
         checklistMonitor.append("<th>Regression</th>");
         checklistMonitor.append("</tr>");
 
-        i = 0;
-        checklistMonitor.append(getRowsFromChecklist("SPIDER", report));
-        checklistMonitor.append(getRowsFromChecklist("BIRT", report));
+
+
+        checklistMonitor.append("<tr><td colspan = 7 align=center>\n");
+        checklistMonitor.append("SPIDER</td></tr>\n");
+        checklistMonitor.append(getRowsFromChecklist(report, report.getSpiderSteps()));
+
+        checklistMonitor.append("<tr><td colspan = 7 align=center>\n");
+        checklistMonitor.append("BIRT</td></tr>\n");
+        checklistMonitor.append(getRowsFromChecklist(report, report.getBirtSteps()));
 
 
 
@@ -45,15 +46,24 @@ public class ChecklistMonitor {
         checklistMonitor.append("</table>");
         checklistMonitor.append("</div>");
 
+        /*Show time and requests count*/
+        checklistMonitor.append("<br/><div align = left>");
 
+        checklistMonitor.append(
+                    String.format(
+                        "Elapsed %s seconds; Requests Count %s",
+                        report.getElapsedTime(),
+                        report.getRequestsCount()));
+        checklistMonitor.append("</div>");
+
+        /*Show error log if it exists*/
         if (report.getLogOfErrors().size() != 0) {
-            checklistMonitor.append("<div align = left>");
+            checklistMonitor.append("<br/><div align = left>");
             checklistMonitor.append("<details><summary><u><b>See log of errors </b></u></summary>\n");
             checklistMonitor.append(
                     String.format(
                             "<div><p><font color=red>%s</font></p></div>\n",
                             report.getLogOfErrors().toString()));
-//                            Arrays.toString(report.getLogOfErrors().toArray())));
             checklistMonitor.append("</b></details>\n");
             checklistMonitor.append("</div>");
         }
@@ -63,57 +73,49 @@ public class ChecklistMonitor {
     }
 
 
-    private static String getRowsFromChecklist(String serviceName, Report report) {
+    private static String getRowsFromChecklist(Report report, List<ChecklistEntry> steps) {
 
         StringBuilder checklistMonitor = new StringBuilder();
 
-        checklistMonitor.append("<tr>");
-        checklistMonitor.append("<td colspan = 7 align=center>");
-        checklistMonitor.append(serviceName);
-        checklistMonitor.append("</td>");
-        checklistMonitor.append("</tr>");
 
-        List<ChecklistEntry> steps = new LinkedList<>();
 
-        switch (serviceName) {
-            case "SPIDER":
-                steps = report.getSpiderSteps();
-                break;
-            case "BIRT":
-                steps = report.getBirtSteps();
-                break;
-        }
+
 
         for (ChecklistEntry entry : steps) {
-            checklistMonitor.append("<tr>");
             i++;
+            //Show index
+            checklistMonitor.append("<tr>");
             checklistMonitor.append(
                     String.format("<td align=center>%2d</td>",
                             i));
 
 
+            //Show the full name of actual PON
             checklistMonitor.append(
                     String.format("<td>%s (%s)</td>",
                             entry.getFullNameOfPon(),
                             report.getIteration()));
 
 
+            //Show the name of error to check
             checklistMonitor.append(
                     String.format("<td>%s</td>",
                             entry.getNameOfErrorToCheckFor()));
 
+            //Show weather the step has been checked or not
             if (entry.getStepIsChecked()) {
                 checklistMonitor.append(
                         String.format("<td align=center><font color = green>%s</font></td>",
                                 entry.getStepIsChecked()));
             } else {
-                checklistMonitor.append("<font color = red>");
                 checklistMonitor.append(
                         String.format("<td align=center><font color = red>%s</font></td>",
                                 entry.getStepIsChecked()));
             }
 
 
+
+            //Show result and TEST if it is not OK or NOK in the tooltip
             String stringNOK_OK;
             String color;
             if (entry.getResultOfCheckIsNOK()) {
@@ -121,34 +123,28 @@ public class ChecklistMonitor {
                 color = "red";
             } else {
                 stringNOK_OK = "OK";
-                if (entry.getResultOfCheckText().equals("OK")){
-                    color = "green";
-                } else {
-                    color = "blue";
-                }
+                color = entry.getResultOfCheckText().equals("OK")?"green":"blue";
+
             }
-
-
-
-
             checklistMonitor.append(
                     String.format("<td align=center><div class=\"tooltip_for_name\">" +
                                     "<font color = %s>%s</font>" +
                                     "<span class=\"tooltiptext\">%s</span>" +
                                     "</div></td>",
-                            color,
-                            stringNOK_OK,
-                            entry.getResultOfCheckText()));
+                                    color,
+                                    stringNOK_OK,
+                                    entry.getResultOfCheckText()));
 
 
+            //Show query in the tooltip
             checklistMonitor.append(
                     String.format("<td align=center><div class=\"tooltip_for_query\"><img src=\"lib/img/glass.jpg\" \n" +
                                     " alt=\"Query\"><span class=\"tooltiptext\">%s</span></div></td>",
-                            entry.getFullQuery()));//query
+                            entry.getFullQuery()));
 
 
 
-
+            //Show regression analysis result and the name of PON in the tooltip
             if (entry.getIsRegression().equals("Yes")) {
                 checklistMonitor.append(
                         String.format("<td align=center><font color = red>" +

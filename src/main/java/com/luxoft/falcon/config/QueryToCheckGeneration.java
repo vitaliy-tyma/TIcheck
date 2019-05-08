@@ -2,10 +2,9 @@ package com.luxoft.falcon.config;
 
 import lombok.Getter;
 
-
 public class QueryToCheckGeneration {
     @Getter
-    private String g2010 = " SELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?";
+    private String g2010 = " \nSELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?\n";
     @Getter
-    private String g2020 = " SELECT * FROM ndsreport_new.suites WHERE name LIKE ? LIMIT ?";
+    private String g2020 = " \nSELECT * FROM ndsreport_new.suites WHERE name LIKE ? LIMIT ?\n";
 }

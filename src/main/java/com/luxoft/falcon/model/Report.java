@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class Report {
 
-    @Setter
+//    @Setter
     private List<ChecklistEntry> spiderSteps = new LinkedList<>();
     private List<ChecklistEntry> birtSteps = new LinkedList<>();
     private List<ChecklistEntry> ndsSteps = new LinkedList<>();
@@ -29,11 +29,11 @@ public class Report {
         String result = name.trim();
         if (result.length() > 30) {
             result = result.substring(0, 30);
-            this.logOfErrors.add("\nLength of the PON name has been reduced to 30 symbols!\n");
+            this.logOfErrors.add("\nLength of the PON name has been reduced to 30 symbols!\n<br/>");
         }
         result = result.replaceAll("[^A-Za-z0-9_%]", "");
         if (!result.equals(name)) {
-            this.logOfErrors.add("\nSome extra symbols have been removed from the PON name!\n");
+            this.logOfErrors.add("\nSome extra symbols have been removed from the PON name!\n<br/>");
         }
         this.name = result;
     }
@@ -44,12 +44,12 @@ public class Report {
         String result = iteration.trim();
         if (result.length() > 2) {
             result = result.substring(0, 2);
-            this.logOfErrors.add("\nLength of the PON iteration has been reduced to 2 symbols!\n");
+            this.logOfErrors.add("\nLength of the PON iteration has been reduced to 2 symbols!\n<br/>");
         }
 
         result = result.replaceAll("[^0-9]", "");
         if (!result.equals(iteration)) {
-            this.logOfErrors.add("\nSome extra symbols have been removed from the PON iteration!\n");
+            this.logOfErrors.add("\nSome extra symbols have been removed from the PON iteration!\n<br/>");
         }
         try {
             this.iteration = Integer.parseInt(iteration);
@@ -80,11 +80,11 @@ public class Report {
         String result = name.trim();
         if (result.length() > 30) {
             result = result.substring(0, 30);
-            this.logOfErrors.add("\nLength of the prevPON name has been reduced to 30 symbols!\n");
+            this.logOfErrors.add("\nLength of the prevPON name has been reduced to 30 symbols!\n<br/>");
         }
         result = result.replaceAll("[^A-Za-z0-9_%]", "");
         if (!result.equals(name)) {
-            this.logOfErrors.add("\nSome extra symbols have been removed from the prevPON name!\n");
+            this.logOfErrors.add("\nSome extra symbols have been removed from the prevPON name!\n<br/>");
         }
         this.prevName = result;
     }
@@ -95,12 +95,12 @@ public class Report {
         String result = iteration.trim();
         if (result.length() > 2) {
             result = result.substring(0, 2);
-            this.logOfErrors.add("\nLength of the prev PON iteration has been reduced to 2 symbols!\n");
+            this.logOfErrors.add("\nLength of the prev PON iteration has been reduced to 2 symbols!\n<br/>");
         }
 
         result = result.replaceAll("[^0-9]", "");
         if (!result.equals(iteration)) {
-            this.logOfErrors.add("\nSome extra symbols have been removed from the prev PON iteration!\n");
+            this.logOfErrors.add("\nSome extra symbols have been removed from the prev PON iteration!\n<br/>");
         }
         try {
             this.prevIteration = Integer.parseInt(iteration);
@@ -127,15 +127,15 @@ public class Report {
 
     @Getter
     private String checklistName;
-    public void setChecklistName(String checklistName){
-        if (checklistName.equals(MainConfig.getCHECKLISTS_NAME_TI()) ||
-                false){//add more checks
-            this.checklistName = checklistName;
-        } else {
-            this.checklistName = MainConfig.getCHECKLISTS_NAME_UNDEF();
-        }
-    }
 
+
+    @Getter
+    @Setter
+    private Float elapsedTime;
+
+    @Getter
+    @Setter
+    private int requestsCount;
 
 
 }

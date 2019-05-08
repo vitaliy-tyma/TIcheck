@@ -24,20 +24,11 @@ import java.sql.SQLException;
  */
 @Slf4j
 public class DbConnectorBirt {
-
     private static Connection con;
 
     public static Connection connectDatabase(String url, String login, String password) throws ClassNotFoundException, SQLException {
-
-        log.debug("********** Run connectDatabase **********");
-
-            //Class.forName(configData.getJdbcDriver());
             con = DriverManager.getConnection( url, login, password);
-            log.info("********** Connection to " + url + " has been established **********");
-
-
-
-
+            log.debug("********** Connection to " + url + " has been established **********");
         return con;
     }
 }

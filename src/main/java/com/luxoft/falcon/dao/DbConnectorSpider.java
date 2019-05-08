@@ -23,23 +23,15 @@ import java.sql.*;
  */
 @Slf4j
 public class DbConnectorSpider {
-
     private static Connection con;
 
     public static Connection connectDatabase(ConfigAndQueryForSpider configData) throws ClassNotFoundException, SQLException {
-
-        log.debug("********** Run connectDatabase **********");
-
             Class.forName(configData.getJdbcDriver());
             con = DriverManager.getConnection(
                     configData.getJdbcUrl(),
                     configData.getJdbcLogin(),
                     configData.getJdbcPassword());
-            log.info("********** Connection to " + configData.getJdbcUrl() + " has been established **********");
-
-
-
-
+            log.debug("********** Connection to " + configData.getJdbcUrl() + " has been established **********");
         return con;
     }
 }

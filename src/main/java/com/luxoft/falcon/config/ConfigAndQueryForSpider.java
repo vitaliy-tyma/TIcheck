@@ -4,7 +4,6 @@ import lombok.*;
 
 /** Entity/Data/POJO to connect to the SPIDER
  * To be loaded from XML-file*/
-
 @Data
 public class ConfigAndQueryForSpider {
     @Getter
@@ -18,7 +17,7 @@ public class ConfigAndQueryForSpider {
 
 
     @Getter
-    private String queryLike = " " +
+    private String queryLike = " \n" +
             "        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR\n" +
             "        FROM spider_bmd.full_task_error_list ftel\n" +
             "        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id\n" +
@@ -40,12 +39,4 @@ public class ConfigAndQueryForSpider {
             "        AND fcel.java_class_error = ?\n" +
             "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
             "        LIMIT ?";
-
-//    @Getter
-//    @Setter
-//    private String queryFinal = "";
-
-
-
-
 }
