@@ -9,7 +9,7 @@ import lombok.Getter;
  */
 
 @Data
-public class ConfigAndQueryForBirt2020 {
+public class Birt2020ConfigAndQuery {
     @Getter
     private String jdbcDriver = "com.mysql.jdbc.Driver";
 
@@ -30,7 +30,7 @@ public class ConfigAndQueryForBirt2020 {
             " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
             " WHERE s.name LIKE ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
             " AND t.name = ?\n" +
-            " AND tr.exit_code = 0\n" +
+ //           " AND tr.exit_code = 0\n" +
             " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";
 
@@ -42,7 +42,7 @@ public class ConfigAndQueryForBirt2020 {
             " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
             " WHERE s.name = ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
             " AND t.name = ?\n" +
-            " AND tr.exit_code = 0\n" +
+//            " AND tr.exit_code = 0\n" +
             " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";
 }

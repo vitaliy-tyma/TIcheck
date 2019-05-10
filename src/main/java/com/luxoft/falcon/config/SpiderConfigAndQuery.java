@@ -5,7 +5,7 @@ import lombok.*;
 /** Entity/Data/POJO to connect to the SPIDER
  * To be loaded from XML-file*/
 @Data
-public class ConfigAndQueryForSpider {
+public class SpiderConfigAndQuery {
     @Getter
     private String jdbcDriver = "org.postgresql.Driver";
     @Getter

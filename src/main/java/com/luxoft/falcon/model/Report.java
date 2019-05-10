@@ -25,7 +25,11 @@ public class Report {
 
     @Getter
     private String name;
-    public void setName(String name){
+    public void setName(String name) throws Exception {
+        if (name == null){
+            throw new Exception("Name of PON is not defined");
+        }
+
         String result = name.trim();
         if (result.length() > 30) {
             result = result.substring(0, 30);
@@ -40,7 +44,11 @@ public class Report {
 
     @Getter
     private int iteration;
-    public void setIteration(String iteration) {
+    public void setIteration(String iteration) throws Exception {
+        if (iteration == null){
+            throw new Exception("Iteration of PON is not defined");
+        }
+
         String result = iteration.trim();
         if (result.length() > 2) {
             result = result.substring(0, 2);
@@ -76,7 +84,11 @@ public class Report {
 
     @Getter
     private String prevName;
-    public void setPrevName(String name){
+    public void setPrevName(String name) throws Exception {
+        if (name == null){
+            throw new Exception("Name of prev PON is not defined");
+        }
+
         String result = name.trim();
         if (result.length() > 30) {
             result = result.substring(0, 30);
@@ -91,7 +103,11 @@ public class Report {
 
     @Getter
     private int prevIteration;
-    public void setPrevIteration(String iteration) {
+    public void setPrevIteration(String iteration) throws Exception {
+        if (iteration == null){
+            throw new Exception("Iteration of prev PON is not defined");
+        }
+
         String result = iteration.trim();
         if (result.length() > 2) {
             result = result.substring(0, 2);

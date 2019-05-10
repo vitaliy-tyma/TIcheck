@@ -5,7 +5,7 @@ import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.Report;
 import com.luxoft.falcon.service.ServiceAnalyseBirt;
 import com.luxoft.falcon.service.ServiceAnalyseSpider;
-import com.luxoft.falcon.util.ChecklistMonitor;
+import com.luxoft.falcon.util.ChecklistToHtml;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.ServletException;
@@ -39,8 +39,6 @@ public class ServletAnalyse extends HttpServlet {
 
 
         log.info("*********************** NEW REQUEST STARTED ** ServletAnalyse.doGet() ****************************************");
-        log.info("***********************************************************************************************************");
-        log.info("**************************************************************************************************************");
         StringBuilder result = new StringBuilder();
 
         final String ponName =
@@ -76,13 +74,9 @@ public class ServletAnalyse extends HttpServlet {
                 httpServletRequest.getParameter(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY());
         httpServletRequest.setAttribute(MainConfig.getAUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_VALUE(), autocompletePrevPon);
 
-
-        if ((prevPonName != "") && (prevPonIteration != "")) {
-            analyseRegression = Boolean.TRUE;
-        }
-
-
-
+        final String regressionCheck =
+                httpServletRequest.getParameter(MainConfig.getCHECKLISTS_REGRESSION_PARAMETER_KEY());
+        httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REGRESSION_PARAMETER_VALUE(), regressionCheck);
 
 
         long start = System.currentTimeMillis();
@@ -103,92 +97,104 @@ public class ServletAnalyse extends HttpServlet {
                 ponIteration,
                 autocompletePon));
 
+        /* Get header and start of the body section*/
+        result.append(getHeader());
+        result.append(getBodyStartPart());
 
-        report.setName(ponName);
-        report.setIteration(ponIteration);
-        report.setLimit(limitValue);
+
+        try {
+            report.setName(ponName);
+            report.setIteration(ponIteration);
+            report.setLimit(limitValue);
 
 
-        if (autocompletePon == null) {
-            report.setAutocomplete(Boolean.FALSE);
-        } else {
-            if (autocompletePon.equals("on")) {
-                report.setAutocomplete(Boolean.TRUE);
-            } else {
+            if (autocompletePon == null) {
                 report.setAutocomplete(Boolean.FALSE);
-            }
-        }
-
-
-        if (analyseRegression) {
-            report.setPrevName(prevPonName);
-            report.setPrevIteration(prevPonIteration);
-            if (autocompletePrevPon == null) {
-                report.setPrevAutocomplete(Boolean.FALSE);
             } else {
-                if (autocompletePrevPon.equals("on")) {
-                    report.setPrevAutocomplete(Boolean.TRUE);
+                if (autocompletePon.equals("on")) {
+                    report.setAutocomplete(Boolean.TRUE);
                 } else {
-                    report.setPrevAutocomplete(Boolean.FALSE);
+                    report.setAutocomplete(Boolean.FALSE);
                 }
             }
+
+            if (regressionCheck != null) {
+                if (regressionCheck.equals("on") && ((prevPonName != "") && (prevPonIteration != ""))) {
+                    analyseRegression = Boolean.TRUE;
+                }
+            }
+
+            if (analyseRegression) {
+                report.setPrevName(prevPonName);
+                report.setPrevIteration(prevPonIteration);
+                if (autocompletePrevPon == null) {
+                    report.setPrevAutocomplete(Boolean.FALSE);
+                } else {
+                    if (autocompletePrevPon.equals("on")) {
+                        report.setPrevAutocomplete(Boolean.TRUE);
+                    } else {
+                        report.setPrevAutocomplete(Boolean.FALSE);
+                    }
+                }
+            }
+
+
+            result.append(getBodyFirstPart(checklistRequestName, checklist, report));
+
+
+
+
+            /* PROCESS SPIDER ERRORS*/
+            requestsCount += ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
+            log.debug(String.format(
+                    "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
+                    report.getName());
+
+
+
+
+            /* PROCESS BIRT ERRORS*/
+            requestsCount += ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
+            log.debug(String.format(
+                    "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
+                    report.getName());
+
+
+            /*calculate statistics - time and requests*/
+            long end = System.currentTimeMillis();
+            float sec = (end - start) / 1000F;
+            log.info(String.format(
+                    "Elapsed: %s seconds; Requests Count: %s.",
+                    sec,
+                    requestsCount));
+            report.setElapsedTime(sec);
+            report.setRequestsCount(requestsCount);
+
+
+
+
+
+
+
+            /* OUTPUT of checklist report*/
+            result.append(ChecklistToHtml.getDataFromReport(report));
+
+
+            log.info("****************************************** CHECKLIST PROCESSING IS FINISHED *****************************************");
+
+            /* Error handling in case of input parameters problems*/
+        } catch (Exception e) {
+            result.append("Error while input processing<br/>");
+            result.append(report.getLogOfErrors());
+            report.addLogOfErrors(e.getMessage());
         }
 
-
-
-
-
-
-
-
-        /* Read all sections to define check steps - fill in Keys*/
-        result.append(getHeader());
-        result.append(getBodyFirstPart(checklistRequestName, checklist, report));
-
-
-
-
-        /* PROCESS SPIDER ERRORS*/
-        requestsCount += ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
-        log.debug(String.format(
-                "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
-                report.getName());
-
-
-
-
-        /* PROCESS BIRT ERRORS*/
-        requestsCount += ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
-        log.debug(String.format(
-                "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
-                report.getName());
-
-
-        /*calculate statistics - time and requests*/
-        long end = System.currentTimeMillis();
-        float sec = (end - start) / 1000F;
-        log.info("Elapsed: " + sec + " seconds");
-        log.info("Requests Count: " + requestsCount);
-        report.setElapsedTime(sec);
-        report.setRequestsCount(requestsCount);
-
-
-
-
-
-
-
-        /* OUTPUT of checklist report*/
-        result.append(ChecklistMonitor.getDataFromReport(report));
-
-
+        /* Get last part of the body section*/
         result.append(getBodyLastPart());
 
 
-
-
-
-        /* To be sent as reply after analysis only*/
+        /* Reply after analysis */
+        analyseRegression = Boolean.FALSE;
         httpServletResponse.getWriter().print(result.toString());
     }
 
@@ -205,8 +211,7 @@ public class ServletAnalyse extends HttpServlet {
 
         StringBuilder result = new StringBuilder();
 
-        result.append("<body>\n");
-        result.append("<div align=center>\n");
+
         result.append(
                 String.format("<p><h3>Automated %s checklist analysis results for the request:</h3>\n",
                         checklistRequestName));
@@ -251,13 +256,23 @@ public class ServletAnalyse extends HttpServlet {
         return result.toString();
     }
 
+    /* Display the last part of the body*/
+    private String getBodyStartPart() {
+        StringBuilder result = new StringBuilder();
+        result.append("<body>\n");
+        result.append("<div align=center>\n");
+        return result.toString();
+    }
+
 
     /* Make header with CSS to display tooltip container*/
     private static String getHeader() {
 
         String header = "<head>" +
                 "<style>\n" +
+
 //                "<link href=\"/lib/css/tooltip.css?v=8\" rel=\"stylesheet\" type=\"text/css\">" +
+//Cannot locate CSS within TOMCAT and IDE
 
                 "/* Tooltip container */\n" +
 

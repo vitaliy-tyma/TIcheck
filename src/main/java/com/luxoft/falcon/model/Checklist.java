@@ -51,10 +51,7 @@ public class Checklist {
     @Getter
     private String checklistName;
     public void setChecklistName(String checklistName){
-        if (checklistName.equals(MainConfig.getCHECKLISTS_NAME_TI()) ||
-                false){//add more checks
-            this.checklistName = checklistName;
-        } else {
+        if (checklistName == null){
             this.checklistName = MainConfig.getCHECKLISTS_NAME_UNDEF();
         }
     }

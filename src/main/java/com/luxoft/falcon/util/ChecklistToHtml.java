@@ -2,11 +2,15 @@ package com.luxoft.falcon.util;
 
 import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.Report;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 
 /* Class forms HTML string with checklist steps*/
-public class ChecklistMonitor {
+public class ChecklistToHtml {
 
 
     private static Integer i;
@@ -46,14 +50,19 @@ public class ChecklistMonitor {
         checklistMonitor.append("</table>");
         checklistMonitor.append("</div>");
 
-        /*Show time and requests count*/
+        /*Show time, requests count and date time*/
         checklistMonitor.append("<br/><div align = left>");
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+
 
         checklistMonitor.append(
                     String.format(
-                        "Elapsed %s seconds; Requests Count %s",
+                        "Elapsed: %s seconds; Requests Count: %s; Request Time is: %s.",
                         report.getElapsedTime(),
-                        report.getRequestsCount()));
+                        report.getRequestsCount(),
+                        dateFormat.format(date)));
         checklistMonitor.append("</div>");
 
         /*Show error log if it exists*/
@@ -126,14 +135,15 @@ public class ChecklistMonitor {
                 color = entry.getResultOfCheckText().equals("OK")?"green":"blue";
 
             }
+
             checklistMonitor.append(
                     String.format("<td align=center><div class=\"tooltip_for_name\">" +
                                     "<font color = %s>%s</font>" +
                                     "<span class=\"tooltiptext\">%s</span>" +
                                     "</div></td>",
                                     color,
-                                    stringNOK_OK,
-                                    entry.getResultOfCheckText()));
+                                    entry.getResultOfCheckText(),
+                                    stringNOK_OK));
 
 
             //Show query in the tooltip

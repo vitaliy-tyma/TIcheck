@@ -14,7 +14,7 @@ public class MainConfig {
     @Getter
     private static final String CONFIG_FILE_NAME = "config.xml";
     @Getter
-    private static final String CHECKLIST_FILE_NAME = "checklist.xml";
+    private static final String CHECKLIST_FILE_NAME = "TI.xml";
 
     @Getter
     private static final String PON_NAME_REQUEST_PARAMETER_KEY = "pon_name";
@@ -35,6 +35,10 @@ public class MainConfig {
     @Getter
     private static final String CHECKLISTS_REQUEST_PARAMETER_VALUE = "checklists";
 
+    @Getter
+    private static final String CHECKLISTS_REGRESSION_PARAMETER_KEY = "regression_check";
+    @Getter
+    private static final String CHECKLISTS_REGRESSION_PARAMETER_VALUE = "regression_check";
 
 
     @Getter

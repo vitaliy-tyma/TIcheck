@@ -1,77 +1,23 @@
+<!DOCTYPE html>
 <html>
 
 <head>
+<meta charset="UTF-8">
 <title>Automated checklist analyser</title>
+<link href="/lib/css/TIcheck.css" rel="stylesheet" type="text/css">
+
 <!--
-CSS from BIRT.
-It breaks mark-up - cause is not detected!!!
+CSS from BIRT. It breaks the mark-up - cause is not detected!!!
 <link href="http://himdlxbirt01/birt/static/css/bootstrap.css?v=6" rel="stylesheet" type="text/css">
+
 <link href="http://himdlxbirt01/birt/static/css/birtstyles.css?v=8" rel="stylesheet" type="text/css">
 <script src="http://himdlxbirt01/birt/static/js/jquery.js" type="text/javascript"></script>
--->
 
   <style type="text/css">
-   table.common {
-    width: 90%; /* Table width */
-    border: 1px solid black; /* Frame around table */
-    margin: auto; /* Align table by the center of the page */
-   }
-   td {
-    text-align: center; /* Align text by the center of the cell */
-   }
-
-
-   table.PON_form {
-     border: 1px solid black; /* Frame around table */
-     margin: auto; /* Align table by the center of the page */
-     }
-     td.left {
-     text-align: right; /* Align text by the right edge of the cell */
-     }
-     td.center {
-     text-align: center; /* Align text by the center of the cell */
-     }
-     td.right {
-     text-align: left; /* Align text by the left edge of the cell */
-     }
-
-     button, input[type=submit] {
-     width: 100%;
-     color: #ffffff;
-     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-     background-color: #006dcc;
-     border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-     background-image: linear-gradient(to bottom, #0088cc, #0044cc);
-     border-radius: 4px;
-     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-     font-weight: normal;
-     -webkit-appearance: button;
-     border: 1px solid #bbbbbb;
-     padding: 4px 14px;
-     }
-
-
-    body {
-    min-height: 100%;
-    overflow-y: scroll;
-    min-width: 500px;
-    background-color: #F5F6F7;
-    }
-
-     input[type=checkbox]{
-     -webkit-transform: scale(2);
-     }
-
-     select {
-         width: 100%;
-        }
-
-
-
-
-
-
   </style>
+-->
+
+
 </head>
 
 
@@ -125,7 +71,7 @@ Request</td>
 type="text"
 name="pon_name"
 placeholder="Enter PON or it's part"
-title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on Autocomplete checkbox"
+title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use query...&quot; checkbox"
 tabindex="1"
 maxlength="30"
 size="20"
@@ -139,7 +85,7 @@ name="autocomplete_pon"
 checked
 title="Query for requested name will be used with LIKE + heading and tailing %"
 tabindex="9">
-Autocomplete
+Use query "LIKE %...%"
 </checkbox>
 </td>
 </tr>
@@ -174,7 +120,22 @@ Checklist
 </tr>
 
 <tr>
-<td class = "right">
+<td class = "left">
+Limit data output
+</td>
+<td class = "center">
+<select name = "limit" form="checklist" width = 100% tabindex="5">
+            <option value = "10" selected>10</option>
+            <option value = "100">100</option>
+            <option value = "1000">1000</option>
+            <option value = "10000">10000</option>
+         </select>
+</td>
+</tr>
+
+<tr>
+<td class = "left">
+
 </td>
 <td class = "center"
 <!-********************************MAIN BUTTON*********************-->
@@ -189,12 +150,16 @@ Analyse
 
 
 <td class = "right">
-<select name = "limit" form="checklist" width = 100% tabindex="5">
-            <option value = "10" selected>10</option>
-            <option value = "100">100</option>
-            <option value = "1000">1000</option>
-            <option value = "10000">10000</option>
-         </select>
+
+<input
+type="checkbox"
+name="regression_check"
+
+title="Unset to disable regression check despite of entered data"
+tabindex="9">
+Regression check
+</checkbox>
+
 </td>
 
 </tr>
@@ -210,7 +175,7 @@ Analyse
 type="text"
 name="prev_pon_name"
 placeholder="Previous PON/part"
-title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on Autocomplete checkbox"
+title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use query...&quot; checkbox"
 maxlength="30"
 size="20"
 
@@ -225,7 +190,7 @@ checked
 
 title="Query for requested name will be used with LIKE + heading and tailing %"
 tabindex="11">
-Autocomplete
+Use query "LIKE %...%"
 </checkbox>
 </td>
 </tr>
