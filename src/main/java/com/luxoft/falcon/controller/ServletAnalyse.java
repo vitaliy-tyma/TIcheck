@@ -5,7 +5,7 @@ import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.Report;
 import com.luxoft.falcon.service.ServiceAnalyseBirt;
 import com.luxoft.falcon.service.ServiceAnalyseSpider;
-import com.luxoft.falcon.util.ChecklistToHtml;
+import com.luxoft.falcon.util.ReportToHtml;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.ServletException;
@@ -177,16 +177,18 @@ public class ServletAnalyse extends HttpServlet {
 
 
             /* OUTPUT of checklist report*/
-            result.append(ChecklistToHtml.getDataFromReport(report));
+            result.append(ReportToHtml.getDataFromReport(report));
 
 
             log.info("****************************************** CHECKLIST PROCESSING IS FINISHED *****************************************");
 
             /* Error handling in case of input parameters problems*/
         } catch (Exception e) {
-            result.append("Error while input processing<br/>");
-            result.append(report.getLogOfErrors());
             report.addLogOfErrors(e.getMessage());
+            result.append("Error while input processing<br/>");
+            result.append(e.getMessage());
+
+            result.append(report.getLogOfErrors());
         }
 
         /* Get last part of the body section*/

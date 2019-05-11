@@ -49,9 +49,12 @@ public class ServiceAnalyseBirt {
                     birt2010ConfigAndQuery.getJdbcUrl(),
                     birt2010ConfigAndQuery.getJdbcLogin(),
                     birt2010ConfigAndQuery.getJdbcPassword());
+            /* Check the generation*/
             isGenDefined = checkGeneration(report);
 
             List<ChecklistEntry> fillBirtErrors = new LinkedList<>();
+
+
             /* Iterate over BIRT*/
             if (isGenDefined) {
 
@@ -67,6 +70,8 @@ public class ServiceAnalyseBirt {
                 for (String errorToCheck : checklist.getBirtSteps()) {
                     try {
                         pstmt.setString(2, errorToCheck);
+
+
 
 
                         String fullQuery = pstmt.toString();
@@ -85,68 +90,74 @@ public class ServiceAnalyseBirt {
                                             fullQuery,
                                             report.getName(),
                                             "Not found"));
-                        }
+                        } else {
 
 
 
-                        /*Check is it possible to aggregate all rows to one with simplified name of PON*/
-//                        Boolean aggregateBirtSteps = Boolean.TRUE;
-//                        String resultOfCheckFirstRow = null;
-//                        Boolean firstRow = Boolean.TRUE;
-//                        while (resultSet.next()) {
-////                            String fullName = resultSet.getString(MainConfig.getBIRT_TASK_COL_NAME());
-//                            String resultOfTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
-//
-//                            if (firstRow){
-//                                resultOfCheckFirstRow = resultOfTest;
-//                                firstRow = Boolean.FALSE;
-//                            }
-//                            if (resultOfTest.toUpperCase().equals(resultOfCheckFirstRow)) {
-//                                continue;
-//                            }
-//                            aggregateBirtSteps = Boolean.FALSE;
-//                            break;
-//                        }
-//                        if (aggregateBirtSteps){
-////                            fillBirtErrors.clear();
-//                            fillBirtErrors.add(
-//                                    new ChecklistEntry(
-//                                            errorToCheck,
-//                                            Boolean.TRUE,
-//                                            Boolean.FALSE,
-//                                            fullQuery,
-//                                            report.getName(),
-//                                            resultOfCheckFirstRow));
-//                        } else {
-//                            resultSet.beforeFirst();
+                            /*Check is it possible to aggregate all rows to one with simplified name of PON*/
+                            Boolean aggregateBirtSteps = Boolean.TRUE;
+                            String resultOfCheckFirstRow = null;
+                            Boolean firstRow = Boolean.TRUE;
+                            ChecklistEntry tempChecklistEntry = new ChecklistEntry(errorToCheck);
                             while (resultSet.next()) {
-                                String fullName = resultSet.getString(MainConfig.getBIRT_TASK_COL_NAME());
-                                String testName = resultSet.getString(MainConfig.getBIRT_TEST_COL_NAME());
                                 String resultOfTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
+                                String testName = resultSet.getString(MainConfig.getBIRT_TEST_COL_NAME());
 
-                                ChecklistEntry entry = new ChecklistEntry(testName);
 
-                                entry.setStepIsChecked(Boolean.TRUE);
-                                entry.setFullQuery(fullQuery);
-                                entry.setFullNameOfPon(fullName);
+                                if (firstRow) {
+                                    resultOfCheckFirstRow = resultOfTest;
 
-                                /*Save result of check as string and as boolean value (may be deleted as non representative)*/
-                                entry.setResultOfCheckText(resultOfTest);
-                                if (resultOfTest.toUpperCase().equals("NOK")) {
-                                    entry.setResultOfCheckIsNOK(Boolean.TRUE);
-                                } else {
-                                    entry.setResultOfCheckIsNOK(Boolean.FALSE);
+                                    tempChecklistEntry.setStepIsChecked(Boolean.TRUE);
+
+                                    tempChecklistEntry.setFullQuery(fullQuery);
+                                    tempChecklistEntry.setFullNameOfPon(report.getName());
+                                    tempChecklistEntry.setResultOfCheckText(resultOfTest);
+                                    if (resultOfTest.toUpperCase().equals("NOK")) {
+                                        tempChecklistEntry.setResultOfCheckIsNOK(Boolean.TRUE);
+                                    } else {
+                                        tempChecklistEntry.setResultOfCheckIsNOK(Boolean.FALSE);
+                                    }
+                                    firstRow = Boolean.FALSE;
                                 }
-
-                                /*Store only NOK results */
-                                fillBirtErrors.add(entry);
-
-                                log.debug(String.format("************************* BIRT resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
-
+                                if (resultOfTest.toUpperCase().equals(resultOfCheckFirstRow)) {
+                                    continue;
+                                }
+                                aggregateBirtSteps = Boolean.FALSE;
+                                break;
                             }
 
-//                        }
+                            if (aggregateBirtSteps) {
+                                fillBirtErrors.add(tempChecklistEntry);
+                            } else {
+                                resultSet.beforeFirst();
+                                while (resultSet.next()) {
+                                    String fullName = resultSet.getString(MainConfig.getBIRT_TASK_COL_NAME());
+                                    String testName = resultSet.getString(MainConfig.getBIRT_TEST_COL_NAME());
+                                    String resultOfTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
 
+                                    ChecklistEntry entry = new ChecklistEntry(testName);
+
+                                    entry.setStepIsChecked(Boolean.TRUE);
+                                    entry.setFullQuery(fullQuery);
+                                    entry.setFullNameOfPon(fullName);
+
+                                    /*Save result of check as string and as boolean value (may be deleted as non representative)*/
+                                    entry.setResultOfCheckText(resultOfTest);
+                                    if (resultOfTest.toUpperCase().equals("NOK")) {
+                                        entry.setResultOfCheckIsNOK(Boolean.TRUE);
+                                    } else {
+                                        entry.setResultOfCheckIsNOK(Boolean.FALSE);
+                                    }
+
+                                    /*Store all results */
+                                    fillBirtErrors.add(entry);
+
+                                    log.debug(String.format("************************* BIRT resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
+
+                                }
+
+                            }
+                        }
 
 
 
@@ -170,6 +181,8 @@ public class ServiceAnalyseBirt {
 
                 /* Store items in report*/
                 report.setBirtSteps(fillBirtErrors);
+
+
 
                 /* CHECK FOR REGRESSION */
                 if (analyseRegression) {
@@ -253,62 +266,66 @@ public class ServiceAnalyseBirt {
     private static void analyseRegression(Report report) {
         for (ChecklistEntry entry : report.getBirtSteps()) {
             try {
-                String[] restOfOriginalNameArray = entry.getFullNameOfPon().split(report.getName(), 2);
-                String nameToCheck;
-                try {
 
-                    if (restOfOriginalNameArray[1].contains("_")){
-                        String[] region = restOfOriginalNameArray[1].split("_");
-                        nameToCheck = restOfOriginalNameArray[0] + report.getPrevName() + "_" + region[1];
-                    } else {
-                        nameToCheck = restOfOriginalNameArray[0] + report.getPrevName();
+                if (entry.getResultOfCheckIsNOK()) {
+
+                    String[] restOfOriginalNameArray = entry.getFullNameOfPon().split(report.getName(), 2);
+                    String nameToCheck;
+                    try {
+
+                        if (restOfOriginalNameArray[1].contains("_")) {
+                            String[] region = restOfOriginalNameArray[1].split("_");
+                            nameToCheck = restOfOriginalNameArray[0] + report.getPrevName() + "_" + region[1];
+                        } else {
+                            nameToCheck = restOfOriginalNameArray[0] + report.getPrevName();
+                        }
+
+                    } catch (Exception e) {
+                        nameToCheck = report.getPrevName();
+                        log.error(String.format("Regression check - error while converting names (%s) - work with %s",
+                                entry.toString(),
+                                nameToCheck));
+                        report.addLogOfErrors(
+                                String.format("Regression check - error while converting names (%s)- work with %s. Error is [%s]",
+                                        entry.toString(),
+                                        nameToCheck,
+                                        e.getMessage()));
                     }
 
-                } catch (Exception e) {
-                    nameToCheck = report.getPrevName();
-                    log.error(String.format("Regression check - error while converting names (%s) - work with %s",
-                            entry.toString(),
-                            nameToCheck));
-                    report.addLogOfErrors(
-                            String.format("Regression check - error while converting names (%s)- work with %s. Error is [%s]",
-                                    entry.toString(),
-                                    nameToCheck,
-                                    e.getMessage()));
-                }
+                    if (report.getPrevAutocomplete()) {
+                        pstmt = con.prepareStatement(queryLike);
+                        pstmt.setString(1, "%" + nameToCheck.trim() + "%R" + report.getPrevIteration());
+                    } else {
+                        pstmt = con.prepareStatement(queryAccurate);
+                        pstmt.setString(1, nameToCheck.trim() + "_R" + report.getPrevIteration());
+                    }
+                    pstmt.setString(2, entry.getNameOfErrorToCheckFor());
+                    pstmt.setInt(3, report.getLimit());
+                    String fullQuery = pstmt.toString();
 
-                if (report.getPrevAutocomplete()) {
-                    pstmt = con.prepareStatement(queryLike);
-                    pstmt.setString(1, "%" + nameToCheck.trim() + "%R" + report.getPrevIteration());
-                } else {
-                    pstmt = con.prepareStatement(queryAccurate);
-                    pstmt.setString(1, nameToCheck.trim() + "_R" + report.getPrevIteration());
-                }
-                pstmt.setString(2, entry.getNameOfErrorToCheckFor());
-                pstmt.setInt(3, report.getLimit());
-                String fullQuery = pstmt.toString();
+                    resultSet = pstmt.executeQuery();
+                    requestsCount++;
 
-                resultSet = pstmt.executeQuery();
-                requestsCount++;
+                    log.debug(
+                            String.format(
+                                    "************************* Birt query for regression check has been executed (%s)",
+                                    fullQuery));
 
-                log.debug(
-                        String.format(
-                                "************************* Birt query for regression check has been executed (%s)",
-                                fullQuery));
-
-                if (!resultSet.isBeforeFirst() && entry.getResultOfCheckIsNOK()) {
-                    entry.setIsRegression("Yes");
-                    entry.setFullNameOfRegressionPon(nameToCheck);
-                }
-
-                while (resultSet.next()) {
-                    String resultPrevTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
-                    String resultOriginalTest = entry.getResultOfCheckText();
-
-                    if (resultOriginalTest.equals(resultPrevTest)) {
-                        entry.setIsRegression("No");
-                    } else if (resultOriginalTest.toUpperCase().equals("NOK") && resultPrevTest.toUpperCase().equals("OK")) {
+                    if (!resultSet.isBeforeFirst() && entry.getResultOfCheckIsNOK()) {
                         entry.setIsRegression("Yes");
                         entry.setFullNameOfRegressionPon(nameToCheck);
+                    }
+
+                    while (resultSet.next()) {
+                        String resultPrevTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
+                        String resultOriginalTest = entry.getResultOfCheckText();
+
+                        if (resultOriginalTest.equals(resultPrevTest)) {
+                            entry.setIsRegression("No");
+                        } else if (resultOriginalTest.toUpperCase().equals("NOK") && resultPrevTest.toUpperCase().equals("OK")) {
+                            entry.setIsRegression("Yes");
+                            entry.setFullNameOfRegressionPon(nameToCheck);
+                        }
                     }
                 }
             } catch (Exception e) {

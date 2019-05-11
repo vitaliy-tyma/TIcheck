@@ -85,7 +85,7 @@ name="autocomplete_pon"
 checked
 title="Query for requested name will be used with LIKE + heading and tailing %"
 tabindex="9">
-Use query "LIKE %...%"
+Use "LIKE %...%"
 </checkbox>
 </td>
 </tr>
@@ -125,8 +125,8 @@ Limit data output
 </td>
 <td class = "center">
 <select name = "limit" form="checklist" width = 100% tabindex="5">
-            <option value = "10" selected>10</option>
-            <option value = "100">100</option>
+            <option value = "10">10</option>
+            <option value = "100" selected>100 (Default)</option>
             <option value = "1000">1000</option>
             <option value = "10000">10000</option>
          </select>
@@ -190,7 +190,7 @@ checked
 
 title="Query for requested name will be used with LIKE + heading and tailing %"
 tabindex="11">
-Use query "LIKE %...%"
+Use "LIKE %...%"
 </checkbox>
 </td>
 </tr>

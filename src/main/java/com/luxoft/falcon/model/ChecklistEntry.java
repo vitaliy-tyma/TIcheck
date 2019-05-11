@@ -37,7 +37,7 @@ public class ChecklistEntry {
 
     @Getter
     @Setter
-    private String resultOfCheckText; // For BIRT (in case of SKIPPED TEST)
+    private String resultOfCheckText = null; // For BIRT (in case of SKIPPED TEST)
 
     @Getter
     @Setter
@@ -54,5 +54,5 @@ public class ChecklistEntry {
 
     @Getter
     @Setter
-    private String fullNameOfRegressionPon = null;
+    private String fullNameOfRegressionPon = "";
 }
