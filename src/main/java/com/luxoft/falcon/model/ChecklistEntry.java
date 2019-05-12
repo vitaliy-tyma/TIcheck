@@ -31,6 +31,9 @@ public class ChecklistEntry {
     @Getter
     @Setter
     private Boolean stepIsChecked = Boolean.FALSE; //Set after step has been checked
+
+
+    //TODO It is not representative - Boolean resultOfCheckIsNOK must be deleted - instead use String below!!!
     @Getter
     @Setter
     private Boolean resultOfCheckIsNOK = Boolean.FALSE; // Set TRUE in case of error founded

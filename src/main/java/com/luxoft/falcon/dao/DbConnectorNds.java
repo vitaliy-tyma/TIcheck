@@ -9,7 +9,7 @@ import java.sql.SQLException;
 /**
  * Contains method to get data from Spider database
  * <p>
- * Data source: BIRT MySQL DB on requested Server:port and with credentials
+ * Data source: NDS SQLite DB on requested Server:port and with credentials
  * <p>
  * Input data: the full name of the PON and iteration #
  * (comes from XML-file or from outer application/class)
@@ -17,13 +17,13 @@ import java.sql.SQLException;
  * <p>
  * Transformation: toString and getHTML by template.
  * <p>
- * Output data: Birt entity
+ * Output data: Nds entity
  * As an option - error list in string format (serialized by toString).
  * <p>
  * In case of exception returns text of error in SpiderDataClass.setJdbcError
  */
 @Slf4j
-public class DbConnectorBirt {
+public class DbConnectorNds {
     private static Connection con;
 
     public static Connection connectDatabase(String url, String login, String password) throws ClassNotFoundException, SQLException {

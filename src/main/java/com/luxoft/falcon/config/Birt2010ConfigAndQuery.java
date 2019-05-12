@@ -8,6 +8,7 @@ import lombok.Setter;
  * Entity/Data/POJO to connect to the BIRT Gen.2010
  * To be loaded from XML-file
  */
+//TODO Store all items in separate XML file and load it's content at start and on request.
 
 @Data
 public class Birt2010ConfigAndQuery {
@@ -32,6 +33,7 @@ public class Birt2010ConfigAndQuery {
             " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
             " WHERE s.testsuitename LIKE ?\n" +//ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
             " AND td.name = ?\n" +
+            //TODO Clarify with the exitcode parameter
   //          " AND tr.exitcode = 0\n" +
             " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";
@@ -46,6 +48,7 @@ public class Birt2010ConfigAndQuery {
             " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
             " WHERE s.testsuitename = ?\n" +
             " AND td.name = ?\n" +
+            //TODO Clarify with the exitcode parameter
 //            " AND tr.exitcode = 0\n" +
             " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";

@@ -4,6 +4,7 @@ import lombok.*;
 
 /** Entity/Data/POJO to connect to the SPIDER
  * To be loaded from XML-file*/
+//TODO Store all items in separate XML file and load it's content at start and on request.
 @Data
 public class SpiderConfigAndQuery {
     @Getter

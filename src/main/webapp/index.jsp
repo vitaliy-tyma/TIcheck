@@ -71,7 +71,7 @@ Request</td>
 type="text"
 name="pon_name"
 placeholder="Enter PON or it's part"
-title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use query...&quot; checkbox"
+title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use LIKE...&quot; checkbox"
 tabindex="1"
 maxlength="30"
 size="20"
@@ -81,7 +81,7 @@ autofocus/>
 <td>
 <input
 type="checkbox"
-name="autocomplete_pon"
+name="use_query_like"
 checked
 title="Query for requested name will be used with LIKE + heading and tailing %"
 tabindex="9">
@@ -100,7 +100,7 @@ Iteration
 type="text"
 name="pon_iteration" value="1"
 placeholder="Enter PON's iteration"
-title="Replace with the actual value"
+title="Replace with the actual value (_R# will be added for query with =)"
 maxlength="2"
 tabindex="2"/>
 </td>
@@ -111,9 +111,16 @@ tabindex="2"/>
 Checklist
 </td>
 <td class = "center">
-<select name = "checklists" form="checklist" width = 100% tabindex="3">
+<!-- //TODO Generate automatically on the basis of existing files-->
+
+
+<select
+name = "checklists"
+form="checklist"
+width = 100%
+tabindex="3">
             <option value = "TI" selected>TI (Default)</option>
-            <option value = "2">2 (not impl.)</option>
+            <option value = "TIwithNoNDS">TIwithNoNDS</option>
             <option value = "3">3 (not impl.)</option>
          </select>
 </td>
@@ -124,7 +131,11 @@ Checklist
 Limit data output
 </td>
 <td class = "center">
-<select name = "limit" form="checklist" width = 100% tabindex="5">
+<select
+name = "limit"
+form="checklist"
+width = 100%
+tabindex="4">
             <option value = "10">10</option>
             <option value = "100" selected>100 (Default)</option>
             <option value = "1000">1000</option>
@@ -143,7 +154,7 @@ Limit data output
 class = "PON_filter"
 type="submit"
 title="Enter PON (or it's part) and press button to start TI analysis"
-tabindex="4">
+tabindex="5">
 Analyse
 </button>
 </td>
@@ -156,7 +167,7 @@ type="checkbox"
 name="regression_check"
 
 title="Unset to disable regression check despite of entered data"
-tabindex="9">
+tabindex="10">
 Regression check
 </checkbox>
 
@@ -175,21 +186,21 @@ Regression check
 type="text"
 name="prev_pon_name"
 placeholder="Previous PON/part"
-title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use query...&quot; checkbox"
+title="Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use LIKE...&quot; checkbox"
 maxlength="30"
 size="20"
 
-tabindex="10"/>
+tabindex="11"/>
 </td>
 
 <td class = "right">
 <input
 type="checkbox"
-name="autocomplete_prev_pon"
+name="use_query_like_for_prev"
 checked
 
 title="Query for requested name will be used with LIKE + heading and tailing %"
-tabindex="11">
+tabindex="12">
 Use "LIKE %...%"
 </checkbox>
 </td>
@@ -205,10 +216,10 @@ Use "LIKE %...%"
 type="text"
 name="prev_pon_iteration"
 value="1"
-title="Enter the previous PON iteration number"
+title="Enter the previous PON iteration number (_R# will be added for query with =)"
 maxlength="2"
 
-tabindex="12"/>
+tabindex="13"/>
 </td>
 
 </tr>

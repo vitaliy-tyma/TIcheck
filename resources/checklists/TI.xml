@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<checklist>
+
+
+    <SPIDER>
+        <step>
+            NndbTmcNamesBuilderTarget:118
+        </step>
+        <step>
+            NndbCountriesBuilderTarget:227
+        </step>
+    </SPIDER>
+
+
+
+    <BIRT>
+        <step>
+            anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest
+        </step>
+        <step>
+            anaconda.inds.ti.TmcLocationExporterTest.tmcNameTableTest
+        </step>
+        <step>
+            anaconda.inds.ti.TmcLocationNameTest.locationNameCountTest
+        </step>
+        <step>
+            anaconda.inds.ti.TmcLocationNameTest.nndbTmcNamesExportTest
+        </step>
+        <step>
+            anaconda.inds.ti.TmcStringTableTest.stringCountTest
+        </step>
+        <step>
+            anaconda.inds.ti.TmcStringTableTest.tmcStringTest
+        </step>
+    </BIRT>
+
+
+    <NDS>
+        <step>
+            tmcLocationTableIdTable
+        </step>
+    </NDS>
+
+</checklist>

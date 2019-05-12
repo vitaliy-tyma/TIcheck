@@ -7,6 +7,7 @@ import lombok.Getter;
  * Entity/Data/POJO to connect to the BIRT Gen.2020
  * To be loaded from XML-file
  */
+//TODO Store all items in separate XML file and load it's content at start and on request.
 
 @Data
 public class Birt2020ConfigAndQuery {
@@ -30,6 +31,7 @@ public class Birt2020ConfigAndQuery {
             " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
             " WHERE s.name LIKE ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
             " AND t.name = ?\n" +
+            //TODO Clarify with the exit_code parameter
  //           " AND tr.exit_code = 0\n" +
             " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";
@@ -42,6 +44,7 @@ public class Birt2020ConfigAndQuery {
             " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
             " WHERE s.name = ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
             " AND t.name = ?\n" +
+            //TODO Clarify with the exit_code parameter
 //            " AND tr.exit_code = 0\n" +
             " ORDER BY TASK, TEST_NAME \n" +
             " LIMIT ?";

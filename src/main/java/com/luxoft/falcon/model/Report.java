@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 public class Report {
 
-//    @Setter
+//    @Setter //Works under @Data
     private List<ChecklistEntry> spiderSteps = new LinkedList<>();
     private List<ChecklistEntry> birtSteps = new LinkedList<>();
     private List<ChecklistEntry> ndsSteps = new LinkedList<>();
@@ -69,7 +69,7 @@ public class Report {
 
     @Getter
     @Setter
-    private Boolean autocomplete = false;
+    private Boolean useQueryLike = false;
 
     @Getter
     private int limit;
@@ -78,7 +78,7 @@ public class Report {
             this.limit = Integer.parseInt(limit);
         }
         catch (Exception e) {
-            this.limit = 10;
+            this.limit = 100;
         }
     }
 
@@ -128,7 +128,7 @@ public class Report {
 
     @Getter
     @Setter
-    private Boolean prevAutocomplete = false;
+    private Boolean useQueryLikeForPrev = false;
 
 
 
@@ -140,17 +140,15 @@ public class Report {
         this.logOfErrors.add("<br>" + string + "<br/>\n");
     }
 
-
-    @Getter
+//TODO Clarify usage of report.checklistName - seems that it is not in use (and no setter here)
+    @Getter @Setter
     private String checklistName;
 
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private Float elapsedTime;
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private int requestsCount;
 
 

@@ -3,74 +3,68 @@ package com.luxoft.falcon.config;
 
 import lombok.*;
 import java.io.File;
+//TODO Store all items in separate XML file and load it's content at start and on request.
 
 @Data
 public class MainConfig {
     @Getter
     private static final String PATH_DELIMITER = File.separator;
-    @Getter
-    private static final String CONFIG_PATH = "resources" + PATH_DELIMITER;
+//    @Getter
+//    private static final String CONFIG_PATH = "resources" + PATH_DELIMITER;
+//
+//    @Getter
+//    private static final String CONFIG_FILE_NAME = "config.xml";
+//    @Getter
+//    private static final String CHECKLIST_FILE_NAME = "checklists/TI.xml";
 
     @Getter
-    private static final String CONFIG_FILE_NAME = "config.xml";
-    @Getter
-    private static final String CHECKLIST_FILE_NAME = "TI.xml";
+    private static final String PON_NAME_REQUEST = "pon_name";
 
     @Getter
-    private static final String PON_NAME_REQUEST_PARAMETER_KEY = "pon_name";
-    @Getter
-    private static final String PON_NAME_REQUEST_PARAMETER_VALUE = "pon_name";
-    @Getter
-    private static final String PON_ITERATION_REQUEST_PARAMETER_KEY = "pon_iteration";
-    @Getter
-    private static final String PON_ITERATION_REQUEST_PARAMETER_VALUE = "pon_iteration";
-
-    @Getter
-    private static final String AUTOCOMPLETE_PON_REQUEST_PARAMETER_KEY = "autocomplete_pon";
-    @Getter
-    private static final String AUTOCOMPLETE_PON_REQUEST_PARAMETER_VALUE = "autocomplete_pon";
-
-    @Getter
-    private static final String CHECKLISTS_REQUEST_PARAMETER_KEY = "checklists";
-    @Getter
-    private static final String CHECKLISTS_REQUEST_PARAMETER_VALUE = "checklists";
-
-    @Getter
-    private static final String CHECKLISTS_REGRESSION_PARAMETER_KEY = "regression_check";
-    @Getter
-    private static final String CHECKLISTS_REGRESSION_PARAMETER_VALUE = "regression_check";
+    private static final String PON_ITERATION_REQUEST = "pon_iteration";
 
 
     @Getter
-    private static final String PON_NAME_PREV_REQUEST_PARAMETER_KEY = "prev_pon_name";
-    @Getter
-    private static final String PON_NAME_PREV_REQUEST_PARAMETER_VALUE = "prev_pon_name";
-    @Getter
-    private static final String PON_ITERATION_PREV_REQUEST_PARAMETER_KEY = "prev_pon_iteration";
-    @Getter
-    private static final String PON_ITERATION_PREV_REQUEST_PARAMETER_VALUE = "prev_pon_iteration";
-
-    @Getter
-    private static final String AUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_KEY = "autocomplete_prev_pon";
-    @Getter
-    private static final String AUTOCOMPLETE_PON_PREV_REQUEST_PARAMETER_VALUE = "autocomplete_prev_pon";
+    private static final String USE_QUERY_LIKE_REQUEST = "use_query_like";
 
 
+    @Getter
+    private static final String CHECKLISTS_REQUEST = "checklists";
 
+
+    @Getter
+    private static final String CHECKLISTS_REGRESSION = "regression_check";
 
 
 
     @Getter
-    private static final String SOURCE_NAME_SPIDER = "spider";
-    @Getter
-    private static final String SOURCE_NAME_BIRT = "birt";
-    @Getter
-    private static final String SOURCE_NAME_NDS = "nds";
+    private static final String PON_NAME_PREV_REQUEST = "prev_pon_name";
 
     @Getter
-    private static final String QUERY_LIMIT_KEY = "limit";
+    private static final String PON_ITERATION_PREV_REQUEST = "prev_pon_iteration";
+
+
+    @Getter
+    private static final String USE_QUERY_LIKE_PREV_REQUEST = "use_query_like_for_prev";
+
+    @Getter
+    private static final String QUERY_LIMIT = "limit";
     @Getter
     private static final String QUERY_LIMIT_VALUE = "limit";
+
+
+
+
+
+
+    @Getter
+    private static final String SOURCE_NAME_SPIDER = "SPIDER";
+    @Getter
+    private static final String SOURCE_NAME_BIRT = "BIRT";
+    @Getter
+    private static final String SOURCE_NAME_NDS = "NDS";
+    @Getter
+    private static final String STEP_NAME = "STEP";
 
 
 
@@ -87,11 +81,11 @@ public class MainConfig {
     @Getter
     private static final String BIRT_TEST_RESULT_NAME = "TEST_RESULT";
 
-    @Getter
-    private static final String CHECKLISTS_NAME_TI = "TI";
-
-    @Getter
-    private static final String CHECKLISTS_NAME_UNDEF = CHECKLISTS_NAME_TI;
+//    @Getter
+//    private static final String CHECKLISTS_NAME_TI = "TI";
+//
+//    @Getter
+//    private static final String CHECKLISTS_NAME_UNDEF = CHECKLISTS_NAME_TI;
 
 
 }

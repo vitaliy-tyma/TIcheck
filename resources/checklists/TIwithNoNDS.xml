@@ -1,28 +1,25 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 
 <checklist>
-    <name>
-        TI
-    </name>
 
 
-    <spider>
+    <SPIDER>
         <step>
             NndbTmcNamesBuilderTarget:118
         </step>
         <step>
             NndbCountriesBuilderTarget:227
         </step>
-    </spider>
+    </SPIDER>
 
 
 
-    <birt>
+    <BIRT>
         <step>
-            ti.TmcLocationTableIdTest.locationTableIdCountTest
+            anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest
         </step>
         <step>
-            ti.TmcLocationExporterTest.tmcNameTableTest
+            anaconda.inds.ti.TmcLocationExporterTest.tmcNameTableTest
         </step>
         <step>
             anaconda.inds.ti.TmcLocationNameTest.locationNameCountTest
@@ -36,16 +33,13 @@
         <step>
             anaconda.inds.ti.TmcStringTableTest.tmcStringTest
         </step>
-    </birt>
+    </BIRT>
 
 
-    <nds>
+    <NDS----->
         <step>
-            xxx:118
+            tmcLocationTableIdTable
         </step>
-        <step>
-            xxx:227
-        </step>
-    </nds>
+    </NDS----->
 
 </checklist>

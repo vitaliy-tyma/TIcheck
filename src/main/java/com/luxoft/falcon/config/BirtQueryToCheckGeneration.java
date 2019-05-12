@@ -1,6 +1,7 @@
 package com.luxoft.falcon.config;
 
 import lombok.Getter;
+//TODO Store all items in separate XML file and load it's content at start and on request.
 
 public class BirtQueryToCheckGeneration {
     @Getter
