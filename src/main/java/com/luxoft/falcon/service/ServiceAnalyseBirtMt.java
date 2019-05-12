@@ -2,9 +2,12 @@ package com.luxoft.falcon.service;
 
 import com.luxoft.falcon.config.Birt2010ConfigAndQuery;
 import com.luxoft.falcon.config.Birt2020ConfigAndQuery;
+import com.luxoft.falcon.config.BirtQueryToCheckGeneration;
 import com.luxoft.falcon.config.MainConfig;
 import com.luxoft.falcon.dao.DbConnectorBirt;
-import com.luxoft.falcon.model.*;
+import com.luxoft.falcon.model.Checklist;
+import com.luxoft.falcon.model.ChecklistEntry;
+import com.luxoft.falcon.model.Report;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -14,37 +17,49 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
-
-import com.luxoft.falcon.config.BirtQueryToCheckGeneration;
-
-/** NOT IN USE
+/**
  * Is used to process TI checklist for BIRT
  */
 @Slf4j
-public class ServiceAnalyseBirt {
+public class ServiceAnalyseBirtMt extends Thread {
+    private Checklist checklist;
+    private Report report;
+    private Boolean analyseRegression;
 
-    private static Connection con = null;
-    private static PreparedStatement pstmt = null;
-    private static ResultSet resultSet = null;
+    private Connection con = null;
+    private PreparedStatement pstmt = null;
+    private ResultSet resultSet = null;
 
-    private static Birt2010ConfigAndQuery birt2010ConfigAndQuery = new Birt2010ConfigAndQuery();
-    private static Birt2020ConfigAndQuery birt2020ConfigAndQuery = new Birt2020ConfigAndQuery();
-    private static BirtQueryToCheckGeneration birtQueryToCheckGeneration = new BirtQueryToCheckGeneration();
+    private Birt2010ConfigAndQuery birt2010ConfigAndQuery = new Birt2010ConfigAndQuery();
+    private Birt2020ConfigAndQuery birt2020ConfigAndQuery = new Birt2020ConfigAndQuery();
+    private BirtQueryToCheckGeneration birtQueryToCheckGeneration = new BirtQueryToCheckGeneration();
 
-    private static PreparedStatement pstmtChecker;
-    private static ResultSet resultSetChecker;
+    private PreparedStatement pstmtChecker;
+    private ResultSet resultSetChecker;
 
-    private static String queryLike = null;
-    private static String queryAccurate = null;
-    private static boolean isGenDefined = false;
-    private static int requestsCount;
+    private String queryLike = null;
+    private String queryAccurate = null;
+    private boolean isGenDefined = false;
+    private int requestsCount;
 
-//    public void run(){
-//
-//    }
+    public ServiceAnalyseBirtMt(Checklist checklist, Report report, Boolean analyseRegression){
+        this.checklist = checklist;
+        this.report = report;
+        this.analyseRegression = analyseRegression;
+    }
+
+    public void run(){
+        processBirtChecklist(checklist, report, analyseRegression);
+    }
+    public List<ChecklistEntry> getSteps (){
+        return report.getBirtSteps();
+    }
+    public int getRequestsCount(){
+        return requestsCount;
+    }
 
 
-    public static int processBirtChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
+    public int processBirtChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
         requestsCount = 0;
         log.debug("**** in ServiceAnalyseBirt.processBirt() ****");
 
@@ -103,7 +118,7 @@ public class ServiceAnalyseBirt {
     }
 
 
-    private static boolean checkGeneration(Report report) throws SQLException, ClassNotFoundException {
+    private boolean checkGeneration(Report report) throws SQLException, ClassNotFoundException {
         isGenDefined = Boolean.FALSE;
         //2010
         String queryToCheck = birtQueryToCheckGeneration.getG2010();
@@ -147,7 +162,7 @@ public class ServiceAnalyseBirt {
     }
 
 
-    private static List<ChecklistEntry> analyseActual(List<String> steps, Report report) throws SQLException {
+    private List<ChecklistEntry> analyseActual(List<String> steps, Report report) throws SQLException {
         List<ChecklistEntry> fillBirtErrors = new LinkedList<>();
 
 
@@ -262,7 +277,7 @@ public class ServiceAnalyseBirt {
     }
 
     /* Make regression analysis*/
-    private static void analyseRegression(Report report) throws SQLException {
+    private void analyseRegression(Report report) throws SQLException {
 //        try {
         for (ChecklistEntry entry : report.getBirtSteps()) {
 

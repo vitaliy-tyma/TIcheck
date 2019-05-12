@@ -20,7 +20,10 @@ import java.util.List;
 
 /* Is used to process checklist for SPIDER */
 @Slf4j
-public class ServiceAnalyseNds {
+public class ServiceAnalyseNdsMt extends Thread{
+    private Checklist checklist;
+    private Report report;
+    private Boolean analyseRegression;
 
     private static NdsConfigAndQuery ndsConfigAndQuery = new NdsConfigAndQuery();
     private static Connection con = null;
@@ -28,8 +31,23 @@ public class ServiceAnalyseNds {
     private static ResultSet resultSet = null;
     private static int requestsCount;
 
+    public ServiceAnalyseNdsMt(Checklist checklist, Report report, Boolean analyseRegression){
+        this.checklist = checklist;
+        this.report = report;
+        this.analyseRegression = analyseRegression;
+    }
 
-    public static int processNdsChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
+    public void run(){
+        processNdsChecklist(checklist, report, analyseRegression);
+    }
+    public List<ChecklistEntry> getSteps (){
+        return report.getNdsSteps();
+    }
+    public int getRequestsCount(){
+        return requestsCount;
+    }
+
+    public int processNdsChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
         requestsCount = 0;
         log.info("**** in ServiceAnalyseNds.processNdsChecklist() ****");
 

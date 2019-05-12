@@ -1,9 +1,11 @@
 package com.luxoft.falcon.service;
 
-import com.luxoft.falcon.config.SpiderConfigAndQuery;
 import com.luxoft.falcon.config.MainConfig;
+import com.luxoft.falcon.config.SpiderConfigAndQuery;
 import com.luxoft.falcon.dao.DbConnectorSpider;
-import com.luxoft.falcon.model.*;
+import com.luxoft.falcon.model.Checklist;
+import com.luxoft.falcon.model.ChecklistEntry;
+import com.luxoft.falcon.model.Report;
 import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
@@ -14,13 +16,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-/* NOT IN USE
-Is used to process checklist for SPIDER */
+/* Is used to process checklist for SPIDER */
 @Slf4j
-public class ServiceAnalyseSpider {
+public class ServiceAnalyseSpiderMt extends Thread {
 
 
-
+    private Checklist checklist;
+    private Report report;
+    private Boolean analyseRegression;
 
     private static SpiderConfigAndQuery spiderConfigAndQuery = new SpiderConfigAndQuery();
     private static Connection con = null;
@@ -29,9 +32,25 @@ public class ServiceAnalyseSpider {
     private static int requestsCount;
 
 
+    public ServiceAnalyseSpiderMt(Checklist checklist, Report report, Boolean analyseRegression){
+        this.checklist = checklist;
+        this.report = report;
+        this.analyseRegression = analyseRegression;
+    }
+
+    public void run(){
+        processSpiderChecklist(checklist, report, analyseRegression);
+    }
+    public List<ChecklistEntry> getSteps (){
+        return report.getSpiderSteps();
+    }
+    public int getRequestsCount(){
+        return requestsCount;
+    }
 
 
-    public static int processSpiderChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
+
+    public int processSpiderChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
         requestsCount = 0;
         log.debug("**** in ServiceAnalyseSpider.processSpiderChecklist() ****");
 

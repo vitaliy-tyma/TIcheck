@@ -3,9 +3,7 @@ package com.luxoft.falcon.controller;
 import com.luxoft.falcon.config.MainConfig;
 import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.Report;
-import com.luxoft.falcon.service.ServiceAnalyseBirt;
-import com.luxoft.falcon.service.ServiceAnalyseNds;
-import com.luxoft.falcon.service.ServiceAnalyseSpider;
+import com.luxoft.falcon.service.*;
 import com.luxoft.falcon.util.ReadXML;
 import com.luxoft.falcon.util.ReportToHtml;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +26,14 @@ public class ServletAnalyse extends HttpServlet {
 
     private Checklist checklist;
     private Report report;
+    private int requestsCount = 0;
 
 
 
     @Override
     public void init() throws ServletException {
         super.init();
+        log.info("Init ServletAnalyse !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 //        Loader loader = new Loader();
 //        loader.init();
     }
@@ -86,13 +86,12 @@ public class ServletAnalyse extends HttpServlet {
 
 
         long start = System.currentTimeMillis();
-        int requestsCount = 0;
+
         boolean analyseRegression = false;
         log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
         try {
 
             // Load checklist by it's name - to be developed later
-//        checklist = new Checklist(checklistRequestName);
             checklist = ReadXML.readChecklistFromFile(checklistRequestName);
 
 
@@ -153,35 +152,63 @@ public class ServletAnalyse extends HttpServlet {
 
 
 
-//TODO Use several threads to process different data sources
+            // Use several threads to process different data sources
+            Thread analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
+            Thread analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
+            Thread analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
 
             /* PROCESS SPIDER ERRORS*/
             if (checklist.getSpiderSteps().size() != 0) {
-                requestsCount += ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
-                log.debug(String.format(
-                        "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
-                        report.getName());
+                analyseSpiderMt.start();
+//                requestsCount += ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
+
             }
+
 
 
 
             /* PROCESS BIRT ERRORS*/
             if (checklist.getBirtSteps().size() != 0) {
-                requestsCount += ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
-                log.debug(String.format(
-                        "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
-                        report.getName());
+                analyseBirtMt.start();
+//                requestsCount += ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
+
             }
 
 
             /* PROCESS NDS ERRORS*/
             if (checklist.getNdsSteps().size() != 0) {
-                requestsCount += ServiceAnalyseNds.processNdsChecklist(checklist, report, analyseRegression);
+                analyseNdsMt.start();
+            }
+
+
+            try {
+                analyseSpiderMt.join();
+                log.debug(String.format(
+                        "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
+                        report.getName());
+
+                analyseBirtMt.join();
+                log.debug(String.format(
+                        "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
+                        report.getName());
+
+                analyseNdsMt.join();
                 log.debug(String.format(
                         "****************************** PROCESSING NDS of PON {} HAS FINISHED ******************"),
                         report.getName());
-            }
 
+                report.setSpiderSteps(((ServiceAnalyseSpiderMt) analyseSpiderMt).getSteps());
+                requestsCount += ((ServiceAnalyseSpiderMt) analyseSpiderMt).getRequestsCount();
+
+                report.setBirtSteps(((ServiceAnalyseBirtMt) analyseBirtMt).getSteps());
+                requestsCount += ((ServiceAnalyseBirtMt) analyseBirtMt).getRequestsCount();
+
+                report.setNdsSteps(((ServiceAnalyseNdsMt) analyseNdsMt).getSteps());
+                requestsCount += ((ServiceAnalyseNdsMt) analyseNdsMt).getRequestsCount();
+            }
+            catch (Exception e){
+                report.addLogOfErrors(e.getMessage());
+            }
 
             log.info("****************************************** CHECKLIST PROCESSING IS FINISHED *****************************************");
 
