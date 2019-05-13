@@ -41,7 +41,8 @@ public class ServiceAnalyseSpiderMt extends Thread {
     private Report report;
     private Boolean analyseRegression;
 
-    private static SpiderConfigAndQuery spiderConfigAndQuery = new SpiderConfigAndQuery();
+    private static MainConfig mainConfig = MainConfig.getInstance();
+    private static SpiderConfigAndQuery spiderConfigAndQuery = SpiderConfigAndQuery.getInstance();
     private static Connection con = null;
     private static PreparedStatement pstmt = null;
     private static ResultSet resultSet = null;
@@ -128,7 +129,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
         pstmt.setInt(4, report.getLimit());
 
         for (String errorToCheck : steps) {
-//            try {
+
                 pstmt.setString(3, errorToCheck);
 
                 String fullQuery = pstmt.toString();
@@ -157,8 +158,8 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
                 /* Ir ResultSet is not empty - check all rows and create new items in List of Spider Errors*/
                 while (resultSet.next()) {
-                    String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
-                    String error = resultSet.getString(MainConfig.getSPIDER_JAVA_CLASS_ERROR_COL_NAME());
+                    String fullName = resultSet.getString(mainConfig.getSPIDER_TASK_COL_NAME());
+                    String error = resultSet.getString(mainConfig.getSPIDER_JAVA_CLASS_ERROR_COL_NAME());
 
 
                     fillSpiderErrors.add(
@@ -172,13 +173,6 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
                     log.debug(String.format("************************* Spider resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
                 }
-
-
-//            } catch (Exception e) {
-//                log.error(e.getMessage());
-//                report.addLogOfErrors(e.getMessage());
-//            }
-
         }
         return fillSpiderErrors;
     }
@@ -187,9 +181,6 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
     /* Make regression analysis*/
     private static void analyseRegression(Report report) throws SQLException {
-
-//        try {
-
 
             for (ChecklistEntry entry : report.getSpiderSteps()) {
 
@@ -238,7 +229,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
 
                     while (resultSet.next()) {
-                        String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
+                        String fullName = resultSet.getString(mainConfig.getSPIDER_TASK_COL_NAME());
                         String restOfPrevName = fullName.replace(report.getPrevName(), "");
                         String restOfOriginalName = entry.getFullNameOfPon().replace(report.getName(), "");
 
@@ -251,10 +242,5 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
                 }
             }
-//        } catch (Exception e) {
-//            log.error(e.getMessage());
-//            report.addLogOfErrors(e.getMessage());
-//        }
-
     }
 }

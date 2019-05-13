@@ -26,7 +26,8 @@ public class ServiceAnalyseNdsMt extends Thread{
     private Report report;
     private Boolean analyseRegression;
 
-    private static NdsConfigAndQuery ndsConfigAndQuery = new NdsConfigAndQuery();
+    private static MainConfig mainConfig = MainConfig.getInstance();
+    private static NdsConfigAndQuery ndsConfigAndQuery = NdsConfigAndQuery.getInstance();
     private static Connection con = null;
     private static PreparedStatement pstmt = null;
     private static ResultSet resultSet = null;
@@ -103,7 +104,7 @@ public class ServiceAnalyseNdsMt extends Thread{
 
 //FIXME - DB is compressed and enciphered - NDS lib must be used to open
 // - Now we have error here!!!
-        pstmt = con.prepareStatement(ndsConfigAndQuery.getQuery());
+        pstmt = con.prepareStatement(ndsConfigAndQuery.getQueryLike());
 //        pstmt.setString(1, "%" + report.getName() + "%");
 //        pstmt.setInt(2, report.getIteration());
 //        pstmt.setInt(4, report.getLimit());
@@ -139,8 +140,8 @@ public class ServiceAnalyseNdsMt extends Thread{
 
             /* Ir ResultSet is not empty - check all rows and create new items in List of Spider Errors*/
             while (resultSet.next()) {
-                String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
-                String error = resultSet.getString(MainConfig.getSPIDER_JAVA_CLASS_ERROR_COL_NAME());
+                String fullName = resultSet.getString(mainConfig.getSPIDER_TASK_COL_NAME());
+                String error = resultSet.getString(mainConfig.getSPIDER_JAVA_CLASS_ERROR_COL_NAME());
 
 
                 fillSpiderErrors.add(
@@ -190,7 +191,7 @@ public class ServiceAnalyseNdsMt extends Thread{
                 }
 
 
-                pstmt = con.prepareStatement(ndsConfigAndQuery.getQuery());
+                pstmt = con.prepareStatement(ndsConfigAndQuery.getQueryLike());
 //                pstmt.setString(1, "%" + nameToCheck.trim() + "%");
 //                pstmt.setInt(2, report.getPrevIteration());
 //                pstmt.setInt(4, report.getLimit());
@@ -213,7 +214,7 @@ public class ServiceAnalyseNdsMt extends Thread{
 
 
                 while (resultSet.next()) {
-                    String fullName = resultSet.getString(MainConfig.getSPIDER_TASK_COL_NAME());
+                    String fullName = resultSet.getString(mainConfig.getSPIDER_TASK_COL_NAME());
                     String restOfPrevName = fullName.replace(report.getPrevName(), "");
                     String restOfOriginalName = entry.getFullNameOfPon().replace(report.getName(), "");
 

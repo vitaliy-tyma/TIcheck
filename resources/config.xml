@@ -59,7 +59,7 @@
         </SOURCE_NAME_NDS>
     </MAIN>
 
-    <Connect source = "SPIDER">
+    <SPIDER>
         <jdbcDriver>org.postgresql.Driver</jdbcDriver>
         <jdbcUrl>jdbc:postgresql://himdlxspider01:5432/DBPROD</jdbcUrl>
         <jdbcLogin>readonly</jdbcLogin>
@@ -84,9 +84,9 @@
              ORDER BY Task, Revision, JAVA_CLASS_ERROR\n
              LIMIT ?
         </queryAccurate>
-        </Connect>
+    </SPIDER>
 
-        <Connect source = "BIRT2010">
+    <BIRT2010>
         <jdbcDriver>com.mysql.jdbc.Driver</jdbcDriver>
         <jdbcUrl>jdbc:mysql://himdlxbirt01:3306/ndsreport</jdbcUrl>
         <jdbcLogin>readonly</jdbcLogin>
@@ -116,10 +116,10 @@
         <queryCheckGeneration>
             SELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?
         </queryCheckGeneration>
-    </Connect>
+    </BIRT2010>
 
 
-    <Connect source = "BIRT2020">
+    <BIRT2020>
         <jdbcDriver>com.mysql.jdbc.Driver</jdbcDriver>
         <jdbcUrl>jdbc:mysql://himdlxbirt01:3306/ndsreport_new</jdbcUrl>
         <jdbcLogin>readonly</jdbcLogin>
@@ -147,5 +147,14 @@
         <queryCheckGeneration>
             SELECT * FROM ndsreport_new.suites WHERE testsuitename LIKE ? LIMIT ?
         </queryCheckGeneration>
-    </Connect>
+    </BIRT2020>
+	
+	<BIRT_GENERATION_SELECTOR>
+		<g2010>
+			SELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?
+		</g2010>
+		<g2020>
+			SELECT * FROM ndsreport_new.suites WHERE name LIKE ? LIMIT ?
+		</g2020>
+	</BIRT_GENERATION_SELECTOR>
 </CONFIG>

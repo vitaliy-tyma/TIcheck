@@ -2,6 +2,7 @@ package com.luxoft.falcon.controller;
 
 import com.luxoft.falcon.config.MainConfig;
 import com.luxoft.falcon.model.Checklist;
+import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.Report;
 import com.luxoft.falcon.service.*;
 import com.luxoft.falcon.util.ReadXML;
@@ -13,36 +14,37 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Servlet is launched from web-browser's form and starts processes of checklists analysis
  */
 
 //FIXME Refactor methods to return only objects with data
-// - code to objects show it must be separated
+// code to show objects it must be separated
 
 @Slf4j
 public class ServletAnalyse extends HttpServlet {
-
-    private Checklist checklist;
-    private Report report;
-    private int requestsCount = 0;
-
+    private static MainConfig mainConfig = MainConfig.getInstance();
+    private static Checklist checklist;
+    private static Report report = new Report();
+    private static int requestsCount = 0;
+    private static boolean analyseRegression = false;
 
 
     @Override
     public void init() throws ServletException {
         super.init();
-        log.info("Init ServletAnalyse !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-//        Loader loader = new Loader();
-//        loader.init();
     }
 
 
     @Override
     public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws IOException {
-        MainConfig mainConfig = MainConfig.getInstance();
+
 
         log.info("*********************** NEW REQUEST STARTED ** ServletAnalyse.doGet() ****************************************");
         StringBuilder result = new StringBuilder();
@@ -87,17 +89,13 @@ public class ServletAnalyse extends HttpServlet {
 
         long start = System.currentTimeMillis();
 
-        boolean analyseRegression = false;
+
         log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
         try {
 
             // Load checklist by it's name - to be developed later
             checklist = ReadXML.readChecklistFromFile(checklistRequestName);
 
-
-
-
-            report = new Report();
 
             log.debug(String.format(
                     "******* Processing checklist %s with the request: name = %s;" +
@@ -148,61 +146,14 @@ public class ServletAnalyse extends HttpServlet {
                 }
             }
 
-
-
-
-
-            // Use several threads to process different data sources
-            Thread analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
-            Thread analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
-            Thread analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
-
-            /* PROCESS SPIDER ERRORS*/
-            if (checklist.getSpiderSteps().size() != 0) {
-                analyseSpiderMt.start();
-                // Outdated - was used for one threaded app
-                // requestsCount += ServiceAnalyseSpiderMt.processSpiderChecklist(checklist, report, analyseRegression);
+            /* Choose only one mode - SingleThread is for debug!!!*/
+            boolean debugMode = true;
+            if (debugMode) {
+                startSingleThreadedMode();
+            } else {
+                startMultithreadedMode(); //For example - may be used for very big requests!!
             }
 
-
-
-
-            /* PROCESS BIRT ERRORS*/
-            if (checklist.getBirtSteps().size() != 0) {
-                analyseBirtMt.start();
-                // Outdated - was used for one threaded app
-                // requestsCount += ServiceAnalyseBirtMt.processBirtChecklist(checklist, report, analyseRegression);
-
-            }
-
-
-            /* PROCESS NDS ERRORS*/
-            if (checklist.getNdsSteps().size() != 0) {
-                analyseNdsMt.start();
-            }
-
-
-
-
-            try {
-                analyseSpiderMt.join();
-                analyseBirtMt.join();
-                analyseNdsMt.join();
-
-
-
-                report.setSpiderSteps(((ServiceAnalyseSpiderMt) analyseSpiderMt).getSteps());
-                requestsCount += ((ServiceAnalyseSpiderMt) analyseSpiderMt).getRequestsCount();
-
-                report.setBirtSteps(((ServiceAnalyseBirtMt) analyseBirtMt).getSteps());
-                requestsCount += ((ServiceAnalyseBirtMt) analyseBirtMt).getRequestsCount();
-
-                report.setNdsSteps(((ServiceAnalyseNdsMt) analyseNdsMt).getSteps());
-                requestsCount += ((ServiceAnalyseNdsMt) analyseNdsMt).getRequestsCount();
-            }
-            catch (Exception e){
-                report.addLogOfErrors(e.getMessage());
-            }
 
             log.info("****************************************** CHECKLIST PROCESSING IS FINISHED *****************************************");
 
@@ -236,11 +187,85 @@ public class ServletAnalyse extends HttpServlet {
         }
 
 
-
-
-
+        analyseRegression = false;
         /* Send reply after analysis */
         httpServletResponse.getWriter().print(result.toString());
+    }
+
+
+    // Use one thread to process different data sources - useful for debug!!!
+    private void startSingleThreadedMode() {
+        ServiceAnalyseSpiderMt analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
+        ServiceAnalyseBirtMt analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
+        ServiceAnalyseNdsMt analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
+
+        /* PROCESS SPIDER ERRORS*/
+        if (checklist.getSpiderSteps().size() != 0) {
+            requestsCount += analyseSpiderMt.processSpiderChecklist(checklist, report, analyseRegression);
+        }
+        /* PROCESS BIRT ERRORS*/
+        if (checklist.getBirtSteps().size() != 0) {
+            requestsCount += analyseBirtMt.processBirtChecklist(checklist, report, analyseRegression);
+        }
+        /* PROCESS NDS ERRORS*/
+        if (checklist.getNdsSteps().size() != 0) {
+            requestsCount += analyseNdsMt.processNdsChecklist(checklist, report, analyseRegression);
+        }
+
+    }
+
+
+    // Use several threads to process different data sources
+    private static void startMultithreadedMode() {
+
+
+        Thread analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
+        Thread analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
+        Thread analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
+
+        /* PROCESS SPIDER ERRORS*/
+        if (checklist.getSpiderSteps().size() != 0) {
+            analyseSpiderMt.start();
+            // Use for one threaded mode
+            // requestsCount += ServiceAnalyseSpiderMt.processSpiderChecklist(checklist, report, analyseRegression);
+        }
+
+
+
+
+        /* PROCESS BIRT ERRORS*/
+        if (checklist.getBirtSteps().size() != 0) {
+            analyseBirtMt.start();
+            // Use for one threaded mode
+            // requestsCount += ServiceAnalyseBirtMt.processBirtChecklist(checklist, report, analyseRegression);
+
+        }
+
+
+        /* PROCESS NDS ERRORS*/
+        if (checklist.getNdsSteps().size() != 0) {
+            analyseNdsMt.start();
+        }
+
+
+        try {
+            analyseSpiderMt.join();
+            analyseBirtMt.join();
+            analyseNdsMt.join();
+
+
+            report.setSpiderSteps(((ServiceAnalyseSpiderMt) analyseSpiderMt).getSteps());
+            requestsCount += ((ServiceAnalyseSpiderMt) analyseSpiderMt).getRequestsCount();
+
+            report.setBirtSteps(((ServiceAnalyseBirtMt) analyseBirtMt).getSteps());
+            requestsCount += ((ServiceAnalyseBirtMt) analyseBirtMt).getRequestsCount();
+
+            report.setNdsSteps(((ServiceAnalyseNdsMt) analyseNdsMt).getSteps());
+            requestsCount += ((ServiceAnalyseNdsMt) analyseNdsMt).getRequestsCount();
+        } catch (Exception e) {
+            report.addLogOfErrors(e.getMessage());
+        }
+
     }
 
 
@@ -278,11 +303,58 @@ public class ServletAnalyse extends HttpServlet {
                             report.getLimit()));
             result.append("</tr>\n");
         }
+
+        result.append("<tr><td colspan = 5 align = center>");
+
+        if (checkReportForErrors(report.getSpiderSteps()) ||
+                checkReportForErrors(report.getBirtSteps()) ||
+                checkReportForErrors(report.getNdsSteps())) {
+            result.append("<b><font color = red>Summary: Checklist hasn't passed</font></b>");
+        } else {
+            result.append("<b><font color = green>Summary: Checklist has passed</font></b>");
+        }
+        /*Show error log if it exists*/
+        if (report.getLogOfErrors().size() != 0) {
+            result.append("<br/><div align = left>");
+            result.append("<details><summary><u><b>See log of errors </b></u></summary>\n");
+            result.append(
+                    String.format(
+                            "<div><p><font color=red>%s</font></p></div>\n",
+                            report.getLogOfErrors().toString()));
+            result.append("</b></details>\n");
+            result.append("</div>");
+        }
+
+        /*Show time, requests count and date time*/
+        result.append("<br/><div align = left>");
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+
+
+        result.append(
+                String.format(
+                        "Elapsed: %s seconds; Requests Count: %s; Request Time is: %s",
+                        report.getElapsedTime(),
+                        report.getRequestsCount(),
+                        dateFormat.format(date)));
+        result.append("</div>");
+        result.append("</td></tr>");
         result.append("</table>\n");
         result.append("<br/>\n");
 
 
         return result.toString();
+    }
+
+
+    private boolean checkReportForErrors(List<ChecklistEntry> steps) {
+        for (ChecklistEntry entry : steps) {
+            if (entry.getResultOfCheckIsNOK()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 

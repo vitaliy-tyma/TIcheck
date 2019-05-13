@@ -1,3 +1,4 @@
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 
 <!--
@@ -23,7 +24,7 @@ MAPPING MUST BE CHANGED
 
 <body>
 <h1>Automated checklist analyser - analyse jsp</h1>
-
+${param.id}
 
 
 <div>

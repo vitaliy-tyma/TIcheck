@@ -1,11 +1,16 @@
 package com.luxoft.falcon.model;
-
-import com.luxoft.falcon.config.MainConfig;
 import lombok.Data;
-import lombok.Getter;
 import java.util.LinkedList;
 import java.util.List;
 
+//FIXME - main log
+// Make tests
+// Make eager initialization
+// Make AJAX for PON name detection and result displaing
+// Make Api for other apps
+// Make analyse.jsp as main page (with form as in index.jsp and result data - displayed with AJAX)
+// Make NDS part - open DB?
+// MAKE AWB part - visual?
 
 /* Class contains steps of checklists, loaded from file with the same name from resources folder */
 @Data

@@ -255,12 +255,19 @@ Refer to the actual checklist log.
 <hr align="center" width="80%" size="2" color="#ff0000" />
 <p>
 Testing area - to be used only after deploy:
-<a href="http://172.30.136.166:8889/TIcheck/">http://172.30.136.166:8889/TIcheck/</a>
+<a href="http://172.30.136.166:8080/TIcheck/">http://172.30.136.166:8080/TIcheck/</a>
 </p>
 </td>
 </tr>
 
-
+<tr>
+<td>
+<hr align="center" width="80%" size="2" color="#ff0000" />
+<p>
+<a href="help.html">Help</a>
+</p>
+</td>
+</tr>
 
 
 

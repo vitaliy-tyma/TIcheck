@@ -1,9 +1,6 @@
 package com.luxoft.falcon.service;
 
-import com.luxoft.falcon.config.Birt2010ConfigAndQuery;
-import com.luxoft.falcon.config.Birt2020ConfigAndQuery;
-import com.luxoft.falcon.config.BirtQueryToCheckGeneration;
-import com.luxoft.falcon.config.MainConfig;
+import com.luxoft.falcon.config.*;
 import com.luxoft.falcon.dao.DbConnectorBirt;
 import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.ChecklistEntry;
@@ -44,9 +41,11 @@ public class ServiceAnalyseBirtMt extends Thread {
     private PreparedStatement pstmt = null;
     private ResultSet resultSet = null;
 
-    private Birt2010ConfigAndQuery birt2010ConfigAndQuery = new Birt2010ConfigAndQuery();
-    private Birt2020ConfigAndQuery birt2020ConfigAndQuery = new Birt2020ConfigAndQuery();
-    private BirtQueryToCheckGeneration birtQueryToCheckGeneration = new BirtQueryToCheckGeneration();
+
+    private static MainConfig mainConfig = MainConfig.getInstance();
+    private Birt2010ConfigAndQuery birt2010ConfigAndQuery = Birt2010ConfigAndQuery.getInstance();
+    private Birt2020ConfigAndQuery birt2020ConfigAndQuery = Birt2020ConfigAndQuery.getInstance();
+    private BirtQueryToCheckGeneration birtQueryToCheckGeneration = BirtQueryToCheckGeneration.getInstance();
 
     private PreparedStatement pstmtChecker;
     private ResultSet resultSetChecker;
@@ -55,6 +54,10 @@ public class ServiceAnalyseBirtMt extends Thread {
     private String queryAccurate = null;
     private boolean isGenDefined = false;
     private int requestsCount;
+
+
+
+
 
     public ServiceAnalyseBirtMt(Checklist checklist, Report report, Boolean analyseRegression){
         this.checklist = checklist;
@@ -86,7 +89,7 @@ public class ServiceAnalyseBirtMt extends Thread {
             /* Check the generation*/
             isGenDefined = checkGeneration(report);
 
-            List<ChecklistEntry> fillBirtErrors = new LinkedList<>();
+            List<ChecklistEntry> fillBirtErrors;// = new LinkedList<>();
 
 
             /* Iterate over BIRT*/
@@ -103,6 +106,19 @@ public class ServiceAnalyseBirtMt extends Thread {
                 if (analyseRegression) {
                     analyseRegression(report);
                 }
+            } else {
+                List<ChecklistEntry> emptyBirtErrors = new LinkedList<>();
+                for (String birtTestname : checklist.getBirtSteps()){
+                    emptyBirtErrors.add(
+                            new ChecklistEntry(
+                                    birtTestname,
+                                    Boolean.TRUE,
+                                    Boolean.FALSE,
+                                    "",
+                                    report.getName(),
+                                    "Not found"));
+                }
+                report.setBirtSteps(emptyBirtErrors);
             }
 
 
@@ -222,8 +238,8 @@ public class ServiceAnalyseBirtMt extends Thread {
                     Boolean firstRow = Boolean.TRUE;
                     ChecklistEntry tempChecklistEntry = new ChecklistEntry(errorToCheck);
                     while (resultSet.next()) {
-                        String resultOfTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
-                        String testName = resultSet.getString(MainConfig.getBIRT_TEST_COL_NAME());
+                        String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
+                        String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
 
 
                         if (firstRow) {
@@ -253,9 +269,9 @@ public class ServiceAnalyseBirtMt extends Thread {
                     } else {
                         resultSet.beforeFirst();
                         while (resultSet.next()) {
-                            String fullName = resultSet.getString(MainConfig.getBIRT_TASK_COL_NAME());
-                            String testName = resultSet.getString(MainConfig.getBIRT_TEST_COL_NAME());
-                            String resultOfTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
+                            String fullName = resultSet.getString(mainConfig.getBIRT_TASK_COL_NAME());
+                            String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
+                            String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
 
                             ChecklistEntry entry = new ChecklistEntry(testName);
 
@@ -348,7 +364,7 @@ public class ServiceAnalyseBirtMt extends Thread {
                 }
 
                 while (resultSet.next()) {
-                    String resultPrevTest = resultSet.getString(MainConfig.getBIRT_TEST_RESULT_NAME());
+                    String resultPrevTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
                     String resultOriginalTest = entry.getResultOfCheckText();
 
                     if (resultOriginalTest.equals(resultPrevTest)) {

@@ -1,5 +1,6 @@
 package com.luxoft.falcon.config;
 
+import com.luxoft.falcon.config.inter.ConfigAndQueryInterface;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -10,47 +11,59 @@ import lombok.Setter;
  */
 //TODO Store all items in separate XML file and load it's content at start and on request.
 
-@Data
-public class Birt2010ConfigAndQuery {
-    @Getter
-    private String jdbcDriver = "com.mysql.jdbc.Driver";
 
-    @Getter
-    private String jdbcUrl = "jdbc:mysql://himdlxbirt01:3306/ndsreport"; //For 2010
+public class Birt2010ConfigAndQuery implements ConfigAndQueryInterface {
 
-    @Getter
-    private String jdbcLogin = "readonly";
-    @Getter
-    private String jdbcPassword = "readonly";
+    private static Birt2010ConfigAndQuery _instance = new Birt2010ConfigAndQuery();
 
+    private Birt2010ConfigAndQuery() {
+    }
 
-    @Getter
-    private String queryLike = " \n" +
-            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult \n" +
-            " TEST_RESULT FROM ndsreport.test t\n" +
-            " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
-            " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
-            " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
-            " WHERE s.testsuitename LIKE ?\n" +//ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
-            " AND td.name = ?\n" +
-            //TODO Clarify with the exitcode parameter
-  //          " AND tr.exitcode = 0\n" +
-            " ORDER BY TASK, TEST_NAME \n" +
-            " LIMIT ?";
+    public static synchronized Birt2010ConfigAndQuery getInstance() {
+        return _instance;
+    }
 
 
-    @Getter
-    private String queryAccurate = " \n" +
-            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT \n" +
-            " FROM ndsreport.test t\n" +
-            " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
-            " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
-            " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
-            " WHERE s.testsuitename = ?\n" +
-            " AND td.name = ?\n" +
-            //TODO Clarify with the exitcode parameter
-//            " AND tr.exitcode = 0\n" +
-            " ORDER BY TASK, TEST_NAME \n" +
-            " LIMIT ?";
+
+    @Getter @Setter
+    private String jdbcDriver;// = "com.mysql.jdbc.Driver";
+
+    @Getter @Setter
+    private String jdbcUrl;// = "jdbc:mysql://himdlxbirt01:3306/ndsreport"; //For 2010
+
+    @Getter @Setter
+    private String jdbcLogin;// = "readonly";
+    @Getter @Setter
+    private String jdbcPassword;// = "readonly";
+
+
+    @Getter @Setter
+    private String queryLike;// = " \n" +
+//            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult \n" +
+//            " TEST_RESULT FROM ndsreport.test t\n" +
+//            " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
+//            " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
+//            " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
+//            " WHERE s.testsuitename LIKE ?\n" +//ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
+//            " AND td.name = ?\n" +
+//            //TODO Clarify with the exitcode parameter
+//  //          " AND tr.exitcode = 0\n" +
+//            " ORDER BY TASK, TEST_NAME \n" +
+//            " LIMIT ?";
+
+
+    @Getter @Setter
+    private String queryAccurate;// = " \n" +
+//            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT \n" +
+//            " FROM ndsreport.test t\n" +
+//            " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
+//            " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
+//            " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
+//            " WHERE s.testsuitename = ?\n" +
+//            " AND td.name = ?\n" +
+//            //TODO Clarify with the exitcode parameter
+////            " AND tr.exitcode = 0\n" +
+//            " ORDER BY TASK, TEST_NAME \n" +
+//            " LIMIT ?";
 }
 

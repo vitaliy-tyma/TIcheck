@@ -17,6 +17,9 @@
         <welcome-file>default.jsp</welcome-file>
     </welcome-file-list>
 
+    <listener>
+        <listener-class>com.luxoft.falcon.util.Listener</listener-class>
+    </listener>
 
     <servlet>
         <servlet-name>ServletLocalhost</servlet-name>

@@ -25,7 +25,7 @@ public class ReportToHtml {
 
         result.append("<table border=1 width = 95%>");
         result.append("<tr>");
-        result.append("<th>##</th>");
+        result.append("<th>#<br/>#</th>");
         result.append("<th>Full name (iteration)</th>");
         result.append("<th>Step</th>");
         result.append("<th>Checked</th>");
@@ -50,32 +50,9 @@ public class ReportToHtml {
         result.append("</table>");
         result.append("</div>");
 
-        /*Show time, requests count and date time*/
-        result.append("<br/><div align = left>");
-
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
 
 
-        result.append(
-                    String.format(
-                        "Elapsed: %s seconds; Requests Count: %s; Request Time is: %s.",
-                        report.getElapsedTime(),
-                        report.getRequestsCount(),
-                        dateFormat.format(date)));
-        result.append("</div>");
 
-        /*Show error log if it exists*/
-        if (report.getLogOfErrors().size() != 0) {
-            result.append("<br/><div align = left>");
-            result.append("<details><summary><u><b>See log of errors </b></u></summary>\n");
-            result.append(
-                    String.format(
-                            "<div><p><font color=red>%s</font></p></div>\n",
-                            report.getLogOfErrors().toString()));
-            result.append("</b></details>\n");
-            result.append("</div>");
-        }
         return result.toString();
 
 
@@ -136,15 +113,20 @@ public class ReportToHtml {
 
             }
 
+//            result.append(
+//                    String.format("<td align=center><div class=\"tooltip_for_name\">" +
+//                                    "<font color = %s>%s</font>" +
+//                                    "<span class=\"tooltiptext\">%s</span>" +
+//                                    "</div></td>",
+//                                    color,
+//                                    entry.getResultOfCheckText(),
+//                                    stringNOK_OK));
             result.append(
-                    String.format("<td align=center><div class=\"tooltip_for_name\">" +
+                    String.format("<td align=center>" +
                                     "<font color = %s>%s</font>" +
-                                    "<span class=\"tooltiptext\">%s</span>" +
-                                    "</div></td>",
-                                    color,
-                                    entry.getResultOfCheckText(),
-                                    stringNOK_OK));
-
+                                    "</td>",
+                            color,
+                            entry.getResultOfCheckText()));
 
             //Show query in the tooltip
             result.append(
