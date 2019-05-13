@@ -18,7 +18,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-/* Is used to process checklist for SPIDER */
+/* Is used to process checklist for NDS DB */
+/* NOT IMPLEMENTED YET - need to use NDSlib to open DB*/
 @Slf4j
 public class ServiceAnalyseNdsMt extends Thread{
     private Checklist checklist;
@@ -89,6 +90,9 @@ public class ServiceAnalyseNdsMt extends Thread{
             }
         }
 
+        log.debug(String.format(
+                "****************************** PROCESSING NDS of PON {} HAS BEEN FINISHED ******************"),
+                report.getName());
 
         return requestsCount;
     }

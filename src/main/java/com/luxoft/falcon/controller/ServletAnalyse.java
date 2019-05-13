@@ -42,47 +42,47 @@ public class ServletAnalyse extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse)
             throws IOException {
-
+        MainConfig mainConfig = MainConfig.getInstance();
 
         log.info("*********************** NEW REQUEST STARTED ** ServletAnalyse.doGet() ****************************************");
         StringBuilder result = new StringBuilder();
 
         final String ponName =
-                httpServletRequest.getParameter(MainConfig.getPON_NAME_REQUEST());
-        httpServletRequest.setAttribute(MainConfig.getPON_NAME_REQUEST(), ponName);
+                httpServletRequest.getParameter(mainConfig.getPON_NAME_REQUEST());
+        httpServletRequest.setAttribute(mainConfig.getPON_NAME_REQUEST(), ponName);
 
         final String ponIteration =
-                httpServletRequest.getParameter(MainConfig.getPON_ITERATION_REQUEST());
-        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_REQUEST(), ponIteration);
+                httpServletRequest.getParameter(mainConfig.getPON_ITERATION_REQUEST());
+        httpServletRequest.setAttribute(mainConfig.getPON_ITERATION_REQUEST(), ponIteration);
 
         final String useQueryLike =
-                httpServletRequest.getParameter(MainConfig.getUSE_QUERY_LIKE_REQUEST());
-        httpServletRequest.setAttribute(MainConfig.getUSE_QUERY_LIKE_REQUEST(), useQueryLike);
+                httpServletRequest.getParameter(mainConfig.getUSE_QUERY_LIKE_REQUEST());
+        httpServletRequest.setAttribute(mainConfig.getUSE_QUERY_LIKE_REQUEST(), useQueryLike);
 
         final String checklistRequestName =
-                httpServletRequest.getParameter(MainConfig.getCHECKLISTS_REQUEST());
-        httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REQUEST(), checklistRequestName);
+                httpServletRequest.getParameter(mainConfig.getCHECKLISTS_REQUEST());
+        httpServletRequest.setAttribute(mainConfig.getCHECKLISTS_REQUEST(), checklistRequestName);
 
         final String limitValue =
-                httpServletRequest.getParameter(MainConfig.getQUERY_LIMIT());
-        httpServletRequest.setAttribute(MainConfig.getQUERY_LIMIT(), limitValue);
+                httpServletRequest.getParameter(mainConfig.getQUERY_LIMIT());
+        httpServletRequest.setAttribute(mainConfig.getQUERY_LIMIT(), limitValue);
 
 
         final String prevPonName =
-                httpServletRequest.getParameter(MainConfig.getPON_NAME_PREV_REQUEST());
-        httpServletRequest.setAttribute(MainConfig.getPON_NAME_PREV_REQUEST(), prevPonName);
+                httpServletRequest.getParameter(mainConfig.getPON_NAME_PREV_REQUEST());
+        httpServletRequest.setAttribute(mainConfig.getPON_NAME_PREV_REQUEST(), prevPonName);
 
         final String prevPonIteration =
-                httpServletRequest.getParameter(MainConfig.getPON_ITERATION_PREV_REQUEST());
-        httpServletRequest.setAttribute(MainConfig.getPON_ITERATION_PREV_REQUEST(), prevPonIteration);
+                httpServletRequest.getParameter(mainConfig.getPON_ITERATION_PREV_REQUEST());
+        httpServletRequest.setAttribute(mainConfig.getPON_ITERATION_PREV_REQUEST(), prevPonIteration);
 
         final String useQueryLikeForPrev =
-                httpServletRequest.getParameter(MainConfig.getUSE_QUERY_LIKE_PREV_REQUEST());
-        httpServletRequest.setAttribute(MainConfig.getUSE_QUERY_LIKE_PREV_REQUEST(), useQueryLikeForPrev);
+                httpServletRequest.getParameter(mainConfig.getUSE_QUERY_LIKE_PREV_REQUEST());
+        httpServletRequest.setAttribute(mainConfig.getUSE_QUERY_LIKE_PREV_REQUEST(), useQueryLikeForPrev);
 
         final String regressionCheck =
-                httpServletRequest.getParameter(MainConfig.getCHECKLISTS_REGRESSION());
-        httpServletRequest.setAttribute(MainConfig.getCHECKLISTS_REGRESSION(), regressionCheck);
+                httpServletRequest.getParameter(mainConfig.getCHECKLISTS_REGRESSION());
+        httpServletRequest.setAttribute(mainConfig.getCHECKLISTS_REGRESSION(), regressionCheck);
 
 
         long start = System.currentTimeMillis();
@@ -160,8 +160,8 @@ public class ServletAnalyse extends HttpServlet {
             /* PROCESS SPIDER ERRORS*/
             if (checklist.getSpiderSteps().size() != 0) {
                 analyseSpiderMt.start();
-//                requestsCount += ServiceAnalyseSpider.processSpiderChecklist(checklist, report, analyseRegression);
-
+                // Outdated - was used for one threaded app
+                // requestsCount += ServiceAnalyseSpiderMt.processSpiderChecklist(checklist, report, analyseRegression);
             }
 
 
@@ -170,7 +170,8 @@ public class ServletAnalyse extends HttpServlet {
             /* PROCESS BIRT ERRORS*/
             if (checklist.getBirtSteps().size() != 0) {
                 analyseBirtMt.start();
-//                requestsCount += ServiceAnalyseBirt.processBirtChecklist(checklist, report, analyseRegression);
+                // Outdated - was used for one threaded app
+                // requestsCount += ServiceAnalyseBirtMt.processBirtChecklist(checklist, report, analyseRegression);
 
             }
 
@@ -181,21 +182,14 @@ public class ServletAnalyse extends HttpServlet {
             }
 
 
+
+
             try {
                 analyseSpiderMt.join();
-                log.debug(String.format(
-                        "********************************* PROCESSING SPIDER of PON {} HAS FINISHED ******************"),
-                        report.getName());
-
                 analyseBirtMt.join();
-                log.debug(String.format(
-                        "****************************** PROCESSING BIRT of PON {} HAS FINISHED ******************"),
-                        report.getName());
-
                 analyseNdsMt.join();
-                log.debug(String.format(
-                        "****************************** PROCESSING NDS of PON {} HAS FINISHED ******************"),
-                        report.getName());
+
+
 
                 report.setSpiderSteps(((ServiceAnalyseSpiderMt) analyseSpiderMt).getSteps());
                 requestsCount += ((ServiceAnalyseSpiderMt) analyseSpiderMt).getRequestsCount();

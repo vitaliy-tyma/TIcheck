@@ -6,22 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-/**
- * Contains method to get data from Spider database
- * <p>
- * Data source: BIRT MySQL DB on requested Server:port and with credentials
- * <p>
- * Input data: the full name of the PON and iteration #
- * (comes from XML-file or from outer application/class)
- * Note: Market and region are not processed!
- * <p>
- * Transformation: toString and getHTML by template.
- * <p>
- * Output data: Birt entity
- * As an option - error list in string format (serialized by toString).
- * <p>
- * In case of exception returns text of error in SpiderDataClass.setJdbcError
- */
+
 @Slf4j
 public class DbConnectorBirt {
     private static Connection con;

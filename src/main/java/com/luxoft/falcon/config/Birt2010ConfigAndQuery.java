@@ -6,7 +6,7 @@ import lombok.Setter;
 
 /**
  * Entity/Data/POJO to connect to the BIRT Gen.2010
- * To be loaded from XML-file
+ * To be loaded from XML-file - Under development
  */
 //TODO Store all items in separate XML file and load it's content at start and on request.
 

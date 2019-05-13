@@ -16,7 +16,23 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-/* Is used to process checklist for SPIDER */
+
+/**
+ * Contains method to get data from SPIDER database
+ *
+ * Data source: Spider PostgreSQL DB on requested Server:port and with credentials
+ *
+ * Input data: the name of the PON and iteration #
+ * (comes from XML-file or from outer application/class via API)
+ * Note: Market and region are not processed!
+ *
+ * Transformation: toString and getHTML by template - NOT IMPLEMENTED
+ *
+ * Output data: returns Requests Count and updates local Report object passed in arguments
+ * As an option - error list in string format (serialized by toString) - NOT IMPLEMENTED
+ *
+ * In case of exception returns text of error in report.logOfErrors
+ */
 @Slf4j
 public class ServiceAnalyseSpiderMt extends Thread {
 
@@ -52,7 +68,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
     public int processSpiderChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
         requestsCount = 0;
-        log.debug("**** in ServiceAnalyseSpider.processSpiderChecklist() ****");
+        log.debug("**** in ServiceAnalyseSpiderMt.processSpiderChecklist() ****");
 
         try {
             con = DbConnectorSpider.connectDatabase(spiderConfigAndQuery);
@@ -88,6 +104,9 @@ public class ServiceAnalyseSpiderMt extends Thread {
             }
         }
 
+        log.debug(String.format(
+                "********************************* PROCESSING SPIDER of PON {} HAS BEEN FINISHED ******************"),
+                report.getName());
 
         return requestsCount;
     }

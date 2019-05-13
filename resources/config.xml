@@ -1,33 +1,151 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<TIcheck>
+<CONFIG>
+    <MAIN>
+        <PON_NAME_REQUEST>
+            pon_name
+        </PON_NAME_REQUEST>
+        <PON_ITERATION_REQUEST>
+            pon_iteration
+        </PON_ITERATION_REQUEST>
+        <USE_QUERY_LIKE_REQUEST>
+            use_query_like
+        </USE_QUERY_LIKE_REQUEST>
+        <CHECKLISTS_REQUEST>
+            checklists
+        </CHECKLISTS_REQUEST>
+        <CHECKLISTS_REGRESSION>
+            regression_check
+        </CHECKLISTS_REGRESSION>
+        <PON_NAME_PREV_REQUEST>
+            prev_pon_name
+        </PON_NAME_PREV_REQUEST>
+        <PON_ITERATION_PREV_REQUEST>
+            prev_pon_iteration
+        </PON_ITERATION_PREV_REQUEST>
+        <USE_QUERY_LIKE_PREV_REQUEST>
+            use_query_like_for_prev
+        </USE_QUERY_LIKE_PREV_REQUEST>
+        <QUERY_LIMIT>
+            limit
+        </QUERY_LIMIT>
 
-<Connect source = "spider">
-    <jdbcDriver>org.postgresql.Driver</jdbcDriver>
-    <jdbcUrl>jdbc:postgresql://himdlxspider01:5432/DBPROD</jdbcUrl>
-    <jdbcLogin>readonly</jdbcLogin>
-    <jdbcPassword>readonly</jdbcPassword>
-    <query>
-        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR
-        FROM spider_bmd.full_task_error_list ftel
-        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id
-        WHERE ftel.task LIKE ?
-        AND ftel.revision = ?
-        AND fcel.java_class_error = ?
-        ORDER BY Task, Revision, JAVA_CLASS_ERROR
-    </query>
-</Connect>
+        <STEP_NAME>
+            STEP
+        </STEP_NAME>
+        <SOURCE_NAME_SPIDER>
+            SPIDER
+        </SOURCE_NAME_SPIDER>
+        <SPIDER_TASK_COL_NAME>
+            Task
+        </SPIDER_TASK_COL_NAME>
+        <SPIDER_JAVA_CLASS_ERROR_COL_NAME>
+            JAVA_CLASS_ERROR
+        </SPIDER_JAVA_CLASS_ERROR_COL_NAME>
+        
+        <SOURCE_NAME_BIRT>
+            BIRT
+        </SOURCE_NAME_BIRT>
+        <BIRT_TASK_COL_NAME>
+            Task
+        </BIRT_TASK_COL_NAME>
+        <BIRT_TEST_COL_NAME>
+            TEST_NAME
+        </BIRT_TEST_COL_NAME>
+        <BIRT_TEST_RESULT_NAME>
+            TEST_RESULT
+        </BIRT_TEST_RESULT_NAME>
+        <SOURCE_NAME_NDS>
+            NDS
+        </SOURCE_NAME_NDS>
+    </MAIN>
 
-<Connect source = "birt">
-    <jdbcDriver>org.postgresql.Driver</jdbcDriver>
-    <jdbcUrl>jdbc:postgresql://localhost:5432/testdb</jdbcUrl>
-    <jdbcLogin>test</jdbcLogin>
-    <jdbcPassword>test</jdbcPassword>
-	<Query>
- SELECT *
- FROM test t
- WHERE t."Name" = ?
- OR t."Id" = ?
- AND t."Set" = ?
-	</Query>
+    <Connect source = "SPIDER">
+        <jdbcDriver>org.postgresql.Driver</jdbcDriver>
+        <jdbcUrl>jdbc:postgresql://himdlxspider01:5432/DBPROD</jdbcUrl>
+        <jdbcLogin>readonly</jdbcLogin>
+        <jdbcPassword>readonly</jdbcPassword>
+        <queryLike>
+             SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR
+             FROM spider_bmd.full_task_error_list ftel
+             JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id
+             WHERE ftel.task LIKE ?
+             AND ftel.revision = ?
+             AND fcel.java_class_error = ?
+             ORDER BY Task, Revision, JAVA_CLASS_ERROR\n
+             LIMIT ?";
+        </queryLike>
+        <queryAccurate>
+             SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR
+             FROM spider_bmd.full_task_error_list ftel
+             JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id
+             WHERE ftel.task = ?
+             AND ftel.revision = ?
+             AND fcel.java_class_error = ?
+             ORDER BY Task, Revision, JAVA_CLASS_ERROR\n
+             LIMIT ?
+        </queryAccurate>
+        </Connect>
+
+        <Connect source = "BIRT2010">
+        <jdbcDriver>com.mysql.jdbc.Driver</jdbcDriver>
+        <jdbcUrl>jdbc:mysql://himdlxbirt01:3306/ndsreport</jdbcUrl>
+        <jdbcLogin>readonly</jdbcLogin>
+        <jdbcPassword>readonly</jdbcPassword>
+	    <queryLike>
+            SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult
+            TEST_RESULT FROM ndsreport.test t
+            JOIN ndsreport.testsuite s ON s.id = t.testsuite_id
+            JOIN ndsreport.testresult tr ON tr.id = t.testresult_id
+            JOIN ndsreport.testdescription td ON td.id = t.testdescription_id
+            WHERE s.testsuitename LIKE ?
+            AND td.name = ?
+            ORDER BY TASK, TEST_NAME\n
+            LIMIT ?
+	    </queryLike>
+        <queryAccurate>
+            SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT
+            FROM ndsreport.test t
+            JOIN ndsreport.testsuite s ON s.id = t.testsuite_id
+            JOIN ndsreport.testresult tr ON tr.id = t.testresult_id
+            JOIN ndsreport.testdescription td ON td.id = t.testdescription_id
+            WHERE s.testsuitename = ?
+            AND td.name = ?
+            ORDER BY TASK, TEST_NAME\n
+            LIMIT ?
+        </queryAccurate>
+        <queryCheckGeneration>
+            SELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?
+        </queryCheckGeneration>
     </Connect>
-</TIcheck>
+
+
+    <Connect source = "BIRT2020">
+        <jdbcDriver>com.mysql.jdbc.Driver</jdbcDriver>
+        <jdbcUrl>jdbc:mysql://himdlxbirt01:3306/ndsreport_new</jdbcUrl>
+        <jdbcLogin>readonly</jdbcLogin>
+        <jdbcPassword>readonly</jdbcPassword>
+        <queryLike>
+            SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT
+            FROM ndsreport_new.tests_results tr
+            JOIN ndsreport_new.suites s ON s.id = tr.suite_id
+            JOIN ndsreport_new.tests t ON t.id = tr.test_id
+            WHERE s.name LIKE ?
+            AND t.name = ?
+            ORDER BY TASK, TEST_NAME\n
+            LIMIT ?
+        </queryLike>
+        <queryAccurate>
+            SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT
+            FROM ndsreport_new.tests_results tr
+            JOIN ndsreport_new.suites s ON s.id = tr.suite_id
+            JOIN ndsreport_new.tests t ON t.id = tr.test_id
+            WHERE s.name = ?
+            AND t.name = ?
+            ORDER BY TASK, TEST_NAME\n
+            LIMIT ?
+        </queryAccurate>
+        <queryCheckGeneration>
+            SELECT * FROM ndsreport_new.suites WHERE testsuitename LIKE ? LIMIT ?
+        </queryCheckGeneration>
+    </Connect>
+</CONFIG>

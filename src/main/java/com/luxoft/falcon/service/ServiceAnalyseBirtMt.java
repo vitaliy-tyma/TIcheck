@@ -17,8 +17,22 @@ import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
 
+
 /**
- * Is used to process TI checklist for BIRT
+ * Contains method to get data from BIRT database
+ *
+ * Data source: BIRT MySQL DB on requested Server:port and with credentials
+ *
+ * Input data: the name of the PON and iteration #
+ * (comes from XML-file or from outer application/class via API)
+ * Note: Market and region are not processed!
+ *
+ * Transformation: toString and getHTML by template - NOT IMPLEMENTED
+ *
+ * Output data: returns Requests Count and updates local Report object passed in arguments
+ * As an option - error list in string format (serialized by toString) - NOT IMPLEMENTED
+ *
+ * In case of exception returns text of error in report.logOfErrors
  */
 @Slf4j
 public class ServiceAnalyseBirtMt extends Thread {
@@ -61,7 +75,7 @@ public class ServiceAnalyseBirtMt extends Thread {
 
     public int processBirtChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
         requestsCount = 0;
-        log.debug("**** in ServiceAnalyseBirt.processBirt() ****");
+        log.debug("**** in ServiceAnalyseBirtMt.processBirt() ****");
 
         try {
             /* CHECK GENERATION FIRST */
@@ -100,19 +114,21 @@ public class ServiceAnalyseBirtMt extends Thread {
             log.error(e.getMessage());
             report.addLogOfErrors(e.getMessage());
         } finally {
-            //TODO Check is it possible to close resultSet, pstmt and con for BIRT not loosing data
-            /*Breaks BIRT processing*/
-//            if (resultSet != null) {
-//                resultSet = null;
-//            }
-//            if (pstmt != null) {
-//                pstmt = null;
-//            }
-//            if (con != null) {
-//                con = null;
-//            }
+
+            if (resultSet != null) {
+                resultSet = null;
+            }
+            if (pstmt != null) {
+                pstmt = null;
+            }
+            if (con != null) {
+                con = null;
+            }
         }
 
+        log.debug(String.format(
+                "****************************** PROCESSING BIRT of PON {} HAS BEEN FINISHED ******************"),
+                report.getName());
 
         return requestsCount;
     }
