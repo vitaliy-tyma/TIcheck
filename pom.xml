@@ -29,6 +29,7 @@
       </dependency>
 
       <!-- Dependencies for SQLite -->
+      <!--
       <dependency>
           <groupId>org.xerial</groupId>
           <artifactId>sqlite-jdbc</artifactId>
@@ -38,6 +39,12 @@
           <groupId>net.kemitix</groupId>
           <artifactId>sqlite-dialect</artifactId>
           <version>0.1.0</version>
+      </dependency>
+-->
+      <dependency>
+          <groupId>de.berlios.datascript</groupId>
+          <artifactId>sqlite</artifactId>
+          <version>3.16.2</version>
       </dependency>
 
       <dependency>
@@ -83,6 +90,19 @@
       </dependency>
 
   </dependencies>
+
+
+
+    <repositories>
+        <repository>
+            <id>polaris-releases</id>
+            <url>http://polaris-suse.harman.com:8081/artifactory/polaris-releases</url>
+        </repository>
+        <repository>
+            <id>remote-repos</id>
+            <url>http://polaris-suse.harman.com:8081/artifactory/remote-repos</url>
+        </repository>
+    </repositories>
 
   <build>
     <finalName>TIcheck</finalName>

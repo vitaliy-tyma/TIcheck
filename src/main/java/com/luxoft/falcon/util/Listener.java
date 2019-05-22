@@ -15,7 +15,7 @@ public class Listener implements javax.servlet.ServletContextListener {
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         readMainConfigFromFile(MainConfig.getCONFIG_PATH_AND_NAME());
 
-        log.info("!!!!!!!!!!!!!! MainConfig has been read !!!!!!!!!!!!!!");
+        log.info("************************ MainConfig has been read ************************");
     }
 
     @Override

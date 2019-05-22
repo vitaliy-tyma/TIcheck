@@ -3,6 +3,7 @@ package com.luxoft.falcon.util;
 import com.luxoft.falcon.config.*;
 import com.luxoft.falcon.config.inter.ConfigAndQueryInterface;
 import com.luxoft.falcon.model.Checklist;
+import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -15,7 +16,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import javax.xml.parsers.*;
 import java.io.*;
 
-
+@Slf4j
 public class ReadXML {
     private static MainConfig mainConfig = MainConfig.getInstance();
     private static SpiderConfigAndQuery spiderConfigAndQuery = SpiderConfigAndQuery.getInstance();
@@ -156,8 +157,10 @@ public class ReadXML {
 
             nList = doc.getElementsByTagName(BIRT2010);
             fillConfig(nList, birt2010ConfigAndQuery);
+
             nList = doc.getElementsByTagName(BIRT2020);
-            fillConfig(nList, birt2010ConfigAndQuery);
+            fillConfig(nList, birt2020ConfigAndQuery);
+
             nList = doc.getElementsByTagName(NDS);
             fillConfig(nList, ndsConfigAndQuery);
 
@@ -183,118 +186,130 @@ public class ReadXML {
         } catch (
                 Exception e) {
             /* Set all values as default*/
-            mainConfig.setPON_NAME_REQUEST("pon_name");
-            mainConfig.setPON_ITERATION_REQUEST("pon_iteration");
-            mainConfig.setUSE_QUERY_LIKE_REQUEST("use_query_like");
-            mainConfig.setCHECKLISTS_REQUEST("checklists");
-            mainConfig.setCHECKLISTS_REGRESSION("regression_check");
-            mainConfig.setPON_NAME_PREV_REQUEST("prev_pon_name");
-            mainConfig.setPON_ITERATION_PREV_REQUEST("prev_pon_iteration");
-            mainConfig.setUSE_QUERY_LIKE_PREV_REQUEST("use_query_like_for_prev");
-            mainConfig.setQUERY_LIMIT("limit");
-            mainConfig.setSTEP_NAME("STEP");
-            mainConfig.setSOURCE_NAME_SPIDER("SPIDER");
-            mainConfig.setSPIDER_TASK_COL_NAME("Task");
-            mainConfig.setSPIDER_JAVA_CLASS_ERROR_COL_NAME("JAVA_CLASS_ERROR");
-            mainConfig.setSOURCE_NAME_BIRT("BIRT");
-            mainConfig.setBIRT_TASK_COL_NAME("Task");
-            mainConfig.setBIRT_TEST_COL_NAME("TEST_NAME");
-            mainConfig.setBIRT_TEST_RESULT_NAME("TEST_RESULT");
-            mainConfig.setSOURCE_NAME_NDS("NDS");
-
-            spiderConfigAndQuery.setJdbcDriver("org.postgresql.Driver");
-            spiderConfigAndQuery.setJdbcUrl("jdbc:postgresql://himdlxspider01:5432/DBPROD");
-            spiderConfigAndQuery.setJdbcLogin("readonly");
-            spiderConfigAndQuery.setJdbcPassword("readonly");
-            spiderConfigAndQuery.setQueryLike(" \n" +
-                    "        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR\n" +
-                    "        FROM spider_bmd.full_task_error_list ftel\n" +
-                    "        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id\n" +
-                    "        WHERE ftel.task LIKE ?\n" +
-                    "        AND ftel.revision = ?\n" +
-                    "        AND fcel.java_class_error = ?\n" +
-                    "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
-                    "        LIMIT ?");
-            spiderConfigAndQuery.setQueryAccurate(" \n" +
-                    "        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR\n" +
-                    "        FROM spider_bmd.full_task_error_list ftel\n" +
-                    "        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id\n" +
-                    "        WHERE ftel.task = ?\n" +
-                    "        AND ftel.revision = ?\n" +
-                    "        AND fcel.java_class_error = ?\n" +
-                    "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
-                    "        LIMIT ?");
-
-            birt2010ConfigAndQuery.setJdbcDriver("com.mysql.jdbc.Driver");
-            birt2010ConfigAndQuery.setJdbcUrl("jdbc:mysql://himdlxbirt01:3306/ndsreport"); //For 2010
-            birt2010ConfigAndQuery.setJdbcLogin("readonly");
-            birt2010ConfigAndQuery.setJdbcPassword("readonly");
-            birt2010ConfigAndQuery.setQueryLike(" \n" +
-            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult \n" +
-            " TEST_RESULT FROM ndsreport.test t\n" +
-            " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
-            " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
-            " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
-            " WHERE s.testsuitename LIKE ?\n" +//ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
-            " AND td.name = ?\n" +
-//TODO Clarify with the exitcode parameter
-//          " AND tr.exitcode = 0\n" +
-            " ORDER BY TASK, TEST_NAME \n" +
-            " LIMIT ?");
-            birt2010ConfigAndQuery.setQueryAccurate(" \n" +
-            " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT \n" +
-            " FROM ndsreport.test t\n" +
-            " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
-            " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
-            " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
-            " WHERE s.testsuitename = ?\n" +
-            " AND td.name = ?\n" +
-//TODO Clarify with the exitcode parameter
-//          " AND tr.exitcode = 0\n" +
-            " ORDER BY TASK, TEST_NAME \n" +
-            " LIMIT ?");
-
-            birt2020ConfigAndQuery.setJdbcDriver("com.mysql.jdbc.Driver");
-            birt2020ConfigAndQuery.setJdbcUrl("jdbc:mysql://himdlxbirt01:3306/ndsreport_new"); //For 2010
-            birt2020ConfigAndQuery.setJdbcLogin("readonly");
-            birt2020ConfigAndQuery.setJdbcPassword("readonly");
-            birt2020ConfigAndQuery.setQueryLike(" \n" +
-            " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT \n" +
-            " FROM ndsreport_new.tests_results tr\n" +
-            " JOIN ndsreport_new.suites s ON s.id = tr.suite_id\n" +
-            " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
-            " WHERE s.name LIKE ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
-            " AND t.name = ?\n" +
-//TODO Clarify with the exit_code parameter
-//          " AND tr.exit_code = 0\n" +
-            " ORDER BY TASK, TEST_NAME \n" +
-            " LIMIT ?");
-            birt2020ConfigAndQuery.setQueryAccurate(" \n" +
-            " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT \n" +
-            " FROM ndsreport_new.tests_results tr\n" +
-            " JOIN ndsreport_new.suites s ON s.id = tr.suite_id\n" +
-            " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
-            " WHERE s.name = ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
-            " AND t.name = ?\n" +
-//TODO Clarify with the exit_code parameter
-//          " AND tr.exit_code = 0\n" +
-            " ORDER BY TASK, TEST_NAME \n" +
-            " LIMIT ?");
-
-
-            birtQueryToCheckGeneration.setG2010(
-                    "SELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?");
-            birtQueryToCheckGeneration.setG2020(
-                    "SELECT * FROM ndsreport_new.suites WHERE name LIKE ? LIMIT ?");
+            setDefaultValuesBecauseOfException();
+            log.error("Read XML failed with the error " + e.getMessage());
 
 
 
 
 
-            //NDS defaults are not entered yet!!!!!!!!!!!!!
+
+
         }
     }
 
+
+
+
+    private static void setDefaultValuesBecauseOfException() {
+
+        mainConfig.setPON_NAME_REQUEST("pon_name");
+        mainConfig.setPON_ITERATION_REQUEST("pon_iteration");
+        mainConfig.setUSE_QUERY_LIKE_REQUEST("use_query_like");
+        mainConfig.setCHECKLISTS_REQUEST("checklists");
+        mainConfig.setCHECKLISTS_REGRESSION("regression_check");
+        mainConfig.setPON_NAME_PREV_REQUEST("prev_pon_name");
+        mainConfig.setPON_ITERATION_PREV_REQUEST("prev_pon_iteration");
+        mainConfig.setUSE_QUERY_LIKE_PREV_REQUEST("use_query_like_for_prev");
+        mainConfig.setQUERY_LIMIT("limit");
+        mainConfig.setSTEP_NAME("STEP");
+        mainConfig.setSOURCE_NAME_SPIDER("SPIDER");
+        mainConfig.setSPIDER_TASK_COL_NAME("Task");
+        mainConfig.setSPIDER_JAVA_CLASS_ERROR_COL_NAME("JAVA_CLASS_ERROR");
+        mainConfig.setSOURCE_NAME_BIRT("BIRT");
+        mainConfig.setBIRT_TASK_COL_NAME("Task");
+        mainConfig.setBIRT_TEST_COL_NAME("TEST_NAME");
+        mainConfig.setBIRT_TEST_RESULT_NAME("TEST_RESULT");
+        mainConfig.setSOURCE_NAME_NDS("NDS");
+
+        spiderConfigAndQuery.setJdbcDriver("org.postgresql.Driver");
+        spiderConfigAndQuery.setJdbcUrl("jdbc:postgresql://himdlxspider01:5432/DBPROD");
+        spiderConfigAndQuery.setJdbcLogin("readonly");
+        spiderConfigAndQuery.setJdbcPassword("readonly");
+        spiderConfigAndQuery.setQueryLike(" \n" +
+                "        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR\n" +
+                "        FROM spider_bmd.full_task_error_list ftel\n" +
+                "        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id\n" +
+                "        WHERE ftel.task LIKE ?\n" +
+                "        AND ftel.revision = ?\n" +
+                "        AND fcel.java_class_error = ?\n" +
+                "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
+                "        LIMIT ?");
+        spiderConfigAndQuery.setQueryAccurate(" \n" +
+                "        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR\n" +
+                "        FROM spider_bmd.full_task_error_list ftel\n" +
+                "        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id\n" +
+                "        WHERE ftel.task = ?\n" +
+                "        AND ftel.revision = ?\n" +
+                "        AND fcel.java_class_error = ?\n" +
+                "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
+                "        LIMIT ?");
+
+        birt2010ConfigAndQuery.setJdbcDriver("com.mysql.jdbc.Driver");
+        birt2010ConfigAndQuery.setJdbcUrl("jdbc:mysql://himdlxbirt01:3306/ndsreport"); //For 2010
+        birt2010ConfigAndQuery.setJdbcLogin("readonly");
+        birt2010ConfigAndQuery.setJdbcPassword("readonly");
+        birt2010ConfigAndQuery.setQueryLike(" \n" +
+                " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult \n" +
+                " TEST_RESULT FROM ndsreport.test t\n" +
+                " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
+                " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
+                " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
+                " WHERE s.testsuitename LIKE ?\n" +//ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
+                " AND td.name = ?\n" +
+//TODO Clarify with the exitcode parameter
+//          " AND tr.exitcode = 0\n" +
+                " ORDER BY TASK, TEST_NAME \n" +
+                " LIMIT ?");
+        birt2010ConfigAndQuery.setQueryAccurate(" \n" +
+                " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT \n" +
+                " FROM ndsreport.test t\n" +
+                " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
+                " JOIN ndsreport.testresult tr ON tr.id = t.testresult_id\n" +
+                " JOIN ndsreport.testdescription td ON td.id = t.testdescription_id\n" +
+                " WHERE s.testsuitename = ?\n" +
+                " AND td.name = ?\n" +
+//TODO Clarify with the exitcode parameter
+//          " AND tr.exitcode = 0\n" +
+                " ORDER BY TASK, TEST_NAME \n" +
+                " LIMIT ?");
+
+        birt2020ConfigAndQuery.setJdbcDriver("com.mysql.jdbc.Driver");
+        birt2020ConfigAndQuery.setJdbcUrl("jdbc:mysql://himdlxbirt01:3306/ndsreport_new"); //For 2010
+        birt2020ConfigAndQuery.setJdbcLogin("readonly");
+        birt2020ConfigAndQuery.setJdbcPassword("readonly");
+        birt2020ConfigAndQuery.setQueryLike(" \n" +
+                " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT \n" +
+                " FROM ndsreport_new.tests_results tr\n" +
+                " JOIN ndsreport_new.suites s ON s.id = tr.suite_id\n" +
+                " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
+                " WHERE s.name LIKE ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
+                " AND t.name = ?\n" +
+//TODO Clarify with the exit_code parameter
+//          " AND tr.exit_code = 0\n" +
+                " ORDER BY TASK, TEST_NAME \n" +
+                " LIMIT ?");
+        birt2020ConfigAndQuery.setQueryAccurate(" \n" +
+                " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT \n" +
+                " FROM ndsreport_new.tests_results tr\n" +
+                " JOIN ndsreport_new.suites s ON s.id = tr.suite_id\n" +
+                " JOIN ndsreport_new.tests t ON t.id = tr.test_id\n" +
+                " WHERE s.name = ?\n" + //ITERATION/REVISION IS THE LAST SYMBOL OF NAME!!!!
+                " AND t.name = ?\n" +
+//TODO Clarify with the exit_code parameter
+//          " AND tr.exit_code = 0\n" +
+                " ORDER BY TASK, TEST_NAME \n" +
+                " LIMIT ?");
+
+
+        birtQueryToCheckGeneration.setG2010(
+                "SELECT * FROM ndsreport.testsuite WHERE testsuitename LIKE ? LIMIT ?");
+        birtQueryToCheckGeneration.setG2020(
+                "SELECT * FROM ndsreport_new.suites WHERE name LIKE ? LIMIT ?");
+
+
+        //NDS defaults are not entered yet!!!!!!!!!!!!!
+    }
 
 
     private static void fillConfig(NodeList nList, ConfigAndQueryInterface configClass){

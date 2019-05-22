@@ -10,12 +10,13 @@ import java.util.List;
 
 
 /** Report of analysis */
-@Data
 public class Report {
 
-//    @Setter //Works under @Data
+    @Getter @Setter
     private List<ChecklistEntry> spiderSteps = new LinkedList<>();
+    @Getter @Setter
     private List<ChecklistEntry> birtSteps = new LinkedList<>();
+    @Getter @Setter
     private List<ChecklistEntry> ndsSteps = new LinkedList<>();
 
 

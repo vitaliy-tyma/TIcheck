@@ -25,12 +25,15 @@ import java.util.List;
 
 //FIXME Refactor methods to return only objects with data
 // code to show objects it must be separated
+// refactor project with MVC
+// check input with case of letters
 
+
+//TODO - Testing section is not used!!!
+// Z:\Test_DB\release-7.2_MAN\TBAA\001\iDb
 @Slf4j
 public class ServletAnalyse extends HttpServlet {
     private static MainConfig mainConfig = MainConfig.getInstance();
-    private static Checklist checklist;
-    private static Report report = new Report();
     private static int requestsCount = 0;
     private static boolean analyseRegression = false;
 
@@ -48,6 +51,8 @@ public class ServletAnalyse extends HttpServlet {
 
         log.info("*********************** NEW REQUEST STARTED ** ServletAnalyse.doGet() ****************************************");
         StringBuilder result = new StringBuilder();
+        Checklist checklist;
+        Report report = new Report();
 
         final String ponName =
                 httpServletRequest.getParameter(mainConfig.getPON_NAME_REQUEST());
@@ -93,7 +98,9 @@ public class ServletAnalyse extends HttpServlet {
         log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
         try {
 
-            // Load checklist by it's name - to be developed later
+//TODO - Load all checklist at the start (or on special request) and
+// only choose the appropriate from the memory at this point
+// to be developed later
             checklist = ReadXML.readChecklistFromFile(checklistRequestName);
 
 
@@ -146,16 +153,19 @@ public class ServletAnalyse extends HttpServlet {
                 }
             }
 
-            /* Choose only one mode - SingleThread is for debug!!!*/
+            /* Choose the mode;
+             - SingleThread is for debug!!!
+             - MultithreadedMode - is for Multithreading (but there is no acceleration detected)*/
             boolean debugMode = true;
             if (debugMode) {
-                startSingleThreadedMode();
+                startSingleThreadedMode(checklist, report, analyseRegression);
             } else {
-                startMultithreadedMode(); //For example - may be used for very big requests!!
+                //Made just as an example - may be useful for very big requests!!
+                startMultithreadedMode(checklist, report, analyseRegression);
             }
 
 
-            log.info("****************************************** CHECKLIST PROCESSING IS FINISHED *****************************************");
+            log.info("****************************************** CHECKLIST PROCESSING HAS FINISHED *****************************************");
 
             /*calculate statistics - time and requests*/
             long end = System.currentTimeMillis();
@@ -179,6 +189,9 @@ public class ServletAnalyse extends HttpServlet {
             result.append(getBodyLastPart());
 
 
+
+
+
             /* Error handling in case of input parameters problems*/
         } catch (Exception e) {
             report.addLogOfErrors(e.getMessage());
@@ -186,73 +199,62 @@ public class ServletAnalyse extends HttpServlet {
             result.append(report.getLogOfErrors());
         }
 
-
+        /* Reset all variables to be ready for the next cycle */
         analyseRegression = false;
+
         /* Send reply after analysis */
         httpServletResponse.getWriter().print(result.toString());
     }
 
 
     // Use one thread to process different data sources - useful for debug!!!
-    private void startSingleThreadedMode() {
-        ServiceAnalyseSpiderMt analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
-        ServiceAnalyseBirtMt analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
-        ServiceAnalyseNdsMt analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
+    private void startSingleThreadedMode(Checklist checklist, Report report, boolean analyseRegression) {
 
         /* PROCESS SPIDER ERRORS*/
         if (checklist.getSpiderSteps().size() != 0) {
+            ServiceAnalyseSpiderMt analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
             requestsCount += analyseSpiderMt.processSpiderChecklist(checklist, report, analyseRegression);
         }
         /* PROCESS BIRT ERRORS*/
         if (checklist.getBirtSteps().size() != 0) {
+            ServiceAnalyseBirtMt analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
             requestsCount += analyseBirtMt.processBirtChecklist(checklist, report, analyseRegression);
         }
         /* PROCESS NDS ERRORS*/
         if (checklist.getNdsSteps().size() != 0) {
+            ServiceAnalyseNdsMt analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
             requestsCount += analyseNdsMt.processNdsChecklist(checklist, report, analyseRegression);
         }
-
     }
 
 
     // Use several threads to process different data sources
-    private static void startMultithreadedMode() {
-
-
-        Thread analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
-        Thread analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
-        Thread analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
-
-        /* PROCESS SPIDER ERRORS*/
-        if (checklist.getSpiderSteps().size() != 0) {
-            analyseSpiderMt.start();
-            // Use for one threaded mode
-            // requestsCount += ServiceAnalyseSpiderMt.processSpiderChecklist(checklist, report, analyseRegression);
-        }
-
-
-
-
-        /* PROCESS BIRT ERRORS*/
-        if (checklist.getBirtSteps().size() != 0) {
-            analyseBirtMt.start();
-            // Use for one threaded mode
-            // requestsCount += ServiceAnalyseBirtMt.processBirtChecklist(checklist, report, analyseRegression);
-
-        }
-
-
-        /* PROCESS NDS ERRORS*/
-        if (checklist.getNdsSteps().size() != 0) {
-            analyseNdsMt.start();
-        }
-
+    private static void startMultithreadedMode(Checklist checklist, Report report, boolean analyseRegression) {
 
         try {
+
+            Thread analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
+            Thread analyseBirtMt = new ServiceAnalyseBirtMt(checklist, report, analyseRegression);
+            Thread analyseNdsMt = new ServiceAnalyseNdsMt(checklist, report, analyseRegression);
+
+            /* PROCESS SPIDER ERRORS*/
+            if (checklist.getSpiderSteps().size() != 0) {
+                analyseSpiderMt.start();
+            }
+
+            /* PROCESS BIRT ERRORS*/
+            if (checklist.getBirtSteps().size() != 0) {
+                analyseBirtMt.start();
+            }
+
+            /* PROCESS NDS ERRORS*/
+            if (checklist.getNdsSteps().size() != 0) {
+                analyseNdsMt.start();
+            }
+
             analyseSpiderMt.join();
             analyseBirtMt.join();
             analyseNdsMt.join();
-
 
             report.setSpiderSteps(((ServiceAnalyseSpiderMt) analyseSpiderMt).getSteps());
             requestsCount += ((ServiceAnalyseSpiderMt) analyseSpiderMt).getRequestsCount();
@@ -265,7 +267,6 @@ public class ServletAnalyse extends HttpServlet {
         } catch (Exception e) {
             report.addLogOfErrors(e.getMessage());
         }
-
     }
 
 
@@ -273,7 +274,6 @@ public class ServletAnalyse extends HttpServlet {
     private String getBodyFirstPart(String checklistRequestName, Report report, boolean analyseRegression) {
 
         StringBuilder result = new StringBuilder();
-
 
         result.append(
                 String.format("<p><h3>Automated <u>%s</u> checklist analysis results for the request:</h3>\n",
@@ -304,19 +304,54 @@ public class ServletAnalyse extends HttpServlet {
             result.append("</tr>\n");
         }
 
-        result.append("<tr><td colspan = 5 align = center>");
+//        result.append("<object type=\"text/html\" data=\"index.jsp\"></object>\n"); //works but in reduced window
+//        result.append("<object type=\"text/html\" data=\"index.jsp\" style=\"width:100%; height: 50%\"></object>\n"); //works well but calls new requests inside of the new frame
+// And not possible to set parameters!
+//The form must be implemented inside of the page!!!
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+//        result.append("\n\n<div id=\"includedContent\"></div>\n\n"); //not work with jQuery - need to be corrected
+//        result.append("<link rel=\"import\" href=\"index.jsp\">\n"); //doesn't work
+//        result.append("\n\n<iframe src=\"index.jsp\" frameborder=\"0\"></iframe>\n\n");//works, nut iFrame is outdated
+
+
+//doesn't work
+//        result.append("\n\n<div id =\"content\" ></div>");
+//        result.append("\n<script>");
+//        result.append("\nfunction load_home(){");
+//        result.append("\ndocument.getElementById(\"content\").innerHTML='<object type=\"text/html\" data=\"index.jsp\" style=\"width:100%; height: 100%\";></object>';");
+//        result.append("\n}");
+//        result.append("\n</script>");
+
+
+        /* Show summary result */
+        result.append("<tr><td colspan = 5 align = center>");
         if (checkReportForErrors(report.getSpiderSteps()) ||
                 checkReportForErrors(report.getBirtSteps()) ||
                 checkReportForErrors(report.getNdsSteps())) {
-            result.append("<b><font color = red>Summary: Checklist hasn't passed</font></b>");
+            result.append("<b><font color = red>Summary: Checklist has failed (see the list of failed tests below)</font></b>");
         } else {
-            result.append("<b><font color = green>Summary: Checklist has passed</font></b>");
+            result.append("<b><font color = green>Summary: Checklist has passed (no failed tests have been detected)</font></b>");
         }
+        result.append("<br/>");
+
+        /* Show time, requests count and date time */
+        result.append("<br/><div align = left>");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        Date date = new Date();
+        result.append(
+                String.format(
+                        "Elapsed: %s seconds; Requests Count: %s; Request Time is: %s",
+                        report.getElapsedTime(),
+                        report.getRequestsCount(),
+                        dateFormat.format(date)));
+        result.append("</div>");
+
+
         /*Show error log if it exists*/
         if (report.getLogOfErrors().size() != 0) {
             result.append("<br/><div align = left>");
-            result.append("<details><summary><u><b>See log of errors </b></u></summary>\n");
+            result.append("<details><summary><u><b>See log of errors while checklist analysis</b></u></summary>\n");
             result.append(
                     String.format(
                             "<div><p><font color=red>%s</font></p></div>\n",
@@ -325,20 +360,7 @@ public class ServletAnalyse extends HttpServlet {
             result.append("</div>");
         }
 
-        /*Show time, requests count and date time*/
-        result.append("<br/><div align = left>");
 
-        DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        Date date = new Date();
-
-
-        result.append(
-                String.format(
-                        "Elapsed: %s seconds; Requests Count: %s; Request Time is: %s",
-                        report.getElapsedTime(),
-                        report.getRequestsCount(),
-                        dateFormat.format(date)));
-        result.append("</div>");
         result.append("</td></tr>");
         result.append("</table>\n");
         result.append("<br/>\n");
@@ -357,15 +379,16 @@ public class ServletAnalyse extends HttpServlet {
         return false;
     }
 
+    /* Display the first part of the body*/
+    private String getBodyStartPart() {
+        return "\n\n<body >\n<div align=center>\n";
+        //onload="load_home()"
+    }
+
 
     /* Display the last part of the body*/
     private String getBodyLastPart() {
         return "</div>\n</body>\n";
-    }
-
-    /* Display the last part of the body*/
-    private String getBodyStartPart() {
-        return "<body>\n<div align=center>\n";
     }
 
 
@@ -373,10 +396,26 @@ public class ServletAnalyse extends HttpServlet {
     private static String getHeader() {
 
         String header = "<head>\n" +
+
+//                "\n" +
+//                "<script src = \"jquery.js\"></script >\n" +
+//                "<script >\n" +
+//                "$(function() {\n" +
+//                "$(\"#includedContent\").load(\"index.jsp\");\n" +
+//                "});\n" +
+//                "</script >\n" +
+
+
+                "\n" +
                 "<style>\n" +
-//TODO Locate CSS in file - place is not defined
-                //"<link href=\"/lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">" +
-//Cannot locate CSS within IDE (must be checked in TOMCAT)
+//TODO Locate CSS in separate file - it is not defined yet
+// Cannot locate CSS within IDE (must be checked in TOMCAT)
+//                       "<link href=\"lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
+//                       "<link href=\"/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
+//                       "<link href=\"css/tableRowsColor.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
+//                "<%@include file=\"lib/css/tooltip.css\"%>\n" +
+//                "<%@include file=\"lib/css/tableRowsColor.css\"%>\n" +
+
 
                 "/* Tooltip container */\n" +
 
@@ -444,7 +483,13 @@ public class ServletAnalyse extends HttpServlet {
                 "  visibility: visible;\n" +
                 "}" +
 
-                "</style>" +
+                "\n" +
+                "table tr#ROW_0  {background-color:; color:;}\n" +
+                "table tr#ROW_WHITE  {background-color:white;}\n" +
+                "table tr#ROW_WHITE2  {background-color:white; color:black;}\n" +
+                "table tr#ROW_GRAY  {background-color:#e6e6e6; color:black;}\n" +
+
+                "</style>\n" +
                 "</head>\n";
         return header;
     }

@@ -19,7 +19,7 @@
             anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest
         </step>
         <step>
-            anaconda.inds.ti.TmcLocationExporterTest.tmcNameTableTest
+            anaconda.nds.ti.TmcLocationExporterTest.tmcNameTableTest
         </step>
         <step>
             anaconda.inds.ti.TmcLocationNameTest.locationNameCountTest

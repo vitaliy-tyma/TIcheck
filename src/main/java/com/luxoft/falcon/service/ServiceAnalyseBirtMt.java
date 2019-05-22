@@ -81,13 +81,15 @@ public class ServiceAnalyseBirtMt extends Thread {
         log.debug("**** in ServiceAnalyseBirtMt.processBirt() ****");
 
         try {
-            /* CHECK GENERATION FIRST */
+
             con = DbConnectorBirt.connectDatabase(
                     birt2010ConfigAndQuery.getJdbcUrl(),
                     birt2010ConfigAndQuery.getJdbcLogin(),
                     birt2010ConfigAndQuery.getJdbcPassword());
-            /* Check the generation*/
+
+            /* CHECK GENERATION */
             isGenDefined = checkGeneration(report);
+            requestsCount += 2;
 
             List<ChecklistEntry> fillBirtErrors;// = new LinkedList<>();
 
@@ -114,7 +116,7 @@ public class ServiceAnalyseBirtMt extends Thread {
                                     birtTestname,
                                     Boolean.TRUE,
                                     Boolean.FALSE,
-                                    "",
+                                    "Generation had not been detected",
                                     report.getName(),
                                     "Not found"));
                 }
@@ -217,7 +219,6 @@ public class ServiceAnalyseBirtMt extends Thread {
                 requestsCount++;
 
                 log.debug(String.format("************************* Birt query has been executed (%s)", fullQuery));
-
                 /*If response is empty = store only one item for the step with NOT FOUND description*/
                 if (!resultSet.isBeforeFirst()) {
                     fillBirtErrors.add(
@@ -232,7 +233,8 @@ public class ServiceAnalyseBirtMt extends Thread {
 
 
 
-                    /*Check is it possible to aggregate all rows to one with simplified name of PON*/
+                    /* Check is it possible to aggregate all rows to one
+                     * with simplified name of PON*/
                     Boolean aggregateBirtSteps = Boolean.TRUE;
                     String resultOfCheckFirstRow = null;
                     Boolean firstRow = Boolean.TRUE;
@@ -315,7 +317,7 @@ public class ServiceAnalyseBirtMt extends Thread {
 
 
             if (entry.getResultOfCheckIsNOK()) {
-
+//TODO Doesn't work if name of PON is with wronge case of letters. Must use report.getName().toUpperCase() to avoid!
                 String[] restOfOriginalNameArray = entry.getFullNameOfPon().split(report.getName(), 2);
                 String nameToCheck;
                 try {
@@ -359,19 +361,27 @@ public class ServiceAnalyseBirtMt extends Thread {
                                 fullQuery));
 
                 if (!resultSet.isBeforeFirst()) {
-                    entry.setIsRegression("Yes");
-                    entry.setFullNameOfRegressionPon(nameToCheck);
+
+                    entry.setIsRegression("Not found");
+                    entry.setFullNameOfRegressionPon(nameToCheck + " [is not found]");
                 }
 
                 while (resultSet.next()) {
                     String resultPrevTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
                     String resultOriginalTest = entry.getResultOfCheckText();
 
+                    //FixME - provide logic that analyses case that in previous PON test was skipped!
                     if (resultOriginalTest.equals(resultPrevTest)) {
                         entry.setIsRegression("No");
                     } else if (resultOriginalTest.toUpperCase().equals("NOK") && resultPrevTest.toUpperCase().equals("OK")) {
                         entry.setIsRegression("Yes");
                         entry.setFullNameOfRegressionPon(nameToCheck);
+                    } else {
+                        entry.setIsRegression("Yes (see comment)");
+                        entry.setFullNameOfRegressionPon(
+                                String.format(" {} [ with result of prev test {}]",
+                                        nameToCheck,
+                                        resultPrevTest));
                     }
                 }
             }

@@ -5,15 +5,15 @@ import com.luxoft.falcon.config.NdsConfigAndQuery;
 import com.luxoft.falcon.config.SpiderConfigAndQuery;
 import com.luxoft.falcon.dao.DbConnectorNds;
 import com.luxoft.falcon.dao.DbConnectorSpider;
+import com.luxoft.falcon.dao.SQLiteDataSource;
 import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.Report;
 import lombok.extern.slf4j.Slf4j;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.sql.*;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -54,10 +54,22 @@ public class ServiceAnalyseNdsMt extends Thread{
         log.info("**** in ServiceAnalyseNds.processNdsChecklist() ****");
 
         try {
-            con = DbConnectorNds.connectDatabase(
-                    ndsConfigAndQuery.getJdbcUrl(),
-                    ndsConfigAndQuery.getJdbcLogin(),
-                    ndsConfigAndQuery.getJdbcPassword());
+            Path versionNdsPath = Paths.get("C:/_TEMP/PONB2F/001/iDb/ME_/0ME_B2F1.NDS");
+            SQLiteDataSource ds = new SQLiteDataSource(versionNdsPath);
+            try (Connection c = ds.getConnection();
+                 Statement stmt = c.createStatement();
+                 ResultSet rs = stmt.executeQuery(" SELECT * FROM tmcLocationTableIdTable"))
+            {
+                if (rs.next())
+                {
+                    String actualNdsDbVersionName = rs.getString(1);
+                }
+            }
+
+//            con = DbConnectorNds.connectDatabase(
+//                    ndsConfigAndQuery.getJdbcUrl(),
+//                    ndsConfigAndQuery.getJdbcLogin(),
+//                    ndsConfigAndQuery.getJdbcPassword());
 
 
             List<ChecklistEntry> fillNdsErrors;// = new LinkedList<>();
@@ -101,6 +113,11 @@ public class ServiceAnalyseNdsMt extends Thread{
 
     private static List<ChecklistEntry> analyseActual(List<String> steps, Report report) throws SQLException {
         List<ChecklistEntry> fillSpiderErrors = new LinkedList<>();
+
+
+
+
+
 
 //FIXME - DB is compressed and enciphered - NDS lib must be used to open
 // - Now we have error here!!!
