@@ -2,6 +2,12 @@
 
 <checklist>
 
+	<name>
+		TI
+	</name>
+	<default>
+	    	yes
+	</default>
 
     <SPIDER>
         <step>

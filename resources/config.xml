@@ -71,8 +71,8 @@
              WHERE ftel.task LIKE ?
              AND ftel.revision = ?
              AND fcel.java_class_error = ?
-             ORDER BY Task, Revision, JAVA_CLASS_ERROR\n
-             LIMIT ?";
+             ORDER BY Task, Revision, JAVA_CLASS_ERROR
+             LIMIT ?
         </queryLike>
         <queryAccurate>
              SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR
@@ -81,7 +81,7 @@
              WHERE ftel.task = ?
              AND ftel.revision = ?
              AND fcel.java_class_error = ?
-             ORDER BY Task, Revision, JAVA_CLASS_ERROR\n
+             ORDER BY Task, Revision, JAVA_CLASS_ERROR
              LIMIT ?
         </queryAccurate>
     </SPIDER>
@@ -99,7 +99,7 @@
             JOIN ndsreport.testdescription td ON td.id = t.testdescription_id
             WHERE s.testsuitename LIKE ?
             AND td.name = ?
-            ORDER BY TASK, TEST_NAME\n
+            ORDER BY TASK, TEST_NAME
             LIMIT ?
 	    </queryLike>
         <queryAccurate>
@@ -110,7 +110,7 @@
             JOIN ndsreport.testdescription td ON td.id = t.testdescription_id
             WHERE s.testsuitename = ?
             AND td.name = ?
-            ORDER BY TASK, TEST_NAME\n
+            ORDER BY TASK, TEST_NAME
             LIMIT ?
         </queryAccurate>
         <queryCheckGeneration>
@@ -131,7 +131,7 @@
             JOIN ndsreport_new.tests t ON t.id = tr.test_id
             WHERE s.name LIKE ?
             AND t.name = ?
-            ORDER BY TASK, TEST_NAME\n
+            ORDER BY TASK, TEST_NAME
             LIMIT ?
         </queryLike>
         <queryAccurate>
@@ -141,7 +141,7 @@
             JOIN ndsreport_new.tests t ON t.id = tr.test_id
             WHERE s.name = ?
             AND t.name = ?
-            ORDER BY TASK, TEST_NAME\n
+            ORDER BY TASK, TEST_NAME
             LIMIT ?
         </queryAccurate>
         <queryCheckGeneration>

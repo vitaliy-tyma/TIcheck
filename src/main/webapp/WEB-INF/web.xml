@@ -22,16 +22,8 @@
     </listener>
 
     <servlet>
-        <servlet-name>ServletLocalhost</servlet-name>
-        <servlet-class>com.luxoft.falcon.controller.ServletLocalhost</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ServletSpider</servlet-name>
-        <servlet-class>com.luxoft.falcon.controller.ServletSpider</servlet-class>
-    </servlet>
-    <servlet>
-        <servlet-name>ServletConfig</servlet-name>
-        <servlet-class>com.luxoft.falcon.controller.ServletConfig</servlet-class>
+        <servlet-name>ServletReadMainConfig</servlet-name>
+        <servlet-class>com.luxoft.falcon.controller.ServletReadMainConfig</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>ServletAnalyse</servlet-name>
@@ -44,16 +36,8 @@
         <url-pattern>/analyse</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>ServletLocalhost</servlet-name>
-        <url-pattern>/ServletLocalhost</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ServletSpider</servlet-name>
-        <url-pattern>/ServletSpider</url-pattern>
-    </servlet-mapping>
-    <servlet-mapping>
-        <servlet-name>ServletConfig</servlet-name>
-        <url-pattern>/ServletConfig</url-pattern>
+        <servlet-name>ServletReadMainConfig</servlet-name>
+        <url-pattern>/ServletReadMainConfig</url-pattern>
     </servlet-mapping>
 
 </web-app>

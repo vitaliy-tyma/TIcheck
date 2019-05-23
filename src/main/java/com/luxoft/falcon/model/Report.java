@@ -9,25 +9,39 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-/** Report of analysis */
+/**
+ * Report of analysis
+ */
 public class Report {
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private List<ChecklistEntry> spiderSteps = new LinkedList<>();
-    @Getter @Setter
+    @Getter
+    @Setter
     private List<ChecklistEntry> birtSteps = new LinkedList<>();
-    @Getter @Setter
+
+    public void addBirtSteps(List<ChecklistEntry> list) {
+        this.birtSteps.addAll(list);
+    }
+
+    @Getter
+    @Setter
     private List<ChecklistEntry> ndsSteps = new LinkedList<>();
 
 
-    public Report(){
+    public Report() {
     }
 
 
-    @Getter
+    //    @Getter
     private String name;
+    public String getName() {
+        return (name == null ? "" : name);
+    }
+
     public void setName(String name) throws Exception {
-        if (name == null){
+        if (name == null) {
             throw new Exception("Name of PON is not defined");
         }
 
@@ -40,13 +54,23 @@ public class Report {
         if (!result.equals(name)) {
             this.logOfErrors.add("\nSome extra symbols have been removed from the PON name!\n<br/>");
         }
-        this.name = result;
+        this.name = result.toUpperCase();
     }
 
-    @Getter
-    private int iteration;
+    //    @Getter
+    private Integer iteration;
+    public Integer getIteration() {
+//        try {
+//            if ((Integer) iteration == null) {
+//                return 1;
+//            }
+//        } catch (Exception e) {
+//            return 1;
+//        }
+        return (iteration == null?1:iteration);
+    }
     public void setIteration(String iteration) throws Exception {
-        if (iteration == null){
+        if (iteration == null) {
             throw new Exception("Iteration of PON is not defined");
         }
 
@@ -62,31 +86,42 @@ public class Report {
         }
         try {
             this.iteration = Integer.parseInt(iteration);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.iteration = 1;
         }
     }
 
     @Getter
     @Setter
-    private Boolean useQueryLike = false;
+    private Boolean useQueryLike = true;
 
-    @Getter
-    private int limit;
-    public void setLimit(String limit){
+//    @Getter
+    private Integer limit;
+    public Integer getLimit() {
+//        try {
+//            if ((Integer) limit == null) {
+//                return 100;
+//            }
+//        } catch (Exception e) {
+//            return 100;
+//        }
+        return (limit == null? 100: limit);
+    }
+    public void setLimit(String limit) {
         try {
             this.limit = Integer.parseInt(limit);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.limit = 100;
         }
     }
 
-    @Getter
+//    @Getter
     private String prevName;
+    public String getPrevName() {
+        return (prevName == null ? "" : prevName);
+    }
     public void setPrevName(String name) throws Exception {
-        if (name == null){
+        if (name == null) {
             throw new Exception("Name of prev PON is not defined");
         }
 
@@ -99,13 +134,23 @@ public class Report {
         if (!result.equals(name)) {
             this.logOfErrors.add("\nSome extra symbols have been removed from the prevPON name!\n<br/>");
         }
-        this.prevName = result;
+        this.prevName = result.toUpperCase();
     }
 
-    @Getter
-    private int prevIteration;
+//    @Getter
+    private Integer prevIteration;
+    public Integer getPrevIteration() {
+//        try {
+//            if ((Integer) iteration == null) {
+//                return 1;
+//            }
+//        } catch (Exception e) {
+//            return 1;
+//        }
+        return (prevIteration == null?1:prevIteration);
+    }
     public void setPrevIteration(String iteration) throws Exception {
-        if (iteration == null){
+        if (iteration == null) {
             throw new Exception("Iteration of prev PON is not defined");
         }
 
@@ -121,36 +166,43 @@ public class Report {
         }
         try {
             this.prevIteration = Integer.parseInt(iteration);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             this.prevIteration = 1;
         }
     }
 
     @Getter
     @Setter
-    private Boolean useQueryLikeForPrev = false;
-
-
+    private Boolean useQueryLikeForPrev = true;
 
 
     @Getter
     @Setter
     private LinkedList<String> logOfErrors = new LinkedList<>();
-    public void addLogOfErrors(String string){
+
+    public void addLogOfErrors(String string) {
         this.logOfErrors.add("<br>" + string + "<br/>\n");
     }
 
-//TODO Clarify usage of report.checklistName - seems that it is not in use (and no setter here)
-    @Getter @Setter
+
+    //TODO Clarify usage of report.checklistName - seems that it is not in use (and no setter here)
+    @Getter
+    @Setter
     private String checklistName;
 
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private Float elapsedTime;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private int requestsCount;
 
 
+    public void clear() {
+        spiderSteps.clear();
+        birtSteps.clear();
+        ndsSteps.clear();
+    }
 }

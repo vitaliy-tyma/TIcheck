@@ -16,6 +16,9 @@ import java.util.List;
 @Data
 public class Checklist {
 
+    private String name = "";
+    private boolean defaultFlag = false;
+
     private List<String> spiderSteps = new LinkedList<>();
     private List<String> birtSteps = new LinkedList<>();
     private List<String> ndsSteps = new LinkedList<>();
@@ -51,5 +54,12 @@ public class Checklist {
     }
     public void addNdsSteps(String string){
         this.ndsSteps.add(string);
+    }
+
+
+    public void clear(){
+        spiderSteps.clear();
+        birtSteps.clear();
+        ndsSteps.clear();
     }
 }

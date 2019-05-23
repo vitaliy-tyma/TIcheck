@@ -35,7 +35,6 @@ public class ReadXML {
     private static final String NDS = "NDS";
 
 
-
     public static void readMainConfigFromFile(String fileAbsolutePathAndName) {
 
 
@@ -58,94 +57,92 @@ public class ReadXML {
                             eElement.getElementsByTagName(
                                     "PON_NAME_REQUEST").
                                     item(0).getTextContent().
-                                    replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setPON_ITERATION_REQUEST(
                             eElement.getElementsByTagName(
                                     "PON_ITERATION_REQUEST").
                                     item(0).getTextContent().
-                                    replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setUSE_QUERY_LIKE_REQUEST(
                             eElement.getElementsByTagName(
                                     "USE_QUERY_LIKE_REQUEST").
                                     item(0).getTextContent().
-                                    replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setCHECKLISTS_REQUEST(
                             eElement.getElementsByTagName(
                                     "CHECKLISTS_REQUEST").
                                     item(0).getTextContent().
-                                    replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setCHECKLISTS_REGRESSION(
                             eElement.getElementsByTagName(
                                     "CHECKLISTS_REGRESSION").
                                     item(0).getTextContent().
-                                    replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setPON_NAME_PREV_REQUEST(
                             eElement.getElementsByTagName(
                                     "PON_NAME_PREV_REQUEST").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setPON_ITERATION_PREV_REQUEST(
                             eElement.getElementsByTagName(
                                     "PON_ITERATION_PREV_REQUEST").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setUSE_QUERY_LIKE_PREV_REQUEST(
                             eElement.getElementsByTagName(
                                     "USE_QUERY_LIKE_PREV_REQUEST").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setQUERY_LIMIT(
                             eElement.getElementsByTagName(
                                     "QUERY_LIMIT").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setSTEP_NAME(
                             eElement.getElementsByTagName(
                                     "STEP_NAME").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setSOURCE_NAME_SPIDER(
                             eElement.getElementsByTagName(
                                     "SOURCE_NAME_SPIDER").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setSPIDER_TASK_COL_NAME(
                             eElement.getElementsByTagName(
                                     "SPIDER_TASK_COL_NAME").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setSPIDER_JAVA_CLASS_ERROR_COL_NAME(
                             eElement.getElementsByTagName(
                                     "SPIDER_JAVA_CLASS_ERROR_COL_NAME").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setSOURCE_NAME_BIRT(
                             eElement.getElementsByTagName(
                                     "SOURCE_NAME_BIRT").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setBIRT_TASK_COL_NAME(
                             eElement.getElementsByTagName(
                                     "BIRT_TASK_COL_NAME").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setBIRT_TEST_COL_NAME(
                             eElement.getElementsByTagName(
                                     "BIRT_TEST_COL_NAME").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setBIRT_TEST_RESULT_NAME(
                             eElement.getElementsByTagName(
                                     "BIRT_TEST_RESULT_NAME").
                                     item(0).getTextContent().
-                                            replace("\n","").trim());
+                                    replace("\n", "").trim());
                     mainConfig.setSOURCE_NAME_NDS(
                             eElement.getElementsByTagName(
                                     "SOURCE_NAME_NDS").
-                                            item(0).getTextContent().
-                                                    replace("\n","").trim());
-
-
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim());
 
 
                 }
@@ -183,22 +180,16 @@ public class ReadXML {
                                     replace("\n", "").trim());
                 }
             }
+            mainConfig.setConfigIsLoaded(true);
+            log.info("************************ MainConfig has been read ************************");
+
         } catch (
                 Exception e) {
             /* Set all values as default*/
             setDefaultValuesBecauseOfException();
             log.error("Read XML failed with the error " + e.getMessage());
-
-
-
-
-
-
-
         }
     }
-
-
 
 
     private static void setDefaultValuesBecauseOfException() {
@@ -312,7 +303,7 @@ public class ReadXML {
     }
 
 
-    private static void fillConfig(NodeList nList, ConfigAndQueryInterface configClass){
+    private static void fillConfig(NodeList nList, ConfigAndQueryInterface configClass) {
 
         for (int temp = 0; temp < nList.getLength(); temp++) {
             Node nNode = nList.item(temp);
@@ -330,12 +321,12 @@ public class ReadXML {
                                 replace("\n", "").trim());
                 configClass.setJdbcLogin(
                         eElement.getElementsByTagName(
-                                "jdbclogin").
+                                "jdbcLogin").
                                 item(0).getTextContent().
                                 replace("\n", "").trim());
                 configClass.setJdbcPassword(
                         eElement.getElementsByTagName(
-                                "jdbcpassword").
+                                "jdbcPassword").
                                 item(0).getTextContent().
                                 replace("\n", "").trim());
                 configClass.setQueryLike(
@@ -353,10 +344,6 @@ public class ReadXML {
 
 
     }
-
-
-
-
 
 
     /* Read checklist from file by given name using SAX parser - JUST FOR EXAMPLE*/
@@ -447,16 +434,20 @@ public class ReadXML {
                         mainConfig.getPATH_DELIMITER() +
                         fileAbsolutePathAndName + ".xml";
 
+        try {
+            File file = new File(currentDir);
+            InputStream inputStream = new FileInputStream(file);
+            Reader reader = new InputStreamReader(inputStream, "UTF-8");
 
-        File file = new File(currentDir);
-        InputStream inputStream = new FileInputStream(file);
-        Reader reader = new InputStreamReader(inputStream, "UTF-8");
+            InputSource is = new InputSource(reader);
+            is.setEncoding("UTF-8");
 
-        InputSource is = new InputSource(reader);
-        is.setEncoding("UTF-8");
+            /* Parse checklist's file to set object's values */
+            saxParser.parse(is, handler);
 
-        saxParser.parse(is, handler);
+        } catch (Exception e) {
 
+        }
         return checklist;
     }
 }

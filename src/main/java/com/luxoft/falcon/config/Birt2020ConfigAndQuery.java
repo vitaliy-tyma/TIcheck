@@ -5,13 +5,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * Entity/Data/POJO to connect to the BIRT Gen.2020
- * To be loaded from XML-file  - Under development
- */
-//TODO Store all items in separate XML file and load it's content at start and on request.
+/* Entity/Data/POJO to connect to the BIRT Gen.2020 */
 
-
+@Data
 public class Birt2020ConfigAndQuery implements ConfigAndQueryInterface {
 
     private static Birt2020ConfigAndQuery _instance = new Birt2020ConfigAndQuery();
@@ -24,7 +20,7 @@ public class Birt2020ConfigAndQuery implements ConfigAndQueryInterface {
     }
 
     @Getter @Setter
-    private String jdbcDriver;// = "com.mysql.jdbc.Driver";
+    private String jdbcDriver;
 
     @Getter @Setter
     private String jdbcUrl;// = "jdbc:mysql://himdlxbirt01:3306/ndsreport_new"; //For 2020

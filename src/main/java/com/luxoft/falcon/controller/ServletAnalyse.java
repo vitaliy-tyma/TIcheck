@@ -31,6 +31,8 @@ import java.util.List;
 
 //TODO - Testing section is not used!!!
 // Z:\Test_DB\release-7.2_MAN\TBAA\001\iDb
+
+//TODO Check if PON and iteration is valid!
 @Slf4j
 public class ServletAnalyse extends HttpServlet {
     private static MainConfig mainConfig = MainConfig.getInstance();
@@ -98,6 +100,10 @@ public class ServletAnalyse extends HttpServlet {
         log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
         try {
 
+            if (!mainConfig.getConfigIsLoaded()) {
+                throw new Exception("MainConfig is not loaded yet!!!");
+            }
+
 //TODO - Load all checklist at the start (or on special request) and
 // only choose the appropriate from the memory at this point
 // to be developed later
@@ -112,34 +118,31 @@ public class ServletAnalyse extends HttpServlet {
                     ponIteration,
                     useQueryLike));
 
-            /* Get header and start of the body section*/
-            result.append(getHeader());
-            result.append(getBodyStartPart());
+
+            if (ponName != null || ponIteration != null || limitValue != null) {
+                report.setName(ponName);
+                report.setIteration(ponIteration);
+                report.setLimit(limitValue);
 
 
-            report.setName(ponName);
-            report.setIteration(ponIteration);
-            report.setLimit(limitValue);
-
-
-            if (useQueryLike == null) {
-                report.setUseQueryLike(Boolean.FALSE);
-            } else {
-                if (useQueryLike.equals("on")) {
-                    report.setUseQueryLike(Boolean.TRUE);
-                } else {
+                if (useQueryLike == null) {
                     report.setUseQueryLike(Boolean.FALSE);
+                } else {
+                    if (useQueryLike.equals("on")) {
+                        report.setUseQueryLike(Boolean.TRUE);
+                    } else {
+                        report.setUseQueryLike(Boolean.FALSE);
+                    }
                 }
-            }
 
-            if (regressionCheck != null) {
-                if (regressionCheck.equals("on") && ((prevPonName != "") && (prevPonIteration != ""))) {
-                    analyseRegression = true;
+                if (regressionCheck != null) {
+                    if (regressionCheck.equals("on") && ((prevPonName != "") && (prevPonIteration != ""))) {
+                        analyseRegression = true;
+                    }
                 }
-            }
 
 
-            if (analyseRegression) {
+//            if (analyseRegression) {
                 report.setPrevName(prevPonName);
                 report.setPrevIteration(prevPonIteration);
                 if (useQueryLikeForPrev == null) {
@@ -151,22 +154,23 @@ public class ServletAnalyse extends HttpServlet {
                         report.setUseQueryLikeForPrev(Boolean.FALSE);
                     }
                 }
-            }
+//            }
 
             /* Choose the mode;
              - SingleThread is for debug!!!
              - MultithreadedMode - is for Multithreading (but there is no acceleration detected)*/
-            boolean debugMode = true;
-            if (debugMode) {
-                startSingleThreadedMode(checklist, report, analyseRegression);
-            } else {
-                //Made just as an example - may be useful for very big requests!!
-                startMultithreadedMode(checklist, report, analyseRegression);
+                boolean debugMode = true;
+                /* MAIN ACTION IS BELOW!*/
+                if (debugMode) {
+                    startSingleThreadedMode(checklist, report, analyseRegression);
+                } else {
+                    //Made just as an example - may be useful for very big requests!!
+                    startMultithreadedMode(checklist, report, analyseRegression);
+                }
+
+
+                log.info("****************************************** CHECKLIST PROCESSING HAS FINISHED *****************************************");
             }
-
-
-            log.info("****************************************** CHECKLIST PROCESSING HAS FINISHED *****************************************");
-
             /*calculate statistics - time and requests*/
             long end = System.currentTimeMillis();
             float sec = (end - start) / 1000F;
@@ -184,23 +188,41 @@ public class ServletAnalyse extends HttpServlet {
 
 
             /* OUTPUT of checklist report*/
-            result.append(getBodyFirstPart(checklistRequestName, report, analyseRegression));
-            result.append(ReportToHtml.getDataFromReport(report));
+            /* Get header and start of the body section*/
+            result.append(getHeader());
+            result.append(getBodyStartPart());
+
+
+            result.append(getBodyForm(checklistRequestName, report, analyseRegression));
+
+            if (ponName != null || ponIteration != null || limitValue != null) {
+                result.append(getSummaryUnderForm(report));
+
+                result.append(ReportToHtml.getDataFromReport(report));
+            }
+
+            /* Footer with service links - Refresh MainConfig, etc. */
+            result.append(getServletReadMainConfig());
             result.append(getBodyLastPart());
 
 
-
+            /* Is not necessary - works well without it*/
+            checklist.clear();
+            report.clear();
 
 
             /* Error handling in case of input parameters problems*/
         } catch (Exception e) {
+            log.error(e.getMessage());
             report.addLogOfErrors(e.getMessage());
-            result.append("Error while processing<br/>\n");
+            result.append("<html>\nError while processing ServiceAnalyse<br/>\n");
             result.append(report.getLogOfErrors());
+            result.append("\n<html>");
         }
 
         /* Reset all variables to be ready for the next cycle */
         analyseRegression = false;
+        requestsCount = 0;
 
         /* Send reply after analysis */
         httpServletResponse.getWriter().print(result.toString());
@@ -271,38 +293,228 @@ public class ServletAnalyse extends HttpServlet {
 
 
     /* Display the first part of the body*/
-    private String getBodyFirstPart(String checklistRequestName, Report report, boolean analyseRegression) {
+    private String getBodyForm(String checklistRequestName, Report report, boolean analyseRegression) throws IOException {
 
         StringBuilder result = new StringBuilder();
 
         result.append(
                 String.format("<p><h3>Automated <u>%s</u> checklist analysis results for the request:</h3>\n",
                         checklistRequestName));
+
+        result.append("<div class=\"PON_selector\">");
+//        result.append("<fieldset width = \"95%\">\n");
+        result.append("<form action=\"/analyse?action=submit\" method=\"get\" id=\"checklist\">");
+
         result.append("<table border=1>\n");
-        result.append("<tr><th>Request</th><th>Name</th><th>Iteration</th><th>Query LIKE%...%</th><th>Limit</th></tr>\n");
+        result.append("<tr><th width=100px>Request</th><th>Name</th><th>Iteration</th><th>Use query<br/> LIKE%...%</th><th>Regression<br/> check</th></tr>\n");
+
+//        result.append("<tr><td>Actual</td>\n");
+//        result.append(
+//                String.format(
+//                        "<td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td></p>\n",
+//                        report.getName(),
+//                        report.getIteration(),
+//                        report.getUseQueryLike(),
+//                        report.getLimit()));
+//        result.append("</tr>\n");
+
+        /* FORM */
         result.append("<tr><td>Actual</td>\n");
+        result.append(
+                String.format(
+                        "<td class = \"center\">\n" +
+                                "<input\n" +
+                                "type=\"text\"\n" +
+                                "name=\"pon_name\"\n" +
+                                "value = \"%s\"\n" +
+                                "placeholder=\"Enter PON or it's part\"\n" +
+                                "title=\"Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use LIKE...&quot; checkbox\"\n" +
+                                "tabindex=\"1\"\n" +
+                                "maxlength=\"30\"\n" +
+                                "size=\"20\"\n" +
+                                "autofocus/>\n" +
+                                "</td>\n",
+                        report.getName()));
 
         result.append(
                 String.format(
-                        "<td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td></p>\n",
-                        report.getName(),
-                        report.getIteration(),
-                        report.getUseQueryLike(),
-                        report.getLimit()));
+                        "<td class = \"center\">\n" +
+                                "<input\n" +
+                                "type=\"text\"\n" +
+                                "name=\"pon_iteration\" value=\"%s\"\n" +
+                                "placeholder=\"Enter PON's iteration\"\n" +
+                                "title=\"Replace with the actual value (_R# will be added for query with =)\"\n" +
+                                "maxlength=\"2\"\n" +
+                                "tabindex=\"2\"/>\n" +
+                                "</td>\n",
+                        report.getIteration()));
+
+
+        result.append(
+                String.format(
+                        "<td class = \"center\">\n" +
+                                "<input\n" +
+                                "type=\"checkbox\"\n" +
+                                "name=\"use_query_like\"\n" +
+                                "%s\n" +
+                                "title=\"Query for requested name will be used with LIKE + heading and tailing &#37;\"\n" +
+                                "tabindex=\"3\">\n" +
+                                "</td>\n",
+                        (report.getUseQueryLike() ? "checked" : "")));
+
+
+        result.append(
+                String.format(
+                        "<td rowspan = 2 class = \"center\">\n" +
+                                "<input\n" +
+                                "type=\"checkbox\"\n" +
+                                "name=\"regression_check\"\n" +
+                                "%s\n" +
+                                "title=\"Unset to disable regression check despite of entered data\"\n" +
+                                "tabindex=\"4\">\n" +
+                                "\n",
+//                                    "</checkbox>",
+                        (analyseRegression ? "checked" : "")));
+
+        result.append("</td>\n");
+
+
         result.append("</tr>\n");
 
 
-        if (analyseRegression) {
-            result.append("<tr><td>Previous</td>\n");
-            result.append(
-                    String.format(
-                            "<td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td></p>\n",
-                            report.getPrevName(),
-                            report.getPrevIteration(),
-                            report.getUseQueryLikeForPrev(),
-                            report.getLimit()));
-            result.append("</tr>\n");
+        /// if (analyseRegression) {
+//            result.append("<tr><td>Previous</td>\n");
+//            result.append(
+//                    String.format(
+//                            "<td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td><td><b>%s</b></td></p>\n",
+//                            report.getPrevName(),
+//                            report.getPrevIteration(),
+//                            report.getUseQueryLikeForPrev(),
+//                            report.getLimit()));
+//            result.append("</tr>\n");
+
+
+        result.append("<tr><td>Previous</td>\n");
+        result.append(
+                String.format(
+                        "<td class = \"center\">\n" +
+                                "<input\n" +
+                                "type=\"text\"\n" +
+                                "name=\"prev_pon_name\"\n" +
+                                "value = \"%s\"\n" +
+                                "placeholder=\"Enter previous PON/part\"\n" +
+                                "title=\"Query with &quot;LIKE&quot; or &quot;=&quot; statement will be used depending on &quot;Use LIKE...&quot; checkbox\"\n" +
+                                "tabindex=\"10\"\n" +
+                                "maxlength=\"30\"\n" +
+                                "size=\"20\"\n" +
+                                "</td>\n",
+                        report.getPrevName()));
+
+        result.append(
+                String.format(
+                        "<td class = \"center\">\n" +
+                                "<input\n" +
+                                "type=\"text\"\n" +
+                                "name=\"prev_pon_iteration\" value=\"%s\"\n" +
+                                "placeholder=\"Enter previous PON's iteration\"\n" +
+                                "title=\"Replace with the actual value (_R# will be added for query with =)\"\n" +
+                                "maxlength=\"2\"\n" +
+                                "tabindex=\"11\"/>\n" +
+                                "</td>\n",
+                        report.getPrevIteration()));
+
+
+        result.append(
+                String.format(
+                        "<td class = \"center\">\n" +
+                                "<input\n" +
+                                "type=\"checkbox\"\n" +
+                                "name=\"use_query_like_for_prev\"\n" +
+                                "%s\n" +
+                                "title=\"Query for requested name will be used with LIKE + heading and tailing &#37;\"\n" +
+                                "tabindex=\"12\">\n" +
+                                "</td>\n",
+                        (report.getUseQueryLikeForPrev() ? "checked" : "")));
+
+
+        result.append("</tr>\n");
+        /// }
+
+        /* Checklist select and Submit button */
+        result.append("<tr>\n");
+        result.append("<td colspan = 5 align = center>\n");
+
+        //TODO Load Checklists at start of the APPLICATION!!!
+        //ReadChecklistsFiles.getChecklistsList(MainConfig.getCHECKLISTS_PATH());
+
+        result.append(
+                "Select Checklist " +
+                        "<select\n" +
+                        "name = \"checklists\"\n" +
+                        "form=\"checklist\"\n" +
+//                "width = 100%\n" +
+                        "style=\"width: 120px\"\n" +
+                        "tabindex=\"30\">\n" +
+                        "            <option value = \"TI\" selected>TI (Default)</option>\n" +
+                        "            <option value = \"TIwithNoNDS\">TIwithNoNDS</option>\n" +
+                        "            <option value = \"3\">3 (not impl.)</option>\n" +
+                        "</select>\n");
+
+        result.append(
+                "<button\n" +
+                        "class = \"PON_filter\"\n" +
+                        "type=\"submit\"\n" +
+                        "style=\"width: 120px\"\n" +
+                        "title=\"Enter PON (or it's part) and press button to start TI analysis\"\n" +
+                        "tabindex=\"31\">\n" +
+                        "Analyse\n" +
+                        "</button>\n");
+
+
+        boolean limit10 = false;
+        boolean limit100 = false;
+        boolean limit1000 = false;
+        boolean limit10000 = false;
+
+        switch (report.getLimit()) {
+            case 10:
+                limit10 = true;
+                break;
+            case 100:
+                limit100 = true;
+                break;
+            case 1000:
+                limit1000 = true;
+                break;
+            case 10000:
+                limit10000 = true;
+                break;
+            default:
+                limit100 = true;
         }
+        result.append(
+                String.format(
+//                        "<td class = \"center\">\n" +
+                        " \n" +
+                                "<select\n" +
+                                "name = \"limit\"\n" +
+                                "form=\"checklist\"\n" +
+                                "style=\"width: 120px\"\n" +
+                                "tabindex=\"32\">\n" +
+                                "            <option value = \"10\" %s>10</option>\n" +
+                                "            <option value = \"100\" %s>100 (Default)</option>\n" +
+                                "            <option value = \"1000\" %s>1000</option>\n" +
+                                "            <option value = \"10000\" %s>10000</option>\n" +
+                                "         </select> Limit request output\n",
+
+                        (limit10 ? "selected" : ""),
+                        (limit100 ? "selected" : ""),
+                        (limit1000 ? "selected" : ""),
+                        (limit10000 ? "selected" : "")));
+
+        result.append("</td>\n");
+        result.append("<tr>\n");
+
 
 //        result.append("<object type=\"text/html\" data=\"index.jsp\"></object>\n"); //works but in reduced window
 //        result.append("<object type=\"text/html\" data=\"index.jsp\" style=\"width:100%; height: 50%\"></object>\n"); //works well but calls new requests inside of the new frame
@@ -324,7 +536,24 @@ public class ServletAnalyse extends HttpServlet {
 //        result.append("\n</script>");
 
 
-        /* Show summary result */
+        result.append("</td>\n");
+        result.append("</tr>\n");
+        result.append("</table>\n");
+        result.append("</form>\n");
+        result.append("</div\n>");
+//        result.append("<br/>\n");
+
+
+        return result.toString();
+    }
+
+
+    /* Show summary result */
+    private String getSummaryUnderForm(Report report) {
+        StringBuilder result = new StringBuilder();
+
+        result.append("<table border=1>\n");
+
         result.append("<tr><td colspan = 5 align = center>");
         if (checkReportForErrors(report.getSpiderSteps()) ||
                 checkReportForErrors(report.getBirtSteps()) ||
@@ -357,13 +586,14 @@ public class ServletAnalyse extends HttpServlet {
                             "<div><p><font color=red>%s</font></p></div>\n",
                             report.getLogOfErrors().toString()));
             result.append("</b></details>\n");
-            result.append("</div>");
+            result.append("</div>\n");
+
+
         }
 
-
-        result.append("</td></tr>");
+        result.append("</td>\n");
+        result.append("</tr>\n");
         result.append("</table>\n");
-        result.append("<br/>\n");
 
 
         return result.toString();
@@ -381,33 +611,37 @@ public class ServletAnalyse extends HttpServlet {
 
     /* Display the first part of the body*/
     private String getBodyStartPart() {
-        return "\n\n<body >\n<div align=center>\n";
+        return "\n\n<body>\n<div align=center>\n";
         //onload="load_home()"
     }
 
 
     /* Display the last part of the body*/
     private String getBodyLastPart() {
-        return "</div>\n</body>\n";
+        return "</div>\n</body>\n</html>";
+    }
+
+    /* Display the last part of the body*/
+    private String getServletReadMainConfig() {
+        return "<br/><div>\n<a href=\"ServletReadMainConfig\" target=\"_blank\">Refresh MainConfig</a></div>\n";
     }
 
 
     /* Make header with CSS to display tooltip container*/
     private static String getHeader() {
 
-        String header = "<head>\n" +
+        String header =
 
-//                "\n" +
-//                "<script src = \"jquery.js\"></script >\n" +
-//                "<script >\n" +
-//                "$(function() {\n" +
-//                "$(\"#includedContent\").load(\"index.jsp\");\n" +
-//                "});\n" +
-//                "</script >\n" +
+                "<!DOCTYPE html>\n" +
+                        "<html>\n" +
 
+                        "<head>\n" +
+                        "<meta charset=\"UTF-8\">\n" +
+                        "<title>Automated checklist analyser</title>\n" +
+                        "<link href=\"/lib/css/TIcheck.css\" rel=\"stylesheet\" type=\"text/css\">" +
 
-                "\n" +
-                "<style>\n" +
+                        "\n" +
+                        "<style>\n" +
 //TODO Locate CSS in separate file - it is not defined yet
 // Cannot locate CSS within IDE (must be checked in TOMCAT)
 //                       "<link href=\"lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
@@ -417,80 +651,85 @@ public class ServletAnalyse extends HttpServlet {
 //                "<%@include file=\"lib/css/tableRowsColor.css\"%>\n" +
 
 
-                "/* Tooltip container */\n" +
+                        "/* Tooltip container */\n" +
 
-                ".tooltip_for_query {\n" +
-                "  position: relative;\n" +
-                "  display: inline-block;\n" +
-                "  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */\n" +
-                "}\n" +
-                ".tooltip_for_name {\n" +
-                "  position: relative;\n" +
-                "  display: inline-block;\n" +
-                "  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */\n" +
-                "}\n" +
+                        ".tooltip_for_query {\n" +
+                        "  position: relative;\n" +
+                        "  display: inline-block;\n" +
+                        "  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */\n" +
+                        "}\n" +
+                        ".tooltip_for_name {\n" +
+                        "  position: relative;\n" +
+                        "  display: inline-block;\n" +
+                        "  border-bottom: 1px dotted black; /* If you want dots under the hoverable text */\n" +
+                        "}\n" +
 
-                "\n" +
-                "/* Tooltip text */\n" +
-                ".tooltip_for_query .tooltiptext {\n" +
-                "  visibility: hidden;\n" +
-                "  width: 500px;\n" +
-                "  bottom: 100%;\n" +
-                "  left: 50%; \n" +
-                "  margin-left: -400px; /* Use shift, to center the tooltip */" +
-                "" +
-                "  background-color: black;\n" +
-                "  color: #fff;\n" +
-                "  text-align: center;\n" +
-                "  padding: 5px 0;\n" +
-                "  border-radius: 6px;\n" +
-                " \n" +
-                "  /* Position the tooltip text - see examples below! */\n" +
-                "  position: absolute;\n" +
-                "  z-index: 1;\n" +
-                "}\n" +
+                        "\n" +
+                        "/* Tooltip text */\n" +
+                        ".tooltip_for_query .tooltiptext {\n" +
+                        "  visibility: hidden;\n" +
+                        "  width: 500px;\n" +
+                        "  bottom: 100%;\n" +
+                        "  left: 50%; \n" +
+                        "  margin-left: -400px; /* Use shift, to center the tooltip */" +
+                        "" +
+                        "  background-color: black;\n" +
+                        "  color: #fff;\n" +
+                        "  text-align: center;\n" +
+                        "  padding: 5px 0;\n" +
+                        "  border-radius: 6px;\n" +
+                        " \n" +
+                        "  /* Position the tooltip text - see examples below! */\n" +
+                        "  position: absolute;\n" +
+                        "  z-index: 1;\n" +
+                        "}\n" +
 
 
-                "\n" +
-                "/* Tooltip text */\n" +
-                ".tooltip_for_name .tooltiptext {\n" +
-                "  visibility: hidden;\n" +
-                "  width: 200px;\n" +
-                "  bottom: 100%;\n" +
-                "  left: 50%; \n" +
-                "  margin-left: -100px; /* Use shift, to center the tooltip */" +
-                "  background-color: black;\n" +
-                "  color: #fff;\n" +
-                "  text-align: center;\n" +
-                "  padding: 5px 0;\n" +
-                "  border-radius: 6px;\n" +
-                " \n" +
-                "  /* Position the tooltip text - see examples below! */\n" +
-                "  position: absolute;\n" +
-                "  z-index: 1;\n" +
-                "}\n" +
-                "" +
+                        "\n" +
+                        "/* Tooltip text */\n" +
+                        ".tooltip_for_name .tooltiptext {\n" +
+                        "  visibility: hidden;\n" +
+                        "  width: 200px;\n" +
+                        "  bottom: 100%;\n" +
+                        "  left: 50%; \n" +
+                        "  margin-left: -100px; /* Use shift, to center the tooltip */" +
+                        "  background-color: black;\n" +
+                        "  color: #fff;\n" +
+                        "  text-align: center;\n" +
+                        "  padding: 5px 0;\n" +
+                        "  border-radius: 6px;\n" +
+                        " \n" +
+                        "  /* Position the tooltip text - see examples below! */\n" +
+                        "  position: absolute;\n" +
+                        "  z-index: 1;\n" +
+                        "}\n" +
+                        "" +
 
-                "\n" +
-                "/* Show the tooltip text when you mouse over the tooltip container */\n" +
-                ".tooltip_for_query:hover .tooltiptext {\n" +
-                "  visibility: visible;\n" +
-                "}" +
+                        "\n" +
+                        "/* Show the tooltip text when you mouse over the tooltip container */\n" +
+                        ".tooltip_for_query:hover .tooltiptext {\n" +
+                        "  visibility: visible;\n" +
+                        "}" +
 
-                "\n" +
-                "/* Show the tooltip text when you mouse over the tooltip container */\n" +
-                ".tooltip_for_name:hover .tooltiptext {\n" +
-                "  visibility: visible;\n" +
-                "}" +
+                        "\n" +
+                        "/* Show the tooltip text when you mouse over the tooltip container */\n" +
+                        ".tooltip_for_name:hover .tooltiptext {\n" +
+                        "  visibility: visible;\n" +
+                        "}" +
 
-                "\n" +
-                "table tr#ROW_0  {background-color:; color:;}\n" +
-                "table tr#ROW_WHITE  {background-color:white;}\n" +
-                "table tr#ROW_WHITE2  {background-color:white; color:black;}\n" +
-                "table tr#ROW_GRAY  {background-color:#e6e6e6; color:black;}\n" +
+                        "\n" +
+                        "table tr#ROW_0  {background-color:; color:;}\n" +
+                        "table tr#ROW_WHITE  {background-color:white;}\n" +
+                        "table tr#ROW_WHITE2  {background-color:white; color:black;}\n" +
+                        "table tr#ROW_GRAY  {background-color:#e6e6e6; color:black;}\n" +
 
-                "</style>\n" +
-                "</head>\n";
+                        "input { \n" +
+                        "    text-align: center; \n" +
+                        "    font-weight:bold; \n" +
+                        "}" +
+
+                        "</style>\n" +
+                        "</head>\n";
         return header;
     }
 

@@ -30,7 +30,7 @@ public class ChecklistEntry {
 
     @Getter
     @Setter
-    private Boolean stepIsChecked = Boolean.FALSE; //Set after step has been checked
+    private Boolean stepIsChecked = Boolean.FALSE; //Set TRUE after step has been checked
 
 
     //TODO It is not representative - Boolean resultOfCheckIsNOK must be deleted - instead use String below!!!

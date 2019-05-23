@@ -31,6 +31,11 @@ import java.util.List;
  *
  * In case of exception returns text of error in report.logOfErrors
  */
+
+//TODO - Logic of BIRT check must be such:
+// 1) if PON name is full - look only in 2010 or 2020 DB
+// 2) if PON name is partial - look both on 2010 and 2020 - issue with regression check!!!
+
 @Slf4j
 public class ServiceAnalyseBirtMt extends Thread {
     private Checklist checklist;
@@ -89,18 +94,28 @@ public class ServiceAnalyseBirtMt extends Thread {
 
             /* CHECK GENERATION */
             isGenDefined = checkGeneration(report);
-            requestsCount += 2;
+            //requestsCount += 2;
 
             List<ChecklistEntry> fillBirtErrors;// = new LinkedList<>();
 
 
             /* Iterate over BIRT*/
             if (isGenDefined) {
-                fillBirtErrors = analyseActual(checklist.getBirtSteps(), report);
 
+              /* Iterate over BIRT2010*/
+//            queryLike = birt2010ConfigAndQuery.getQueryLike();
+//            queryAccurate = birt2010ConfigAndQuery.getQueryAccurate();
+            fillBirtErrors = analyseActual(checklist.getBirtSteps(), report);
+            /* Store items in report*/
+            report.addBirtSteps(fillBirtErrors);
 
-                /* Store items in report*/
-                report.setBirtSteps(fillBirtErrors);
+            /* Iterate over BIRT2020*/
+//            queryLike = birt2020ConfigAndQuery.getQueryLike();
+//            queryAccurate = birt2020ConfigAndQuery.getQueryAccurate();
+//            fillBirtErrors = analyseActual(checklist.getBirtSteps(), report);
+            /* Add items to report*/
+//            report.addBirtSteps(fillBirtErrors);
+
 
 
 
@@ -167,9 +182,9 @@ public class ServiceAnalyseBirtMt extends Thread {
             queryAccurate = birt2010ConfigAndQuery.getQueryAccurate();
             isGenDefined = true;
         }
-        resultSetChecker.close();
-        pstmtChecker.close();
-        con.close();
+//        resultSetChecker.close();
+//        pstmtChecker.close();
+//        con.close();
 
 
 //2020
@@ -189,13 +204,17 @@ public class ServiceAnalyseBirtMt extends Thread {
             queryAccurate = birt2020ConfigAndQuery.getQueryAccurate();
             isGenDefined = true;
         }
-        resultSetChecker.close();
-        pstmtChecker.close();
+//        resultSetChecker.close();
+//        pstmtChecker.close();
 
         return isGenDefined;
     }
 
 
+
+
+
+    /* THE MAIN ACTION IS BELOW!!!*/
     private List<ChecklistEntry> analyseActual(List<String> steps, Report report) throws SQLException {
         List<ChecklistEntry> fillBirtErrors = new LinkedList<>();
 
@@ -210,7 +229,7 @@ public class ServiceAnalyseBirtMt extends Thread {
         pstmt.setInt(3, report.getLimit());
 
         for (String errorToCheck : steps) {
-//            try {
+
                 pstmt.setString(2, errorToCheck);
 
 
@@ -288,43 +307,36 @@ public class ServiceAnalyseBirtMt extends Thread {
                             } else {
                                 entry.setResultOfCheckIsNOK(Boolean.FALSE);
                             }
-
                             /*Store all results */
                             fillBirtErrors.add(entry);
 
                             log.debug(String.format("************************* BIRT resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
-
                         }
-
                     }
                 }
-
-
-//            } catch (Exception e) {
-//                log.error(e.getMessage());
-//                report.addLogOfErrors(e.getMessage());
-//            }
         }
-
-
         return fillBirtErrors;
     }
 
+
     /* Make regression analysis*/
     private void analyseRegression(Report report) throws SQLException {
-//        try {
+
         for (ChecklistEntry entry : report.getBirtSteps()) {
 
-
             if (entry.getResultOfCheckIsNOK()) {
-//TODO Doesn't work if name of PON is with wronge case of letters. Must use report.getName().toUpperCase() to avoid!
-                String[] restOfOriginalNameArray = entry.getFullNameOfPon().split(report.getName(), 2);
                 String nameToCheck;
+                /*Split the name to two parts - first before name from request and second - the rest*/
+                String[] restOfOriginalNameArray =
+                        entry.getFullNameOfPon().split(report.getName(), 2);
                 try {
 
                     if (restOfOriginalNameArray[1].contains("_")) {
                         String[] region = restOfOriginalNameArray[1].split("_");
-                        nameToCheck = restOfOriginalNameArray[0] + report.getPrevName() + "_" + region[1];
+                        /* Make the new name for request from the first part (before entered name),
+                        * previous name, symbol "_" and the region*/
+                        nameToCheck = restOfOriginalNameArray[0] +
+                                      report.getPrevName() + "_" + region[1];
                     } else {
                         nameToCheck = restOfOriginalNameArray[0] + report.getPrevName();
                     }
@@ -385,11 +397,6 @@ public class ServiceAnalyseBirtMt extends Thread {
                     }
                 }
             }
-
         }
-//        } catch (Exception e) {
-//            log.error(e.getMessage());
-//            report.addLogOfErrors(e.getMessage());
-//        }
     }
 }

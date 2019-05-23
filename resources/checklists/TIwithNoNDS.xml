@@ -2,6 +2,12 @@
 
 <checklist>
 
+	<name>
+		TI without NDS
+	</name>
+	<default>
+	    no
+	</default>
 
     <SPIDER>
         <step>

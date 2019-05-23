@@ -119,14 +119,12 @@ public class ServiceAnalyseNdsMt extends Thread{
 
 
 
-//FIXME - DB is compressed and enciphered - NDS lib must be used to open
-// - Now we have error here!!!
         pstmt = con.prepareStatement(ndsConfigAndQuery.getQueryLike());
 //        pstmt.setString(1, "%" + report.getName() + "%");
 //        pstmt.setInt(2, report.getIteration());
 //        pstmt.setInt(4, report.getLimit());
 
-        //TODO NOT IMPLEMENTED
+        //TODO - TO BE IMPLEMENTED
         for (String errorToCheck : steps) {
 //            try {
 //            pstmt.setString(3, errorToCheck);
@@ -189,7 +187,7 @@ public class ServiceAnalyseNdsMt extends Thread{
 
 //        try {
 
-//TODO - NOT IMPLEMENTED
+//TODO - TO BE IMPLEMENTED
         for (ChecklistEntry entry : report.getSpiderSteps()) {
 
             if (entry.getResultOfCheckIsNOK()) {
