@@ -51,6 +51,9 @@ public final class MainConfig {
     private String STEP_NAME;
 
     @Getter @Setter
+    private String CHECKLIST_NAME;
+
+    @Getter @Setter
     private String SOURCE_NAME_SPIDER;
     @Getter @Setter
     private String SPIDER_TASK_COL_NAME;
@@ -71,8 +74,17 @@ public final class MainConfig {
 
 //    @Getter
     @Setter
-    private boolean configIsLoaded = false;
+    private boolean MULTITHREAD;
+    public boolean getMULTITHREAD() {
+        return this.MULTITHREAD;
+    }
+
+//    @Getter
+    @Setter
+    private boolean configIsLoaded;// = false;
     public boolean getConfigIsLoaded() {
         return this.configIsLoaded;
     }
+
+
 }

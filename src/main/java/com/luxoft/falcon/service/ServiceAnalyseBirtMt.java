@@ -17,24 +17,24 @@ import java.util.List;
 
 /**
  * Contains method to get data from BIRT database
- *
+ * <p>
  * Data source: BIRT MySQL DB on requested Server:port and with credentials
- *
+ * <p>
  * Input data: the name of the PON and iteration #
  * (comes from XML-file or from outer application/class via API)
  * Note: Market and region are not processed!
- *
+ * <p>
  * Transformation: toString and getHTML by template - NOT IMPLEMENTED
- *
+ * <p>
  * Output data: returns Requests Count and updates local Report object passed in arguments
  * As an option - error list in string format (serialized by toString) - NOT IMPLEMENTED
- *
+ * <p>
  * In case of exception returns text of error in report.logOfErrors
  */
 
 //TODO - Logic of BIRT check must be such:
-// 1) if PON name is full - look only in 2010 or 2020 DB
-// 2) if PON name is partial - look both on 2010 and 2020 - issue with regression check!!!
+// 1) if PON name is full (i.e. found in one DB) - look only in 2010 or 2020 DB
+// 2) if PON name is partial (i.e. found in both DBs) - look both on 2010 and 2020 - issue with regression check!!!
 
 @Slf4j
 public class ServiceAnalyseBirtMt extends Thread {
@@ -52,31 +52,26 @@ public class ServiceAnalyseBirtMt extends Thread {
     private Birt2020ConfigAndQuery birt2020ConfigAndQuery = Birt2020ConfigAndQuery.getInstance();
     private BirtQueryToCheckGeneration birtQueryToCheckGeneration = BirtQueryToCheckGeneration.getInstance();
 
-    private PreparedStatement pstmtChecker;
-    private ResultSet resultSetChecker;
-
     private String queryLike = null;
     private String queryAccurate = null;
-    private boolean isGenDefined = false;
     private int requestsCount;
 
 
-
-
-
-    public ServiceAnalyseBirtMt(Checklist checklist, Report report, Boolean analyseRegression){
+    public ServiceAnalyseBirtMt(Checklist checklist, Report report, Boolean analyseRegression) {
         this.checklist = checklist;
         this.report = report;
         this.analyseRegression = analyseRegression;
     }
 
-    public void run(){
+    public void run() {
         processBirtChecklist(checklist, report, analyseRegression);
     }
-    public List<ChecklistEntry> getSteps (){
+
+    public List<ChecklistEntry> getSteps() {
         return report.getBirtSteps();
     }
-    public int getRequestsCount(){
+
+    public int getRequestsCount() {
         return requestsCount;
     }
 
@@ -93,28 +88,33 @@ public class ServiceAnalyseBirtMt extends Thread {
                     birt2010ConfigAndQuery.getJdbcPassword());
 
             /* CHECK GENERATION */
-            isGenDefined = checkGeneration(report);
-            //requestsCount += 2;
+            boolean isGen2010 = checkGeneration(birtQueryToCheckGeneration.getG2010(), report);
+            boolean isGen2020 = checkGeneration(birtQueryToCheckGeneration.getG2020(), report);
 
             List<ChecklistEntry> fillBirtErrors;// = new LinkedList<>();
 
 
-            /* Iterate over BIRT*/
-            if (isGenDefined) {
 
-              /* Iterate over BIRT2010*/
-//            queryLike = birt2010ConfigAndQuery.getQueryLike();
-//            queryAccurate = birt2010ConfigAndQuery.getQueryAccurate();
-            fillBirtErrors = analyseActual(checklist.getBirtSteps(), report);
-            /* Store items in report*/
-            report.addBirtSteps(fillBirtErrors);
+            /* Iterate over BIRT2010*/
+            if (isGen2010) {
+                log.info("***************************** Look in Birt 2010 *****************");
+                queryLike = birt2010ConfigAndQuery.getQueryLike();
+                queryAccurate = birt2010ConfigAndQuery.getQueryAccurate();
+                fillBirtErrors = analyseActual(checklist.getBirtSteps(), report, isGen2020?" (2010)":"");
+                /* Store items in report*/
+                report.addBirtSteps(fillBirtErrors);
+            }
 
             /* Iterate over BIRT2020*/
-//            queryLike = birt2020ConfigAndQuery.getQueryLike();
-//            queryAccurate = birt2020ConfigAndQuery.getQueryAccurate();
-//            fillBirtErrors = analyseActual(checklist.getBirtSteps(), report);
-            /* Add items to report*/
-//            report.addBirtSteps(fillBirtErrors);
+            if (isGen2020) {
+                log.info("***************************** Look in Birt 2020 *****************");
+                queryLike = birt2020ConfigAndQuery.getQueryLike();
+                queryAccurate = birt2020ConfigAndQuery.getQueryAccurate();
+                fillBirtErrors = analyseActual(checklist.getBirtSteps(), report, isGen2010?" (2020)":"");
+                /* Store items in report*/
+                report.addBirtSteps(fillBirtErrors);
+            }
+
 
 
 
@@ -123,9 +123,11 @@ public class ServiceAnalyseBirtMt extends Thread {
                 if (analyseRegression) {
                     analyseRegression(report);
                 }
-            } else {
+
+            /* Iterate over BIRTs is not processed*/
+            if (!isGen2010 && !isGen2020) {
                 List<ChecklistEntry> emptyBirtErrors = new LinkedList<>();
-                for (String birtTestname : checklist.getBirtSteps()){
+                for (String birtTestname : checklist.getBirtSteps()) {
                     emptyBirtErrors.add(
                             new ChecklistEntry(
                                     birtTestname,
@@ -159,55 +161,20 @@ public class ServiceAnalyseBirtMt extends Thread {
             }
         }
 
-        log.debug(String.format(
-                "****************************** PROCESSING BIRT of PON {} HAS BEEN FINISHED ******************"),
+        log.debug("****************************** PROCESSING BIRT of PON %s HAS BEEN FINISHED ******************",
                 report.getName());
 
         return requestsCount;
     }
 
 
-    private boolean checkGeneration(Report report) throws SQLException, ClassNotFoundException {
-        isGenDefined = Boolean.FALSE;
-        //2010
-        String queryToCheck = birtQueryToCheckGeneration.getG2010();
-        pstmtChecker = con.prepareStatement(queryToCheck);
+    private boolean checkGeneration(String queryToCheck ,Report report) throws SQLException {
+        PreparedStatement pstmtChecker = con.prepareStatement(queryToCheck);
         pstmtChecker.setString(1, "%" + report.getName() + "%");
         pstmtChecker.setInt(2, report.getLimit());
-        resultSetChecker = pstmtChecker.executeQuery();
+        ResultSet resultSetChecker = pstmtChecker.executeQuery();
         requestsCount++;
-        if (resultSetChecker.isBeforeFirst()) {
-            log.debug("***************************** Use Birt 2010 *****************");
-            queryLike = birt2010ConfigAndQuery.getQueryLike();
-            queryAccurate = birt2010ConfigAndQuery.getQueryAccurate();
-            isGenDefined = true;
-        }
-//        resultSetChecker.close();
-//        pstmtChecker.close();
-//        con.close();
-
-
-//2020
-        con = DbConnectorBirt.connectDatabase(
-                birt2020ConfigAndQuery.getJdbcUrl(),
-                birt2020ConfigAndQuery.getJdbcLogin(),
-                birt2020ConfigAndQuery.getJdbcPassword());
-        queryToCheck = birtQueryToCheckGeneration.getG2020();
-        pstmtChecker = con.prepareStatement(queryToCheck);
-        pstmtChecker.setString(1, "%" + report.getName() + "%");
-        pstmtChecker.setInt(2, report.getLimit());
-        resultSetChecker = pstmtChecker.executeQuery();
-        requestsCount++;
-        if (resultSetChecker.isBeforeFirst()) {
-            log.debug("***************************** Use Birt 2020 *****************");
-            queryLike = birt2020ConfigAndQuery.getQueryLike();
-            queryAccurate = birt2020ConfigAndQuery.getQueryAccurate();
-            isGenDefined = true;
-        }
-//        resultSetChecker.close();
-//        pstmtChecker.close();
-
-        return isGenDefined;
+        return resultSetChecker.isBeforeFirst();
     }
 
 
@@ -215,7 +182,7 @@ public class ServiceAnalyseBirtMt extends Thread {
 
 
     /* THE MAIN ACTION IS BELOW!!!*/
-    private List<ChecklistEntry> analyseActual(List<String> steps, Report report) throws SQLException {
+    private List<ChecklistEntry> analyseActual(List<String> steps, Report report, String generation) throws SQLException {
         List<ChecklistEntry> fillBirtErrors = new LinkedList<>();
 
 
@@ -229,91 +196,92 @@ public class ServiceAnalyseBirtMt extends Thread {
         pstmt.setInt(3, report.getLimit());
 
         for (String errorToCheck : steps) {
+            pstmt.setString(2, errorToCheck);
 
-                pstmt.setString(2, errorToCheck);
+            String fullQuery =
+                    pstmt.toString().replace("com.mysql.cj.jdbc.ClientPreparedStatement: ", "");
+            resultSet = pstmt.executeQuery();
+            requestsCount++;
 
+            log.debug(String.format("************************* Birt query has been executed (%s)", fullQuery));
+            /*If response is empty = store only one item for the step with NOT FOUND description*/
+            if (!resultSet.isBeforeFirst()) {
+                fillBirtErrors.add(
+                        new ChecklistEntry(
+                                errorToCheck + generation,
+                                Boolean.TRUE,
+                                Boolean.FALSE,
+                                fullQuery,
+                                report.getName(),
+                                "Not found"));
+            } else {
 
-                String fullQuery = pstmt.toString().replace("com.mysql.cj.jdbc.ClientPreparedStatement: ","");
-                resultSet = pstmt.executeQuery();
-                requestsCount++;
-
-                log.debug(String.format("************************* Birt query has been executed (%s)", fullQuery));
-                /*If response is empty = store only one item for the step with NOT FOUND description*/
-                if (!resultSet.isBeforeFirst()) {
-                    fillBirtErrors.add(
-                            new ChecklistEntry(
-                                    errorToCheck,
-                                    Boolean.TRUE,
-                                    Boolean.FALSE,
-                                    fullQuery,
-                                    report.getName(),
-                                    "Not found"));
-                } else {
-
-
-
-                    /* Check is it possible to aggregate all rows to one
-                     * with simplified name of PON*/
-                    Boolean aggregateBirtSteps = Boolean.TRUE;
-                    String resultOfCheckFirstRow = null;
-                    Boolean firstRow = Boolean.TRUE;
-                    ChecklistEntry tempChecklistEntry = new ChecklistEntry(errorToCheck);
-                    while (resultSet.next()) {
-                        String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
-                        String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
+                /* Check is it possible to aggregate all rows to one
+                 * with simplified name of PON*/
+                Boolean aggregateBirtSteps = Boolean.TRUE;
+                String resultOfCheckFirstRow = null;
+                Boolean firstRow = Boolean.TRUE;
+                ChecklistEntry tempChecklistEntry =
+                        new ChecklistEntry(errorToCheck + generation);
+                while (resultSet.next()) {
+                    String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
+//                        String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
 
 
-                        if (firstRow) {
-                            resultOfCheckFirstRow = resultOfTest;
+                    if (firstRow) {
+                        resultOfCheckFirstRow = resultOfTest;
 
-                            tempChecklistEntry.setStepIsChecked(Boolean.TRUE);
+                        tempChecklistEntry.setStepIsChecked(Boolean.TRUE);
 
-                            tempChecklistEntry.setFullQuery(fullQuery);
-                            tempChecklistEntry.setFullNameOfPon(report.getName());
-                            tempChecklistEntry.setResultOfCheckText(resultOfTest);
-                            if (resultOfTest.toUpperCase().equals("NOK")) {
-                                tempChecklistEntry.setResultOfCheckIsNOK(Boolean.TRUE);
-                            } else {
-                                tempChecklistEntry.setResultOfCheckIsNOK(Boolean.FALSE);
-                            }
-                            firstRow = Boolean.FALSE;
+                        tempChecklistEntry.setFullQuery(fullQuery);
+                        tempChecklistEntry.setFullNameOfPon(report.getName() + " (aggregated)");
+                        tempChecklistEntry.setResultOfCheckText(resultOfTest);
+                        if (resultOfTest.toUpperCase().equals("NOK")) {
+                            tempChecklistEntry.setResultOfCheckIsNOK(Boolean.TRUE);
+                        } else {
+                            tempChecklistEntry.setResultOfCheckIsNOK(Boolean.FALSE);
                         }
-                        if (resultOfTest.toUpperCase().equals(resultOfCheckFirstRow)) {
-                            continue;
-                        }
-                        aggregateBirtSteps = Boolean.FALSE;
-                        break;
+                        firstRow = Boolean.FALSE;
                     }
+                    if (resultOfTest.toUpperCase().equals(resultOfCheckFirstRow)) {
+                        continue;
+                    }
+                    aggregateBirtSteps = Boolean.FALSE;
+                    break;
+                }
 
-                    if (aggregateBirtSteps) {
-                        fillBirtErrors.add(tempChecklistEntry);
-                    } else {
-                        resultSet.beforeFirst();
-                        while (resultSet.next()) {
-                            String fullName = resultSet.getString(mainConfig.getBIRT_TASK_COL_NAME());
-                            String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
-                            String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
+                if (aggregateBirtSteps) {
+                    fillBirtErrors.add(tempChecklistEntry);
+                } else {
+                    resultSet.beforeFirst();
+                    while (resultSet.next()) {
+                        String fullName = resultSet.getString(mainConfig.getBIRT_TASK_COL_NAME());
+                        String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
+                        String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
 
-                            ChecklistEntry entry = new ChecklistEntry(testName);
+                        ChecklistEntry entry =
+                                new ChecklistEntry(testName + generation);
 
-                            entry.setStepIsChecked(Boolean.TRUE);
-                            entry.setFullQuery(fullQuery);
-                            entry.setFullNameOfPon(fullName);
+                        entry.setStepIsChecked(Boolean.TRUE);
+                        entry.setFullQuery(fullQuery);
+                        entry.setFullNameOfPon(fullName);
 
-                            /*Save result of check as string and as boolean value (may be deleted as non representative)*/
-                            entry.setResultOfCheckText(resultOfTest);
-                            if (resultOfTest.toUpperCase().equals("NOK")) {
-                                entry.setResultOfCheckIsNOK(Boolean.TRUE);
-                            } else {
-                                entry.setResultOfCheckIsNOK(Boolean.FALSE);
-                            }
-                            /*Store all results */
-                            fillBirtErrors.add(entry);
-
-                            log.debug(String.format("************************* BIRT resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
+                        /*Save result of check as string and as boolean value */
+                        entry.setResultOfCheckText(resultOfTest);
+                        if (resultOfTest.toUpperCase().equals("NOK")) {
+                            entry.setResultOfCheckIsNOK(Boolean.TRUE);
+                        } else {
+                            entry.setResultOfCheckIsNOK(Boolean.FALSE);
                         }
+                        /*Store all results */
+                        fillBirtErrors.add(entry);
+
+                        log.debug(
+                                String.format(
+                                "************************* BIRT resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
                     }
                 }
+            }
         }
         return fillBirtErrors;
     }
@@ -334,23 +302,26 @@ public class ServiceAnalyseBirtMt extends Thread {
                     if (restOfOriginalNameArray[1].contains("_")) {
                         String[] region = restOfOriginalNameArray[1].split("_");
                         /* Make the new name for request from the first part (before entered name),
-                        * previous name, symbol "_" and the region*/
+                         * previous name, symbol "_" and the region*/
                         nameToCheck = restOfOriginalNameArray[0] +
-                                      report.getPrevName() + "_" + region[1];
+                                report.getPrevName() + "_" + region[1];
                     } else {
                         nameToCheck = restOfOriginalNameArray[0] + report.getPrevName();
                     }
 
                 } catch (Exception e) {
                     nameToCheck = report.getPrevName();
-                    log.error(String.format("Regression check - error while converting names (%s) - work with %s",
+                    log.error(
+                            String.format(
+                            "Regression check - error while converting names (%s) - work with %s",
                             entry.toString(),
                             nameToCheck));
                     report.addLogOfErrors(
-                            String.format("Regression check - error while converting names (%s)- work with %s. Error is [%s]",
-                                    entry.toString(),
-                                    nameToCheck,
-                                    e.getMessage()));
+                            String.format(
+                            "Regression check - error while converting names (%s)- work with %s. Error is [%s]",
+                            entry.toString(),
+                            nameToCheck,
+                            e.getMessage()));
                 }
 
                 if (report.getUseQueryLikeForPrev()) {
@@ -363,35 +334,40 @@ public class ServiceAnalyseBirtMt extends Thread {
                 pstmt.setString(2, entry.getNameOfErrorToCheckFor());
                 pstmt.setInt(3, report.getLimit());
                 String fullQuery = pstmt.toString();
+                entry.setFullQuery(entry.getFullQuery() +
+                        "<br/><br/>\nRegression query:<br/>\n" +
+                        fullQuery.replace("com.mysql.cj.jdbc.ClientPreparedStatement: ", ""));
 
                 resultSet = pstmt.executeQuery();
                 requestsCount++;
 
                 log.debug(
                         String.format(
-                                "************************* Birt query for regression check has been executed (%s)",
-                                fullQuery));
+                        "************************* Birt query for regression check has been executed (%s)",
+                        fullQuery));
 
                 if (!resultSet.isBeforeFirst()) {
-
                     entry.setIsRegression("Not found");
-                    entry.setFullNameOfRegressionPon(nameToCheck + " [is not found]");
+                    entry.setFullNameOfRegressionPon("No results for " + nameToCheck);
                 }
 
                 while (resultSet.next()) {
                     String resultPrevTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
                     String resultOriginalTest = entry.getResultOfCheckText();
 
-                    //FixME - provide logic that analyses case that in previous PON test was skipped!
+
                     if (resultOriginalTest.equals(resultPrevTest)) {
                         entry.setIsRegression("No");
-                    } else if (resultOriginalTest.toUpperCase().equals("NOK") && resultPrevTest.toUpperCase().equals("OK")) {
+                        entry.setFullNameOfRegressionPon(nameToCheck);
+                    } else if (resultOriginalTest.toUpperCase().equals("NOK") &&
+                               resultPrevTest.toUpperCase().equals("OK")) {
                         entry.setIsRegression("Yes");
                         entry.setFullNameOfRegressionPon(nameToCheck);
                     } else {
+                        //Case that in previous PON test was skipped!
                         entry.setIsRegression("Yes (see comment)");
                         entry.setFullNameOfRegressionPon(
-                                String.format(" {} [ with result of prev test {}]",
+                                String.format(" %s [ with result of prev test %s]",
                                         nameToCheck,
                                         resultPrevTest));
                     }

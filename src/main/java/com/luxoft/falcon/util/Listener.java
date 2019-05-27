@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import static com.luxoft.falcon.util.ReadChecklistsFiles.getChecklistsList;
 import static com.luxoft.falcon.util.ReadXML.readMainConfigFromFile;
 import javax.servlet.ServletContextEvent;
-import java.io.IOException;
 
 /* Class is loaded at start of the app (while webapp is started) and is used to load mainConfig.
 * It is used with <listener-class>com.luxoft.falcon.util.Listener</listener-class> in web.xml */
@@ -20,8 +19,8 @@ public class Listener implements javax.servlet.ServletContextListener {
 
         try {
             getChecklistsList(MainConfig.getCHECKLISTS_PATH());
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            log.error("Error in getChecklistsList: " + e.getMessage());
         }
 
     }

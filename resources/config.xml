@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <CONFIG>
     <MAIN>
+        <MULTITHREAD>
+            no
+        </MULTITHREAD>
+        <CHECKLIST_NAME>
+            name
+        </CHECKLIST_NAME>
+
         <PON_NAME_REQUEST>
             pon_name
         </PON_NAME_REQUEST>

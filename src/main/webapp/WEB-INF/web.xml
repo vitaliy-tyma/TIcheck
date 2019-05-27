@@ -6,15 +6,9 @@
     <display-name>Archetype Created Web Application</display-name>
 
     <welcome-file-list>
+        <welcome-file>analyse</welcome-file>
         <welcome-file>index.jsp</welcome-file>
-
-        <welcome-file>analyse.jsp</welcome-file>
-        <welcome-file>index.html</welcome-file>
-        <welcome-file>index.htm</welcome-file>
-
-        <welcome-file>default.html</welcome-file>
-        <welcome-file>default.htm</welcome-file>
-        <welcome-file>default.jsp</welcome-file>
+        <welcome-file>help.html</welcome-file>
     </welcome-file-list>
 
     <listener>
@@ -29,7 +23,10 @@
         <servlet-name>ServletAnalyse</servlet-name>
         <servlet-class>com.luxoft.falcon.controller.ServletAnalyse</servlet-class>
     </servlet>
-
+    <servlet>
+        <servlet-name>ServletReadChecklistsList</servlet-name>
+        <servlet-class>com.luxoft.falcon.controller.ServletReadChecklistsList</servlet-class>
+    </servlet>
 
     <servlet-mapping>
         <servlet-name>ServletAnalyse</servlet-name>
@@ -39,5 +36,8 @@
         <servlet-name>ServletReadMainConfig</servlet-name>
         <url-pattern>/ServletReadMainConfig</url-pattern>
     </servlet-mapping>
-
+    <servlet-mapping>
+        <servlet-name>ServletReadChecklistsList</servlet-name>
+        <url-pattern>/ServletReadChecklistsList</url-pattern>
+    </servlet-mapping>
 </web-app>

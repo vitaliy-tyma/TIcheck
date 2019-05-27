@@ -2,15 +2,11 @@ package com.luxoft.falcon.service;
 
 import com.luxoft.falcon.config.MainConfig;
 import com.luxoft.falcon.config.NdsConfigAndQuery;
-import com.luxoft.falcon.config.SpiderConfigAndQuery;
-import com.luxoft.falcon.dao.DbConnectorNds;
-import com.luxoft.falcon.dao.DbConnectorSpider;
 import com.luxoft.falcon.dao.SQLiteDataSource;
 import com.luxoft.falcon.model.Checklist;
 import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.Report;
 import lombok.extern.slf4j.Slf4j;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.*;
@@ -103,8 +99,7 @@ public class ServiceAnalyseNdsMt extends Thread{
             }
         }
 
-        log.debug(String.format(
-                "****************************** PROCESSING NDS of PON {} HAS BEEN FINISHED ******************"),
+        log.debug("****************************** PROCESSING NDS of PON {} HAS BEEN FINISHED ******************",
                 report.getName());
 
         return requestsCount;

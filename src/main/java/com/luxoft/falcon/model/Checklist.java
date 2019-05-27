@@ -1,5 +1,6 @@
 package com.luxoft.falcon.model;
 import lombok.Data;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -16,34 +17,38 @@ import java.util.List;
 @Data
 public class Checklist {
 
-    private String name = "";
-    private boolean defaultFlag = false;
 
     private List<String> spiderSteps = new LinkedList<>();
     private List<String> birtSteps = new LinkedList<>();
     private List<String> ndsSteps = new LinkedList<>();
 
+    /* NOT USED YET*/
+    private String nameOfChecklist = "";
+    private String fileName = "";
+    private boolean defaultFlag = false;
 
+
+/* !!!!!!!!!!!!!!UNDER CONSTRUCTION!!!!!!!!!!!!!!!!!!!!*/
 //TODO Clarify usage of report.checklistName - seems that it is not in use
-//        /* !!!!!!!!!!!!!!UNDER CONSTRUCTION!!!!!!!!!!!!!!!!!!!!*/
-//        ndsSteps.add("tmcLocationTableIdTable");
+// ndsSteps.add("tmcLocationTableIdTable");
+// 0MXXXX.NDS //One file must be processed!!!!
+// NHXXXX.NDS //Many files must be processed!!!!
 
-//FIXME
-// find out with https://jira.harman.com/jira/browse/NAV2010ANA-23009 !!!!!
+//TODO
+// ndsSteps.add("TI version tmcLocationTableIdTable");
+// Find out what versions are current!!!
 
-    /*
-     * 0MXXXX.NDS //One file must be processed!!!!
-     * NHXXXX.NDS //Many files must be processed!!!!
-     * */
-//        ndsSteps.add("TI version tmcLocationTableIdTable"); //Find out what versions are current!!!
+// Task https://jira.harman.com/jira/browse/NAV2010ANA-23009 !!!!!
+// Is incorporated to anaconda.nds.ti.TmcLocationExporterTest.tmcNameTableTest
 
-    /* !!!!!!!!!!!!!!NOT IMPLEMENTED!!!!!!!!!!!!!!!!!!!!
-     * Filled Local_tmc_location on Route links
-     * TI Browser - TI icons and messages are present for TMC and TPEG_TEC
-     * */
+//FIXME - WAY OF PROCESSING IS NOT IMPLEMENTED - VISUAL TASK TO BE DEVELOPED !!!!!!!!!!!!!!!!!!!!
+// Filled Local_tmc_location on Route links
+// TI Browser - TI icons and messages are present for TMC and TPEG_TEC
+
 
     public Checklist() {
     }
+
 
 
     public void addSpiderSteps(String string){

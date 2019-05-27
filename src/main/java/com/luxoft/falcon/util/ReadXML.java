@@ -15,6 +15,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import javax.xml.parsers.*;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 
 @Slf4j
 public class ReadXML {
@@ -37,9 +38,9 @@ public class ReadXML {
 
     public static void readMainConfigFromFile(String fileAbsolutePathAndName) {
 
-
+        File fXmlFile;
         try {
-            File fXmlFile = new File(fileAbsolutePathAndName);
+            fXmlFile = new File(fileAbsolutePathAndName); //TODO Close file?
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);
@@ -143,8 +144,18 @@ public class ReadXML {
                                     "SOURCE_NAME_NDS").
                                     item(0).getTextContent().
                                     replace("\n", "").trim());
-
-
+                    mainConfig.setMULTITHREAD(
+                            (eElement.getElementsByTagName(
+                                    "MULTITHREAD").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim().
+                                    toUpperCase().
+                                    equals("YES")));
+                    mainConfig.setCHECKLIST_NAME(
+                            eElement.getElementsByTagName(
+                                    "CHECKLIST_NAME").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim());
                 }
             }
 
@@ -189,7 +200,12 @@ public class ReadXML {
             setDefaultValuesBecauseOfException();
             log.error("Read XML failed with the error " + e.getMessage());
         }
+
+
     }
+
+
+
 
 
     private static void setDefaultValuesBecauseOfException() {
@@ -346,7 +362,15 @@ public class ReadXML {
     }
 
 
-    /* Read checklist from file by given name using SAX parser - JUST FOR EXAMPLE*/
+
+
+
+
+
+    /*
+    * Read checklist from file by given name using SAX parser
+    * - SAX parser is used JUST FOR EXAMPLE
+    * */
     public static Checklist readChecklistFromFile(String fileAbsolutePathAndName)
             throws ParserConfigurationException, SAXException, IOException {
 
@@ -361,6 +385,7 @@ public class ReadXML {
             boolean birt = false;
             boolean nds = false;
             boolean step = false;
+            boolean name = false;
 
 
             public void startElement(String uri,
@@ -373,17 +398,27 @@ public class ReadXML {
                     spider = true;
                     birt = false;
                     nds = false;
+                    name = false;
                 }
                 if (qName.equalsIgnoreCase(mainConfig.getSOURCE_NAME_BIRT())) {
                     birt = true;
                     spider = false;
                     nds = false;
+                    name = false;
                 }
                 if (qName.equalsIgnoreCase(mainConfig.getSOURCE_NAME_NDS())) {
                     nds = true;
                     spider = false;
                     birt = false;
+                    name = false;
                 }
+                if (qName.equalsIgnoreCase(mainConfig.getCHECKLIST_NAME())) {
+                    nds = false;
+                    spider = false;
+                    birt = false;
+                    name = true;
+                }
+
                 if (qName.equalsIgnoreCase(mainConfig.getSTEP_NAME())) {
                     step = true;
                 }
@@ -402,12 +437,15 @@ public class ReadXML {
                 if (qName.equalsIgnoreCase(mainConfig.getSOURCE_NAME_NDS())) {
                     nds = false;
                 }
+                if (qName.equalsIgnoreCase(mainConfig.getCHECKLIST_NAME())) {
+                    name = false;
+                }
                 if (qName.equalsIgnoreCase(mainConfig.getSTEP_NAME())) {
                     step = false;
                 }
             }
 
-            public void characters(char ch[], int start, int length) {
+            public void characters(char[] ch, int start, int length) {
 
                 String s = new String(ch, start, length).replace("\n", "").trim();
                 if (step) {
@@ -421,23 +459,27 @@ public class ReadXML {
                         checklist.addNdsSteps(s);
                     }
                 }
+
+                if (name) {
+                    checklist.setNameOfChecklist(s);
+                }
             }
         };
 
 
         String currentDir = new java.io.File(".").getCanonicalPath();
         currentDir +=
-                mainConfig.getPATH_DELIMITER() +
+                MainConfig.getPATH_DELIMITER() +
                         "resources" +
-                        mainConfig.getPATH_DELIMITER() +
+                        MainConfig.getPATH_DELIMITER() +
                         "checklists" +
-                        mainConfig.getPATH_DELIMITER() +
+                        MainConfig.getPATH_DELIMITER() +
                         fileAbsolutePathAndName + ".xml";
 
         try {
             File file = new File(currentDir);
             InputStream inputStream = new FileInputStream(file);
-            Reader reader = new InputStreamReader(inputStream, "UTF-8");
+            Reader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
 
             InputSource is = new InputSource(reader);
             is.setEncoding("UTF-8");
@@ -446,7 +488,7 @@ public class ReadXML {
             saxParser.parse(is, handler);
 
         } catch (Exception e) {
-
+            log.error("XML parser failed with " + e.getMessage());
         }
         return checklist;
     }

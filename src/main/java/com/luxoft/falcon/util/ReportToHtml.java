@@ -2,10 +2,6 @@ package com.luxoft.falcon.util;
 
 import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.Report;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 
@@ -18,13 +14,12 @@ public class ReportToHtml {
     private static String tempErrorToCheck = "";
 
 
+    @SuppressWarnings("StringBufferReplaceableByString")
     public static String getDataFromReport(Report report) {
         i = 0;
-
         StringBuilder result = new StringBuilder();
 
-        result.append("<div>");
-
+        result.append("<div>\n");
 
         result.append("<table border=1 width = 95%>\n");
         result.append("<tr>\n");
@@ -37,23 +32,16 @@ public class ReportToHtml {
         result.append("<th>Regression</th>\n");
         result.append("</tr>\n");
 
-
-        result.append("<tr><td colspan = 7 align=center>\n");
-        result.append("SPIDER</td></tr>\n");
+        result.append("<tr>\n<td colspan = 7 align=center>\n");
+        result.append("SPIDER\n</td>\n</tr>\n");
         result.append(getRowsFromReport(report, report.getSpiderSteps()));
-
-        result.append("<tr><td colspan = 7 align=center>\n");
-        result.append("BIRT</td></tr>\n");
+        result.append("<tr>\n<td colspan = 7 align=center>\n");
+        result.append("BIRT\n</td></tr>\n");
         result.append(getRowsFromReport(report, report.getBirtSteps()));
-
-
         result.append("</table>\n");
         result.append("</div>\n");
 
-
         return result.toString();
-
-
     }
 
 
@@ -72,7 +60,9 @@ public class ReportToHtml {
             tempErrorToCheck = entry.getNameOfErrorToCheckFor();
 
             //Show index
-            result.append("\n <tr id = " + (bgColorSwap ? "ROW_WHITE" : "ROW_GRAY") + ">");
+            result.append("\n <tr id = ");
+            result.append(bgColorSwap ? "ROW_WHITE" : "ROW_GRAY");
+            result.append(">");
             result.append(
                     String.format("\n<td align=center>%2d</td>\n",
                             i));
@@ -91,7 +81,7 @@ public class ReportToHtml {
                             entry.getNameOfErrorToCheckFor()));
 
 
-            //Show weather the step has been checked or not
+            //Show whether the step has been checked or not
             if (entry.getStepIsChecked()) {
                 result.append(
                         String.format("<td align=center><font color = green>%s</font></td>\n",
@@ -104,25 +94,14 @@ public class ReportToHtml {
 
 
             //Show result and TEST if it is not OK or NOK in the tooltip
-            String stringNOK_OK;
             String color;
             if (entry.getResultOfCheckIsNOK()) {
-                stringNOK_OK = "NOK";
                 color = "red";
             } else {
-                stringNOK_OK = "OK";
                 color = entry.getResultOfCheckText().equals("OK") ? "green" : "blue";
 
             }
 
-//            result.append(
-//                    String.format("<td align=center><div class=\"tooltip_for_name\">" +
-//                                    "<font color = %s>%s</font>" +
-//                                    "<span class=\"tooltiptext\">%s</span>" +
-//                                    "</div></td>",
-//                                    color,
-//                                    entry.getResultOfCheckText(),
-//                                    stringNOK_OK));
             result.append(
                     String.format("<td align=center>" +
                                     "<font color = %s>%s</font>" +
@@ -145,9 +124,18 @@ public class ReportToHtml {
                                         "<span class=\"tooltiptext\">%s</span>" +
                                         "</div></font></td>\n",
                                 entry.getIsRegression(),
-                                "To " +
-                                        entry.getFullNameOfRegressionPon() +
-                                        " (iteration " + report.getPrevIteration() + ")"));
+                                entry.getFullNameOfRegressionPon() +
+                                " (iteration " + report.getPrevIteration() + ")"));
+            } else if (entry.getFullNameOfRegressionPon() != null &&
+                    !entry.getFullNameOfRegressionPon().equals("")) {
+                result.append(
+                        String.format("<td align=center><font color = blue>" +
+                                        "<div class=\"tooltip_for_name\">%s" +
+                                        "<span class=\"tooltiptext\">%s</span>" +
+                                        "</div></font></td>\n",
+                                entry.getIsRegression(),
+                                entry.getFullNameOfRegressionPon() +
+                                " (iteration " + report.getPrevIteration() + ")"));
             } else {
                 result.append(
                         String.format("<td align = center>%s</td>\n",

@@ -105,8 +105,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
             }
         }
 
-        log.debug(String.format(
-                "********************************* PROCESSING SPIDER of PON {} HAS BEEN FINISHED ******************"),
+        log.debug("********************************* PROCESSING SPIDER of PON {} HAS BEEN FINISHED ******************",
                 report.getName());
 
         return requestsCount;
@@ -213,6 +212,10 @@ public class ServiceAnalyseSpiderMt extends Thread {
                     pstmt.setString(3, entry.getNameOfErrorToCheckFor());
                     String fullQuery = pstmt.toString();
 
+                    entry.setFullQuery(entry.getFullQuery() +
+                            "<br/><br/>\nRegression query:<br/>\n" +
+                            fullQuery);
+
                     resultSet = pstmt.executeQuery();
                     requestsCount++;
 
@@ -225,6 +228,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
                     if (!resultSet.isBeforeFirst()) {
                         entry.setIsRegression("Yes");
                         entry.setFullNameOfRegressionPon(nameToCheck);
+
                     }
 
 
@@ -235,6 +239,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
                         if (restOfOriginalName.equals(restOfPrevName)) {
                             entry.setIsRegression("No");
+                            entry.setFullNameOfRegressionPon(nameToCheck);
                         }
 
                     }
