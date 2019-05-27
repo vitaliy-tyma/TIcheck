@@ -6,6 +6,7 @@ import com.luxoft.falcon.service.*;
 import com.luxoft.falcon.util.ReadXML;
 import com.luxoft.falcon.view.View;
 import lombok.extern.slf4j.Slf4j;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -24,7 +25,7 @@ import java.io.IOException;
 @Slf4j
 public class ServletAnalyse extends HttpServlet {
     private static MainConfig mainConfig = MainConfig.getInstance();
-//    private static ChecklistsList checklistsList = ChecklistsList.getInstance();
+    //    private static ChecklistsList checklistsList = ChecklistsList.getInstance();
     private static int requestsCount = 0;
     private static boolean analyseRegression = false;
 
@@ -83,9 +84,6 @@ public class ServletAnalyse extends HttpServlet {
         httpServletRequest.setAttribute(mainConfig.getCHECKLISTS_REGRESSION(), regressionCheck);
 
 
-
-
-
         long start = System.currentTimeMillis();
         log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
         try {
@@ -124,12 +122,6 @@ public class ServletAnalyse extends HttpServlet {
                 }
 
 
-
-
-
-
-
-
                 report.setPrevName(prevPonName);
                 report.setPrevIteration(prevPonIteration);
                 if (useQueryLikeForPrev == null) {
@@ -141,9 +133,6 @@ public class ServletAnalyse extends HttpServlet {
                         report.setUseQueryLikeForPrev(Boolean.FALSE);
                     }
                 }
-
-
-
 
 
                 if (regressionCheck != null) {
@@ -163,7 +152,7 @@ public class ServletAnalyse extends HttpServlet {
                     log.info("****************************************** startMultithreadedMode *****************************************");
                     startMultithreadedMode(checklist, report, analyseRegression);
                 } else {
-                   // Use SingleThread mode for debug!!!
+                    // Use SingleThread mode for debug!!!
                     log.info("****************************************** startSingleThreadedMode *****************************************");
                     startSingleThreadedMode(checklist, report, analyseRegression);
                 }
@@ -192,17 +181,19 @@ public class ServletAnalyse extends HttpServlet {
             showEmptyForm = (ponName == null && ponIteration == null && limitValue == null);
             result.append(
                     View.getHTML(
-                    checklist.getNameOfChecklist(),
-                    report,
-                    analyseRegression,
-                    showEmptyForm));
+                            checklist.getNameOfChecklist(),
+                            report,
+                            analyseRegression,
+                            showEmptyForm));
 
 
             /* The block is not necessary - works well without it*/
-            {checklist.clear();
-            report.clear();
-            //checklist = null;//never used more!
-            report = null;}
+            {
+                checklist.clear();
+                report.clear();
+                //checklist = null;//never used more!
+                report = null;
+            }
 
 
             /* Error handling in case of input parameters problems*/
@@ -221,7 +212,6 @@ public class ServletAnalyse extends HttpServlet {
         /* Send reply to the client */
         httpServletResponse.getWriter().print(result.toString());
     }
-
 
 
     // Use one thread to process different data sources - useful for debug!!!
