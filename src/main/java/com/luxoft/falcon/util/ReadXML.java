@@ -491,6 +491,8 @@ public class ReadXML {
         } catch (Exception e) {
             log.error("XML parser failed with " + e.getMessage());
         }
+
+        log.info("************************ ReadXML has finished succesfully **************");
         return checklist;
     }
 }

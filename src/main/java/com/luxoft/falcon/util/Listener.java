@@ -19,7 +19,9 @@ public class Listener implements javax.servlet.ServletContextListener {
         log.info("MainConfig.getCONFIG_PATH_AND_NAME(): " + MainConfig.getCONFIG_PATH_AND_NAME());
 
         try {
+            //FixME - error if is called with empty request - null.xml is impossible to proceed!
             getChecklistsList(MainConfig.getCHECKLISTS_PATH());
+            log.info("MainConfig.getCHECKLISTS_PATH(): " + MainConfig.getCHECKLISTS_PATH());
         } catch (Exception e) {
             log.error("Error in getChecklistsList: " + e.getMessage());
         }

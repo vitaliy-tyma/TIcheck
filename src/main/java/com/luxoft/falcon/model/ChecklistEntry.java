@@ -58,4 +58,8 @@ public class ChecklistEntry {
     @Getter
     @Setter
     private String fullNameOfRegressionPon = "";
+
+    @Getter
+    @Setter
+    private String aggregatedNames;
 }

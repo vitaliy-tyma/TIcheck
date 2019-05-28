@@ -39,10 +39,10 @@ z-index: 1;
 /* Tooltip text */
 .tooltip_for_name .tooltiptext {
 visibility: hidden;
-width: 200px;
+width: 300px;
 bottom: 100%;
 left: 50%;
-margin-left: -100px; /* Use shift, to center the tooltip */
+margin-left: -200px; /* Use shift, to center the tooltip */
 background-color: black;
 color: #fff;
 text-align: center;

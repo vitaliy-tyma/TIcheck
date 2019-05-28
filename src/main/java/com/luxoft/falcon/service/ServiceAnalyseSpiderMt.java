@@ -69,7 +69,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
     public int processSpiderChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
         requestsCount = 0;
-        log.debug("**** in ServiceAnalyseSpiderMt.processSpiderChecklist() ****");
+        log.info("**** in ServiceAnalyseSpiderMt.processSpiderChecklist() ****");
 
         try {
             con = DbConnectorSpider.connectDatabase(spiderConfigAndQuery);
@@ -105,7 +105,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
             }
         }
 
-        log.debug("********************************* PROCESSING SPIDER of PON {} HAS BEEN FINISHED ******************",
+        log.info("********************************* PROCESSING SPIDER of PON {} HAS BEEN FINISHED ******************",
                 report.getName());
 
         return requestsCount;

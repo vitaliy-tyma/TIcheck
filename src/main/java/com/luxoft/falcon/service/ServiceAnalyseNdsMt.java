@@ -99,7 +99,7 @@ public class ServiceAnalyseNdsMt extends Thread{
             }
         }
 
-        log.debug("****************************** PROCESSING NDS of PON {} HAS BEEN FINISHED ******************",
+        log.info("****************************** PROCESSING NDS of PON {} HAS BEEN FINISHED ******************",
                 report.getName());
 
         return requestsCount;

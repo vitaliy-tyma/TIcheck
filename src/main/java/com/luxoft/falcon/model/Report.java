@@ -17,10 +17,10 @@ public class Report {
     @Getter
     @Setter
     private List<ChecklistEntry> spiderSteps = new LinkedList<>();
+
     @Getter
     @Setter
     private List<ChecklistEntry> birtSteps = new LinkedList<>();
-
     public void addBirtSteps(List<ChecklistEntry> list) {
         this.birtSteps.addAll(list);
     }
@@ -198,6 +198,9 @@ public class Report {
     @Getter
     @Setter
     private int requestsCount;
+
+
+
 
 
     public void clear() {

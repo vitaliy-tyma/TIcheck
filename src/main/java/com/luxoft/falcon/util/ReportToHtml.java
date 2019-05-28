@@ -69,10 +69,27 @@ public class ReportToHtml {
 
 
             //Show the full name of actual PON
-            result.append(
-                    String.format("\n<td>%s (%s)</td>\n",
-                            entry.getFullNameOfPon(),
-                            report.getIteration()));
+            if (entry.getAggregatedNames() == null) {
+                result.append(
+                        String.format("\n<td>%s (%s)</td>\n",
+                                entry.getFullNameOfPon(),
+                                report.getIteration()));
+
+            } else {
+                result.append(
+                        String.format("<td align=center><font color = blue>" +
+                                        "<div class=\"tooltip_for_name\">%s (%s)" +
+                                        "<span class=\"tooltiptext\">%s</span>" +
+                                        "</div></font></td>\n",
+                                entry.getFullNameOfPon(),
+                                report.getIteration(),
+                                entry.getAggregatedNames()));
+            }
+
+
+
+
+
 
 
             //Show the name of error to check

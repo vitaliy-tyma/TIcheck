@@ -78,7 +78,7 @@ public class ServiceAnalyseBirtMt extends Thread {
 
     public int processBirtChecklist(Checklist checklist, Report report, Boolean analyseRegression) {
         requestsCount = 0;
-        log.debug("**** in ServiceAnalyseBirtMt.processBirt() ****");
+        log.info("**** in ServiceAnalyseBirtMt.processBirt() ****");
 
         try {
 
@@ -161,7 +161,7 @@ public class ServiceAnalyseBirtMt extends Thread {
             }
         }
 
-        log.debug("****************************** PROCESSING BIRT of PON %s HAS BEEN FINISHED ******************",
+        log.info("****************************** PROCESSING BIRT of PON %s HAS BEEN FINISHED ******************",
                 report.getName());
 
         return requestsCount;
@@ -221,10 +221,13 @@ public class ServiceAnalyseBirtMt extends Thread {
                 Boolean aggregateBirtSteps = Boolean.TRUE;
                 String resultOfCheckFirstRow = null;
                 Boolean firstRow = Boolean.TRUE;
+                StringBuilder ponNamesAggregated = new StringBuilder();
                 ChecklistEntry tempChecklistEntry =
                         new ChecklistEntry(errorToCheck + generation);
                 while (resultSet.next()) {
+
                     String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
+                    String ponName = resultSet.getString(mainConfig.getBIRT_TASK_COL_NAME());
 //                        String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
 
 
@@ -234,7 +237,7 @@ public class ServiceAnalyseBirtMt extends Thread {
                         tempChecklistEntry.setStepIsChecked(Boolean.TRUE);
 
                         tempChecklistEntry.setFullQuery(fullQuery);
-                        tempChecklistEntry.setFullNameOfPon(report.getName() + " (aggregated)");
+//                        tempChecklistEntry.setFullNameOfPon(report.getName() + " (aggregated)");
                         tempChecklistEntry.setResultOfCheckText(resultOfTest);
                         if (resultOfTest.toUpperCase().equals("NOK")) {
                             tempChecklistEntry.setResultOfCheckIsNOK(Boolean.TRUE);
@@ -244,6 +247,9 @@ public class ServiceAnalyseBirtMt extends Thread {
                         firstRow = Boolean.FALSE;
                     }
                     if (resultOfTest.toUpperCase().equals(resultOfCheckFirstRow)) {
+                        ponNamesAggregated.append("&nbsp;");
+                        ponNamesAggregated.append(ponName);
+                        ponNamesAggregated.append("&nbsp;\n");
                         continue;
                     }
                     aggregateBirtSteps = Boolean.FALSE;
@@ -251,8 +257,13 @@ public class ServiceAnalyseBirtMt extends Thread {
                 }
 
                 if (aggregateBirtSteps) {
+                    /* It is possible to aggregate steps to one! */
+                    tempChecklistEntry.setAggregatedNames(ponNamesAggregated.toString());
+                    tempChecklistEntry.setFullNameOfPon(
+                            "[Aggregated] " + report.getName() );
                     fillBirtErrors.add(tempChecklistEntry);
                 } else {
+                    /* Proceed with all results from the beginning - aggregation is not necessary! */
                     resultSet.beforeFirst();
                     while (resultSet.next()) {
                         String fullName = resultSet.getString(mainConfig.getBIRT_TASK_COL_NAME());
@@ -348,7 +359,7 @@ public class ServiceAnalyseBirtMt extends Thread {
 
                 if (!resultSet.isBeforeFirst()) {
                     entry.setIsRegression("Not found");
-                    entry.setFullNameOfRegressionPon("No results for " + nameToCheck);
+                    entry.setFullNameOfRegressionPon(" No results for <br/>\n " + nameToCheck);
                 }
 
                 while (resultSet.next()) {

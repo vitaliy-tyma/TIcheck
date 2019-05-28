@@ -98,7 +98,7 @@ public class ServletAnalyse extends HttpServlet {
             checklist = ReadXML.readChecklistFromFile(checklistRequestName);
 
 
-            log.debug(String.format(
+            log.info(String.format(
                     "******* Processing checklist %s with the request: name = %s;" +
                             " iteration = %s; useQueryLike = %s",
                     checklistRequestName,
@@ -217,6 +217,7 @@ public class ServletAnalyse extends HttpServlet {
     // Use one thread to process different data sources - useful for debug!!!
     private void startSingleThreadedMode(Checklist checklist, Report report, boolean analyseRegression) {
 
+        log.info("************************ startSingleThreadedMode **************");
         /* PROCESS SPIDER ERRORS*/
         if (checklist.getSpiderSteps().size() != 0) {
             ServiceAnalyseSpiderMt analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
@@ -238,6 +239,7 @@ public class ServletAnalyse extends HttpServlet {
     // Use several threads to process different data sources
     private static void startMultithreadedMode(Checklist checklist, Report report, boolean analyseRegression) {
 
+        log.info("************************ startMultithreadedMode **************");
         try {
 
             ServiceAnalyseSpiderMt analyseSpiderMt = new ServiceAnalyseSpiderMt(checklist, report, analyseRegression);
