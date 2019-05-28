@@ -20,6 +20,6 @@ public class ServletReadChecklistsList extends HttpServlet {
             log.error("Error in getChecklistsList: " + e.getMessage());
         }
         log.info("*********************** ServletReadChecklistsList.doGet() ****************************************");
-        httpServletResponse.getWriter().print("ServletReadChecklistsList has passed"); //May be used to return flag - successful!
+        httpServletResponse.getWriter().print("ServletReadChecklistsList has passed, please refresh the search page (TODO - automatic refresh is in development plans)."); //May be used to return flag - successful!
     }
 }

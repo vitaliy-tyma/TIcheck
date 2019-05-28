@@ -3,10 +3,10 @@
 <checklist>
 
 	<name>
-		TI without NDS
+		SPIDER only
 	</name>
 	<default>
-	    yes
+	    no
 	</default>
 
     <SPIDER>
@@ -20,7 +20,7 @@
 
 
 
-    <BIRT>
+    <BIRT->
         <step>
             anaconda.inds.ti.TmcLocationTableIdTest.locationTableIdCountTest
         </step>
@@ -39,13 +39,13 @@
         <step>
             anaconda.inds.ti.TmcStringTableTest.tmcStringTest
         </step>
-    </BIRT>
+    </BIRT->
 
 
-    <NDS----->
+    <NDS->
         <step>
             tmcLocationTableIdTable
         </step>
-    </NDS----->
+    </NDS->
 
 </checklist>

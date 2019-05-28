@@ -75,8 +75,8 @@ public class Report {
         }
 
         String result = iteration.trim();
-        if (result.length() > 2) {
-            result = result.substring(0, 2);
+        if (result.length() > 3) {
+            result = result.substring(0, 3);
             this.logOfErrors.add("\nLength of the PON iteration has been reduced to 2 symbols!\n<br/>");
         }
 
@@ -155,8 +155,8 @@ public class Report {
         }
 
         String result = iteration.trim();
-        if (result.length() > 2) {
-            result = result.substring(0, 2);
+        if (result.length() > 3) {
+            result = result.substring(0, 3);
             this.logOfErrors.add("\nLength of the prev PON iteration has been reduced to 2 symbols!\n<br/>");
         }
 

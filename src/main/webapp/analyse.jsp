@@ -1,10 +1,13 @@
-<%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<!DOCTYPE html>
-
+<!-- TO BE DELETED-->
 <!--
 NOT IN USE
 MAPPING MUST BE CHANGED
 -->
+
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<!DOCTYPE html>
+
+
 
 
 

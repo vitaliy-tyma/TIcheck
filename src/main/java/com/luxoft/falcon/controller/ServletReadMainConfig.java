@@ -16,6 +16,6 @@ public class ServletReadMainConfig extends HttpServlet {
     public void doGet(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) throws IOException {
         readMainConfigFromFile(MainConfig.getCONFIG_PATH_AND_NAME());
         log.info("*********************** ServletReadMainConfig.doGet() ****************************************");
-        httpServletResponse.getWriter().print("ServletReadMainConfig has passed."); //May be used to return flag - successful!
+        httpServletResponse.getWriter().print("ServletReadMainConfig has passed, please refresh the search page (TODO - automatic refresh is in development plans)."); //May be used to return flag - successful!
     }
 }

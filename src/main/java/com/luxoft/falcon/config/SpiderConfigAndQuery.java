@@ -28,5 +28,5 @@ public final class SpiderConfigAndQuery implements ConfigAndQueryInterface {
     @Getter
     private String queryLike;
     @Getter
-    private String queryAccurate;
+    private String queryIs;
 }

@@ -88,7 +88,7 @@ public class View {
 
         result.append("\n<div class=\"PON_selector\">\n");
 
-        result.append("\n<form action=\"/analyse?action=submit\" method=\"get\" id=\"checklist\">\n");
+        result.append("\n<form action=\"analyse?action=submit\" method=\"get\" id=\"checklist\">\n");
 
         result.append("<table border=1>\n");
         result.append("<tr>\n<th width=100px>Request</th><th>Name</th><th>Iteration</th><th>Use query<br/> LIKE%...%</th><th>Regression<br/> check</th></tr>\n");
@@ -120,7 +120,7 @@ public class View {
                                 "name=\"pon_iteration\" value=\"%s\"\n" +
                                 "placeholder=\"Enter PON's iteration\"\n" +
                                 "title=\"Replace with the actual value (_R# will be added for query with =)\"\n" +
-                                "maxlength=\"2\"\n" +
+                                "maxlength=\"3\"\n" +
                                 "tabindex=\"2\"/>\n" +
                                 "</td>\n",
                         report.getIteration()));
@@ -147,7 +147,7 @@ public class View {
                                 "name=\"regression_check\"\n" +
                                 "%s\n" +
                                 "title=\"Unset to disable regression check despite of entered data\"\n" +
-                                "tabindex=\"4\">\n" +
+                                "tabindex=\"20\">\n" +
                                 "\n",
                         (analyseRegression ? "checked" : "")));
 
@@ -181,7 +181,7 @@ public class View {
                                 "name=\"prev_pon_iteration\" value=\"%s\"\n" +
                                 "placeholder=\"Enter previous PON's iteration\"\n" +
                                 "title=\"Replace with the actual value (_R# will be added for query with =)\"\n" +
-                                "maxlength=\"2\"\n" +
+                                "maxlength=\"3\"\n" +
                                 "tabindex=\"11\"/>\n" +
                                 "</td>\n",
                         report.getPrevIteration()));
@@ -224,7 +224,9 @@ public class View {
                             "            <option value = \"%s\" %s>%s %s</option>\n",
                             entry.getSimpleFileNameOfChecklist(),
                             (entry.getNameOfChecklist().equals(checklistRequestName) ||
-                            (entry.getDefaultFlag() && checklistRequestName == null))
+
+                            //FIXME - find out why is it false always?!?
+                            (entry.getDefaultFlag() && checklistRequestName.equals("")))
                                     ? "selected" : "",
                             entry.getNameOfChecklist(),
                             entry.getDefaultFlag() ? " (Default)" : ""));
@@ -369,35 +371,37 @@ public class View {
     private static String getServletFooter() {
         StringBuilder result = new StringBuilder();
         result.append("<br/>\n<div>\n");
-        result.append("<table>\n");
-        result.append("<tr>\n");
+        result.append("<table border = 0 width=\"95%\">\n");
 
-        result.append("<td>\n");
+
+        result.append("<tr>\n");
+        result.append("<td colspan = 6><hr align=\"center\" width=\"100%\" size=\"2\" color=\"#ff0000\" /></td>\n");
+        result.append("</tr>\n");
+
+        result.append("<tr>\n");
+        result.append("<td width=\"20%\"> ADMIN AREA </td>\n");
+
+        result.append("<td width=\"20%\">\n");
         result.append("<a href=\"help.html\" target=\"_blank\">HELP</a>\n");
         result.append("</td>\n");
-        result.append("<td>   </td>\n");
 
         //Todo Use AJAX to process servlet in silent mode
-        result.append("<td>\n");
-        result.append("<a href=\"ServletReadMainConfig\" target=\"_blank\">RELOAD MainConfig</a>\n");
+        result.append("<td width=\"20%\">\n");
+        result.append("<a href=\"ServletReadMainConfig\" target=\"_blank\">RELOAD MAIN CONFIG</a>\n");
         result.append("</td>\n");
-        result.append("<td>   </td>\n");
 
         //Todo Use AJAX to process servlet in silent mode
-        result.append("<td>\n");
-        result.append("<a href=\"ServletReadChecklistsList\" target=\"_blank\">RELOAD ChecklistsList</a>\n");
-        result.append("</td>\n");
-        result.append("<td>   </td>\n");
-
-        result.append("<td>\n");
-        result.append("<a href=\"http://172.30.136.166:8889/\">IDE LINK [http://172.30.136.166:8889/]</a>\n");
-        result.append("</td>\n");
-        result.append("<td>   </td>\n");
-
-        result.append("<td>\n");
-        result.append("<a href=\"http://172.30.136.166:8080/TIcheck/\">DEPLOY LINK [http://172.30.136.166:8080/TIcheck/]</a>\n");
+        result.append("<td width=\"20%\">\n");
+        result.append("<a href=\"ServletReadChecklistsList\" target=\"_blank\">RELOAD LIST OF CHECKLISTS</a>\n");
         result.append("</td>\n");
 
+        result.append("<td width=\"20%\">\n");
+        result.append("<a href=\"http://172.30.136.166:8889/\">IDE [http://172.30.136.166:8889/]</a>\n");
+        result.append("</td>\n");
+
+        result.append("<td width=\"20%\">\n");
+        result.append("<a href=\"http://172.30.136.166:8080/TIcheck/\">[http://172.30.136.166:8080/TIcheck/]</a>\n");
+        result.append("</td>\n");
 
         result.append("</table>\n");
         result.append("</div>\n");

@@ -36,7 +36,7 @@ public class Birt2010ConfigAndQuery implements ConfigAndQueryInterface {
     //TODO Clarify with the exitcode parameter
 
     @Getter @Setter
-    private String queryAccurate;
+    private String queryIs;
     //TODO Clarify with the exitcode parameter
 }
 

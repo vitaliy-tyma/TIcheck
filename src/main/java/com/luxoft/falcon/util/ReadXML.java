@@ -243,7 +243,7 @@ public class ReadXML {
                 "        AND fcel.java_class_error = ?\n" +
                 "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
                 "        LIMIT ?");
-        spiderConfigAndQuery.setQueryAccurate(" \n" +
+        spiderConfigAndQuery.setQueryIs(" \n" +
                 "        SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR\n" +
                 "        FROM spider_bmd.full_task_error_list ftel\n" +
                 "        JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id\n" +
@@ -269,7 +269,7 @@ public class ReadXML {
 //          " AND tr.exitcode = 0\n" +
                 " ORDER BY TASK, TEST_NAME \n" +
                 " LIMIT ?");
-        birt2010ConfigAndQuery.setQueryAccurate(" \n" +
+        birt2010ConfigAndQuery.setQueryIs(" \n" +
                 " SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT \n" +
                 " FROM ndsreport.test t\n" +
                 " JOIN ndsreport.testsuite s ON s.id = t.testsuite_id\n" +
@@ -297,7 +297,7 @@ public class ReadXML {
 //          " AND tr.exit_code = 0\n" +
                 " ORDER BY TASK, TEST_NAME \n" +
                 " LIMIT ?");
-        birt2020ConfigAndQuery.setQueryAccurate(" \n" +
+        birt2020ConfigAndQuery.setQueryIs(" \n" +
                 " SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT \n" +
                 " FROM ndsreport_new.tests_results tr\n" +
                 " JOIN ndsreport_new.suites s ON s.id = tr.suite_id\n" +
@@ -351,9 +351,9 @@ public class ReadXML {
                                 "queryLike").
                                 item(0).getTextContent().
                                 replace("\n", "").trim());
-                configClass.setQueryAccurate(
+                configClass.setQueryIs(
                         eElement.getElementsByTagName(
-                                "queryAccurate").
+                                "queryIs").
                                 item(0).getTextContent().
                                 replace("\n", "").trim());
             }

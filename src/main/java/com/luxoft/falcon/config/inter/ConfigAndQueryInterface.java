@@ -18,5 +18,5 @@ public interface ConfigAndQueryInterface {
     public void setJdbcLogin(String string);
     public void setJdbcPassword(String string);
     public void setQueryLike(String string);
-    public void setQueryAccurate(String string);
+    public void setQueryIs(String string);
 }

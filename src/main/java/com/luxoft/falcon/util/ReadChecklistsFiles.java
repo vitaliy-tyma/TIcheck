@@ -15,6 +15,7 @@ import java.io.*;
 @Slf4j
 public class ReadChecklistsFiles {
     private static ChecklistsList checklistsList = ChecklistsList.getInstance();
+    private static boolean defaultFlagIsAllowed = true;
 
     public static void getChecklistsList(String checklists_path) {
 
@@ -35,6 +36,7 @@ public class ReadChecklistsFiles {
                 checklistsList.addLine(entry);
             }
         }
+        defaultFlagIsAllowed = true;
     }
 
 
@@ -67,8 +69,12 @@ public class ReadChecklistsFiles {
                     checklistDefaultFlagString = eElement.getElementsByTagName(
                             "default").item(0).getTextContent().
                             replace("\n", "").trim();
-                    if (checklistDefaultFlagString.equals("yes")) {
+                    if (checklistDefaultFlagString
+                            .toUpperCase()
+                            .equals("YES") &&
+                            defaultFlagIsAllowed) {
                         defaultFlag = true;
+                        defaultFlagIsAllowed = false;
                     } else {
                         defaultFlag = false;
                     }

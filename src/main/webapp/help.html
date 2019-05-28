@@ -1,18 +1,103 @@
 <html>
 
 <body>
-<h3>HELP</h3>
-
-<div>
-    <pre>
-Use the following PONs for testing
-
-PON928 001
-PON943 001
-
-PONAD0 001
-    </pre>
+<div align = "center">
+<h1>AUTOMATED CHECKLIST ANALYSER v.0.3.0</h1>
+<h2>HELP</h2>
 </div>
+<table align="center" width=50%>
+    <tr><td>
 
+        <div>
+        <h3>Preface</h3>
+        <pre>
+This project is designed to automate TI checklist analysis:
+<a href="https://adc.luxoft.com/confluence/pages/viewpage.action?spaceKey=DBPROD&title=07.+TI">TI checklist</a>
+        </pre>
+
+<h3>Usage hints</h3>
+    <pre>
+Use the following PONs for testing (with representative results)
+
+Status   Name    Iteration
+Actual   PON943  1
+Previous PON928  1
+<a href="http://172.30.136.166:8080/TIcheck/analyse?pon_name=PON943&pon_iteration=1&use_query_like=on&regression_check=on&prev_pon_name=PON928&prev_pon_iteration=1&use_query_like_for_prev=on&checklists=TIwithNoNDS&limit=100">PON943/1 to PON928/1</a>
+
+Actual   PONB6A  1
+Previous PONB2F  1
+<a href="http://172.30.136.166:8080/TIcheck/analyse?pon_name=PONB6A&pon_iteration=1&use_query_like=on&regression_check=on&prev_pon_name=PONB2F&prev_pon_iteration=1&use_query_like_for_prev=on&checklists=TIwithNoNDS&limit=100">PONB6A/1 to PONB2F/1</a>
+
+Actual   PONA    1
+<a href="http://172.30.136.166:8080/TIcheck/analyse?pon_name=PONA&pon_iteration=1&use_query_like=on&prev_pon_name=PONB2F&prev_pon_iteration=1&use_query_like_for_prev=on&checklists=TIwithNoNDS&limit=100">PONA/1</a>
+
+For SPIDER typical names are like PONA30_E7 and iteration is stored in separate column.
+For BIRT  typical names are like PONA30_E7_BMD_MID_R1 (iteration is included in name).
+If to use partial names better to use Use query LIKE %...% option.
+In case you need exact result - uncheck Use query LIKE %...% option but be aware that
+typically only one service will give the proper results!
+
+For SPIDER errors are shown only in case that NOK record has been found for the requested error!
+For BIRT errors are shown in the following way:
+If for the FACT-test at least one result is NOK or SKIPPED - all BIRT records will be shown;
+NOK are shown in red, SKIPPED are shown in blue.
+If for the FACT-test all results are equal (not matter OK or another), name of PON will be aggregated
+        and [Aggregated] will be added to the pon name (+ shown in blue and tooltip is visible with
+        all pon names that were included).
+In the Query column the actual query is shown (in tooltip).
+In the Regression column result of regression check is shown in the following way:
+        If actual PON is OK - regression is "Not analysed";
+        If result for previous PON is the same as for actual - regression is "No";
+        If result is not found:
+            for SPIDER - regression is "Yes" - see the name of previous PON the tooltip;
+            for BIRT - regression is "Not found" - see the name of previous PON the tooltip;
+        If result is OK for BIRT - regression is "Yes" - see the name of previous PON the tooltip.
+
+        <b><font color="red">
+        Important note: if PON has several iterations and, in worse case
+        for some URs different iterations/revisions are used,
+        <u>user should search only by UR name and specific iteration</u>!!!
+        </font>
+        </b>
+    </pre>
+
+
+<h3>NDS DB check</h3>
+    <pre>
+    NDS part of checklist is in development!
+
+
+ ndsSteps.add("tmcLocationTableIdTable");
+ 0MXXXX.NDS //One file must be processed!!!!
+ NHXXXX.NDS //Many files must be processed!!!!
+
+ ndsSteps.add("TI version tmcLocationTableIdTable");
+ Find out what versions are current!!!
+
+ DONE
+ Task https://jira.harman.com/jira/browse/NAV2010ANA-23009 !!!!!
+ Is incorporated to anaconda.nds.ti.TmcLocationExporterTest.tmcNameTableTest
+
+ WAY OF PROCESSING IS NOT DEFINED - VISUAL TASK TO BE DEVELOPED !!!!!!!!!!!!!!!!!!!!
+ Filled Local_tmc_location on Route links
+ TI Browser - TI icons and messages are present for TMC and TPEG_TEC
+    </pre>
+
+
+    <h3>TODO plans:</h3>
+    <pre>
+
+        1) automatic deploy with Docker and Jenkins.
+        2) automatic tests run before maven package.
+        3) automatic refresh of configs after requesting is in development.
+        4) make AJAX for PON name detection and result displaying
+        5) make Api for other apps
+        <font color="red">6) BIRT - clarify with exitcode parameter!!!</font>
+        7) test DBs processing - location differs
+    </pre>
+
+</div>
+    </td></tr>
+</table>
 </body>
 </html>

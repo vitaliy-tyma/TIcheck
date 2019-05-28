@@ -73,7 +73,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
         try {
             con = DbConnectorSpider.connectDatabase(spiderConfigAndQuery);
 
-            List<ChecklistEntry> fillSpiderErrors;// = new LinkedList<>();
+            List<ChecklistEntry> fillSpiderErrors;
 
             /* Iterate over SPIDER*/
             fillSpiderErrors = analyseActual(checklist.getSpiderSteps(), report);
@@ -120,7 +120,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
             pstmt = con.prepareStatement(spiderConfigAndQuery.getQueryLike());
             pstmt.setString(1, "%" + report.getName() + "%");
         } else {
-            pstmt = con.prepareStatement(spiderConfigAndQuery.getQueryAccurate());
+            pstmt = con.prepareStatement(spiderConfigAndQuery.getQueryIs());
             pstmt.setString(1, report.getName());
         }
         pstmt.setInt(2, report.getIteration());
@@ -202,7 +202,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
                         pstmt = con.prepareStatement(spiderConfigAndQuery.getQueryLike());
                         pstmt.setString(1, "%" + nameToCheck.trim() + "%");
                     } else {
-                        pstmt = con.prepareStatement(spiderConfigAndQuery.getQueryAccurate());
+                        pstmt = con.prepareStatement(spiderConfigAndQuery.getQueryIs());
                         pstmt.setString(1, nameToCheck.trim());
                     }
 

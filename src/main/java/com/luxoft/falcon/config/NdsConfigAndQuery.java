@@ -38,7 +38,7 @@ public final class NdsConfigAndQuery implements ConfigAndQueryInterface {
             "        SELECT *\n" +
             "        FROM tmcLocationTableIdTable\n";
     @Getter @Setter
-    private String queryAccurate = " \n" +
+    private String queryIs = " \n" +
             "        SELECT *\n" +
             "        FROM tmcLocationTableIdTable\n";
 

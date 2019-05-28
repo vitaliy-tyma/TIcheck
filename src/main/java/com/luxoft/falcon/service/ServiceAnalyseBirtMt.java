@@ -47,9 +47,9 @@ public class ServiceAnalyseBirtMt extends Thread {
 
 
     private static MainConfig mainConfig = MainConfig.getInstance();
-    private Birt2010ConfigAndQuery birt2010ConfigAndQuery = Birt2010ConfigAndQuery.getInstance();
-    private Birt2020ConfigAndQuery birt2020ConfigAndQuery = Birt2020ConfigAndQuery.getInstance();
-    private BirtQueryToCheckGeneration birtQueryToCheckGeneration = BirtQueryToCheckGeneration.getInstance();
+    private static Birt2010ConfigAndQuery birt2010ConfigAndQuery = Birt2010ConfigAndQuery.getInstance();
+    private static Birt2020ConfigAndQuery birt2020ConfigAndQuery = Birt2020ConfigAndQuery.getInstance();
+    private static BirtQueryToCheckGeneration birtQueryToCheckGeneration = BirtQueryToCheckGeneration.getInstance();
 
     private String queryLike = null;
     private String queryAccurate = null;
@@ -81,10 +81,10 @@ public class ServiceAnalyseBirtMt extends Thread {
 
         try {
 
-            con = DbConnectorBirt.connectDatabase(
-                    birt2010ConfigAndQuery.getJdbcUrl(),
-                    birt2010ConfigAndQuery.getJdbcLogin(),
-                    birt2010ConfigAndQuery.getJdbcPassword());
+            con = DbConnectorBirt.connectDatabase(birt2010ConfigAndQuery);
+//            .getJdbcUrl(),
+//                    birt2010ConfigAndQuery.getJdbcLogin(),
+//                    birt2010ConfigAndQuery.getJdbcPassword());
 
             /* CHECK GENERATION */
             boolean isGen2010 = checkGeneration(birtQueryToCheckGeneration.getG2010(), report);
@@ -98,7 +98,7 @@ public class ServiceAnalyseBirtMt extends Thread {
             if (isGen2010) {
                 log.info("***************************** Look in Birt 2010 *****************");
                 queryLike = birt2010ConfigAndQuery.getQueryLike();
-                queryAccurate = birt2010ConfigAndQuery.getQueryAccurate();
+                queryAccurate = birt2010ConfigAndQuery.getQueryIs();
                 fillBirtErrors = analyseActual(checklist.getBirtSteps(), report, isGen2020?" (2010)":"");
                 /* Store items in report*/
                 report.addBirtSteps(fillBirtErrors);
@@ -108,7 +108,7 @@ public class ServiceAnalyseBirtMt extends Thread {
             if (isGen2020) {
                 log.info("***************************** Look in Birt 2020 *****************");
                 queryLike = birt2020ConfigAndQuery.getQueryLike();
-                queryAccurate = birt2020ConfigAndQuery.getQueryAccurate();
+                queryAccurate = birt2020ConfigAndQuery.getQueryIs();
                 fillBirtErrors = analyseActual(checklist.getBirtSteps(), report, isGen2010?" (2020)":"");
                 /* Store items in report*/
                 report.addBirtSteps(fillBirtErrors);
