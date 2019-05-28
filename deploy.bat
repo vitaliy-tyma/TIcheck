@@ -1,4 +1,5 @@
-copy spiderconnector.xml C:\tomcat\bin
+copy /Y resources C:\tomcat\bin
+
 cd target
-copy spiderconnector.war C:\tomcat\webapps
+copy TIcheck.war C:\tomcat\webapps
 pause

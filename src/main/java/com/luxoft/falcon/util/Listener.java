@@ -16,6 +16,7 @@ public class Listener implements javax.servlet.ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent servletContextEvent) {
         readMainConfigFromFile(MainConfig.getCONFIG_PATH_AND_NAME());
+        log.info("MainConfig.getCONFIG_PATH_AND_NAME(): " + MainConfig.getCONFIG_PATH_AND_NAME());
 
         try {
             getChecklistsList(MainConfig.getCHECKLISTS_PATH());

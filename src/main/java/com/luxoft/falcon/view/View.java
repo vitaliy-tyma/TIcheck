@@ -57,9 +57,9 @@ public class View {
 
 //Done - Locate CSS within IDE
 //TODO checked the location in TOMCAT
-                "<link href=\"/lib/css/TIcheck.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
-                "<link href=\"/lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
-                "<link href=\"/lib/css/tableRowsColor.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
+                "<link href=\"lib/css/TIcheck.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
+                "<link href=\"lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
+                "<link href=\"lib/css/tableRowsColor.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
                 "<style>\n" +
                 "</style>\n" +
                 "</head>\n";
@@ -373,29 +373,29 @@ public class View {
         result.append("<tr>\n");
 
         result.append("<td>\n");
-        result.append("<a href=\"help.html\">Help</a>\n");
+        result.append("<a href=\"help.html\" target=\"_blank\">HELP</a>\n");
         result.append("</td>\n");
-        result.append("<td> X </td>\n");
+        result.append("<td>   </td>\n");
 
         //Todo Use AJAX to process servlet in silent mode
         result.append("<td>\n");
-        result.append("<a href=\"ServletReadMainConfig\" target=\"_blank\">Reload MainConfig</a>\n");
+        result.append("<a href=\"ServletReadMainConfig\" target=\"_blank\">RELOAD MainConfig</a>\n");
         result.append("</td>\n");
-        result.append("<td> X </td>\n");
+        result.append("<td>   </td>\n");
 
         //Todo Use AJAX to process servlet in silent mode
         result.append("<td>\n");
-        result.append("<a href=\"ServletReadChecklistsList\" target=\"_blank\">Reload ChecklistsList</a>\n");
+        result.append("<a href=\"ServletReadChecklistsList\" target=\"_blank\">RELOAD ChecklistsList</a>\n");
         result.append("</td>\n");
-        result.append("<td> X </td>\n");
+        result.append("<td>   </td>\n");
 
         result.append("<td>\n");
-        result.append("<a href=\"http://172.30.136.166:8889/\">IDE LINK [ http://172.30.136.166:8889/ ]</a>\n");
+        result.append("<a href=\"http://172.30.136.166:8889/\">IDE LINK [http://172.30.136.166:8889/]</a>\n");
         result.append("</td>\n");
-        result.append("<td> X </td>\n");
+        result.append("<td>   </td>\n");
 
         result.append("<td>\n");
-        result.append("<a href=\"http://172.30.136.166:8080/TIcheck/\">DEPLOY LINK [ http://172.30.136.166:8080/TIcheck/ ]</a>\n");
+        result.append("<a href=\"http://172.30.136.166:8080/TIcheck/\">DEPLOY LINK [http://172.30.136.166:8080/TIcheck/]</a>\n");
         result.append("</td>\n");
 
 

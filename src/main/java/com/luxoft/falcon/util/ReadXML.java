@@ -40,7 +40,8 @@ public class ReadXML {
 
         File fXmlFile;
         try {
-            fXmlFile = new File(fileAbsolutePathAndName); //TODO Close file?
+            //TODO Close file or use try with resources?
+            fXmlFile = new File(fileAbsolutePathAndName);
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
             Document doc = dBuilder.parse(fXmlFile);

@@ -21,7 +21,7 @@ visibility: hidden;
 width: 500px;
 bottom: 100%;
 left: 50%;
-margin-left: -400px; /* Use shift, to center the tooltip */" +
+margin-left: -400px; /* Use shift, to center the tooltip */
 background-color: black;
 color: #fff;
 text-align: center;
@@ -42,7 +42,7 @@ visibility: hidden;
 width: 200px;
 bottom: 100%;
 left: 50%;
-margin-left: -100px; /* Use shift, to center the tooltip */" +
+margin-left: -100px; /* Use shift, to center the tooltip */
 background-color: black;
 color: #fff;
 text-align: center;
