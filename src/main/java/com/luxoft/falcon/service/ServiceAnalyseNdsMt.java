@@ -14,8 +14,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 
-/* Is used to process checklist for NDS DB */
-/* NOT IMPLEMENTED YET - need to use NDSlib to open DB*/
+/* Is used to process UNDER CONSTRUCTION
+ * special NDSlib is used to open DB*/
 @Slf4j
 public class ServiceAnalyseNdsMt extends Thread{
     private Checklist checklist;

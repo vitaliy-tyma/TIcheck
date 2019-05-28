@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<checklist>
+
+	<name>
+		NDS only
+	</name>
+	<default>
+	    	yes
+	</default>
+
+
+    <NDS>
+        <step>
+            tmcLocationTableIdTable
+        </step>
+    </NDS>
+
+</checklist>

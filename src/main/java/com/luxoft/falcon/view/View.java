@@ -223,11 +223,9 @@ public class View {
                     String.format(
                             "            <option value = \"%s\" %s>%s %s</option>\n",
                             entry.getSimpleFileNameOfChecklist(),
-                            (entry.getNameOfChecklist().
-                                    equals(checklistRequestName) ||
-                                    (entry.getDefaultFlag() &&
-                                            checklistRequestName == null)) ?
-                                    "selected" : "",
+                            (entry.getNameOfChecklist().equals(checklistRequestName) ||
+                            (entry.getDefaultFlag() && checklistRequestName == null))
+                                    ? "selected" : "",
                             entry.getNameOfChecklist(),
                             entry.getDefaultFlag() ? " (Default)" : ""));
         }
@@ -317,7 +315,6 @@ public class View {
         }
         result.append("</tr>\n");
         result.append("\n<tr>\n<td colspan = 5 align = center>\n");
-//        result.append("<br/>\n");
 
         /* Show time, requests count and date time */
         result.append("\n<br/>\n<div align = left>\n");
@@ -340,7 +337,10 @@ public class View {
             result.append(
                     String.format(
                             "\n<div><p>\n<font color=red>%s</font></p>\n</div>\n",
-                            report.getLogOfErrors().toString()));
+                            report.getLogOfErrors()
+                                  .toString()
+                                  .replace("[", "")
+                                  .replace("]","")));
             result.append("</details>\n");
             result.append("</div>\n");
 

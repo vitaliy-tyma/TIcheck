@@ -32,12 +32,10 @@ public class ReportToHtml {
         result.append("<th>Regression</th>\n");
         result.append("</tr>\n");
 
-        result.append("<tr>\n<td colspan = 7 align=center>\n");
-        result.append("SPIDER\n</td>\n</tr>\n");
-        result.append(getRowsFromReport(report, report.getSpiderSteps()));
-        result.append("<tr>\n<td colspan = 7 align=center>\n");
-        result.append("BIRT\n</td></tr>\n");
-        result.append(getRowsFromReport(report, report.getBirtSteps()));
+
+        result.append(getRowsFromReport("SPIDER", report, report.getSpiderSteps()));
+        result.append(getRowsFromReport("BIRT", report, report.getBirtSteps()));
+        result.append(getRowsFromReport("NDS", report, report.getNdsSteps()));
         result.append("</table>\n");
         result.append("</div>\n");
 
@@ -45,11 +43,14 @@ public class ReportToHtml {
     }
 
 
-    private static String getRowsFromReport(Report report, List<ChecklistEntry> steps) {
+    private static String getRowsFromReport(String stepName, Report report, List<ChecklistEntry> steps) {
 
         StringBuilder result = new StringBuilder();
 
-
+        if (steps.size() != 0) {
+            result.append("<tr>\n<td colspan = 7 align=center>\n");
+            result.append(stepName + "\n</td>\n</tr>\n");
+        }
 
         for (ChecklistEntry entry : steps) {
             i++;
@@ -58,6 +59,7 @@ public class ReportToHtml {
                 bgColorSwap = !bgColorSwap;
             }
             tempErrorToCheck = entry.getNameOfErrorToCheckFor();
+
 
             //Show index
             result.append("\n <tr id = ");

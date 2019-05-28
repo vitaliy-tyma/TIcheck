@@ -29,7 +29,6 @@ import java.util.List;
  * Transformation: toString and getHTML by template - NOT IMPLEMENTED
  *
  * Output data: returns Requests Count and updates local Report object passed in arguments
- * As an option - error list in string format (serialized by toString) - NOT IMPLEMENTED
  *
  * In case of exception returns text of error in report.logOfErrors
  */

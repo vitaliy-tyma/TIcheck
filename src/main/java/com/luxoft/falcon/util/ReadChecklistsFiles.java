@@ -20,6 +20,7 @@ public class ReadChecklistsFiles {
 
         File folder = new File(checklists_path);
         File[] listOfFiles = folder.listFiles();
+        checklistsList.clearChecklistsList();
 
         for (int i = 0; i < listOfFiles.length; i++) {
             if (listOfFiles[i].isFile()) {
@@ -29,6 +30,7 @@ public class ReadChecklistsFiles {
                         checklists_path +
                                 MainConfig.getPATH_DELIMITER(),
                                 checklistFileName);
+
 
                 checklistsList.addLine(entry);
             }

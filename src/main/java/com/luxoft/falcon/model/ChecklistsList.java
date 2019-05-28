@@ -15,7 +15,9 @@ public final class ChecklistsList {
     public void addLine(ChecklistsListEntry entry){
         checklistsList.add(entry);
     }
-
+    public void clearChecklistsList() {
+        checklistsList.clear();
+    }
 
     private ChecklistsList() {
     }
@@ -23,6 +25,7 @@ public final class ChecklistsList {
     public static ChecklistsList getInstance() {
         return _instance;
     }
+
 
 
 }
