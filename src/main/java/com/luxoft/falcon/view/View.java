@@ -14,9 +14,6 @@ import java.util.List;
 
 public class View {
 
-//    private static ChecklistsList checklistsList = ChecklistsList.getInstance();
-
-
     /* MAIN METHOD*/
     public static String getHTML(
             String nameOfChecklist,
@@ -26,7 +23,7 @@ public class View {
         StringBuilder result = new StringBuilder();
 
         /* Get header and start of the body section*/
-        result.append(getHeader());
+        result.append(getHeader(nameOfChecklist, report));
         result.append(getBodyStartPart());
         result.append(getBodyForm(nameOfChecklist, report, analyseRegression));
 
@@ -47,24 +44,48 @@ public class View {
 
 
     /* Make header with CSS to display tooltip container*/
-    private static String getHeader() {
-        String header;
-        header = "<!DOCTYPE html>\n" +
-                "<html>\n" +
-                "<head>\n" +
-                "<meta charset=\"UTF-8\">\n" +
-                "<title>Automated checklist analyser</title>\n" +
+    private static String getHeader(String nameOfChecklist, Report report) {
 
-//Done - Locate CSS within IDE
-//TODO checked the location in TOMCAT
-                "<link href=\"lib/css/TIcheck.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
-                "<link href=\"lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
-                "<link href=\"lib/css/tableRowsColor.css\" rel=\"stylesheet\" type=\"text/css\">\n" +
-                "<style>\n" +
-                "</style>\n" +
-                "</head>\n";
-        return header;
+        StringBuilder result = new StringBuilder();
+        result.append("<!DOCTYPE html>\n");
+        result.append("<html>\n");
+        result.append("<head>\n");
+        result.append("<meta charset=\"UTF-8\">\n");
+        result.append("<title>");
+        result.append(getTitle(nameOfChecklist, report));
+        result.append("</title>\n");
+        result.append("<link href=\"lib/css/TIcheck.css\" rel=\"stylesheet\" type=\"text/css\">\n");
+        result.append("<link href=\"lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n");
+        result.append("<link href=\"lib/css/tableRowsColor.css\" rel=\"stylesheet\" type=\"text/css\">\n");
+        result.append("<style>\n");
+        result.append("</style>\n");
+        result.append("</head>\n");
+
+        return result.toString();
     }
+
+    private static String getTitle(String nameOfChecklist, Report report){
+        StringBuilder result = new StringBuilder();
+
+        result.append((nameOfChecklist != null && nameOfChecklist != "")? "[" + nameOfChecklist:"");
+
+        result.append(
+                (report.getName() != null && report.getName() != "")
+                        ? " for " + report.getName() + ":" + report.getIteration() :"");
+
+        result.append(
+                (report.getPrevName() != null && report.getPrevName() != "")
+                        ? " / " + report.getPrevName() + ":" + report.getPrevIteration() :"");
+
+        result.append((nameOfChecklist != null && nameOfChecklist != "")? "] - " :"");
+
+
+        result.append("Automated checklist analyser\n");
+
+        return result.toString();
+    }
+
+
 
     /* Display the first part of the body*/
     private static String getBodyStartPart() {
@@ -225,8 +246,8 @@ public class View {
                             entry.getSimpleFileNameOfChecklist(),
                             (entry.getNameOfChecklist().equals(checklistRequestName) ||
 
-                            //FIXME - find out why is it false always?!?
-                            (entry.getDefaultFlag() && checklistRequestName.equals("")))
+                                    //FIXME - find out why is it false always?!?
+                                    (entry.getDefaultFlag() && checklistRequestName.equals("")))
                                     ? "selected" : "",
                             entry.getNameOfChecklist(),
                             entry.getDefaultFlag() ? " (Default)" : ""));
@@ -325,7 +346,7 @@ public class View {
         Date date = new Date();
         result.append(
                 String.format(
-                        "Elapsed: %s seconds; Requests Count: %s; Request Time is: %s",
+                        "Elapsed: %s seconds; Requests Count: %s; Request time: %s",
                         report.getElapsedTime(),
                         report.getRequestsCount(),
                         dateFormat.format(date)));
@@ -340,9 +361,9 @@ public class View {
                     String.format(
                             "\n<div><p>\n<font color=red>%s</font></p>\n</div>\n",
                             report.getLogOfErrors()
-                                  .toString()
-                                  .replace("[", "")
-                                  .replace("]","")));
+                                    .toString()
+                                    .replace("[", "")
+                                    .replace("]", "")));
             result.append("</details>\n");
             result.append("</div>\n");
 

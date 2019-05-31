@@ -157,6 +157,40 @@ public class ReadXML {
                                     "CHECKLIST_NAME").
                                     item(0).getTextContent().
                                     replace("\n", "").trim());
+
+
+
+                    mainConfig.setEXIT_CODE_COL_NAME(
+                            eElement.getElementsByTagName(
+                                    "BIRT_EXIT_CODE_NAME").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim());
+
+                    mainConfig.setANAlYZED_FLAG_COL_NAME(
+                            eElement.getElementsByTagName(
+                                    "BIRT_ANALYZED_FLAG_NAME").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim());
+
+                    mainConfig.setSTART_TIME_COL_NAME(
+                            eElement.getElementsByTagName(
+                                    "BIRT_START_TIME_NAME").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim());
+
+                    mainConfig.setEND_TIME_COL_NAME(
+                            eElement.getElementsByTagName(
+                                    "BIRT_END_TIME_NAME").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim());
+
+                    mainConfig.setFAILURE_DESC_COL_NAME(
+                            eElement.getElementsByTagName(
+                                    "BIRT_FAILURE_DESC_NAME").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim());
+
+
                 }
             }
 
@@ -199,7 +233,9 @@ public class ReadXML {
                 Exception e) {
             /* Set all values as default*/
             setDefaultValuesBecauseOfException();
-            log.error("Read XML failed with the error " + e.getMessage());
+
+            log.error("!!!!!!!!!!!! Read XML failed with the error " + e.getMessage());
+            log.error("!!!!!!!!!!!! Default values have been set !!!!!!");
         }
 
 
@@ -210,7 +246,7 @@ public class ReadXML {
 
 
     private static void setDefaultValuesBecauseOfException() {
-
+        //TODO values are outdated - must be deleted!!!
         mainConfig.setPON_NAME_REQUEST("pon_name");
         mainConfig.setPON_ITERATION_REQUEST("pon_iteration");
         mainConfig.setUSE_QUERY_LIKE_REQUEST("use_query_like");
@@ -253,7 +289,7 @@ public class ReadXML {
                 "        ORDER BY Task, Revision, JAVA_CLASS_ERROR\n" +
                 "        LIMIT ?");
 
-        birt2010ConfigAndQuery.setJdbcDriver("com.mysql.jdbc.Driver");
+        birt2010ConfigAndQuery.setJdbcDriver("com.mysql.cj.jdbc.Driver");
         birt2010ConfigAndQuery.setJdbcUrl("jdbc:mysql://himdlxbirt01:3306/ndsreport"); //For 2010
         birt2010ConfigAndQuery.setJdbcLogin("readonly");
         birt2010ConfigAndQuery.setJdbcPassword("readonly");
@@ -282,7 +318,7 @@ public class ReadXML {
                 " ORDER BY TASK, TEST_NAME \n" +
                 " LIMIT ?");
 
-        birt2020ConfigAndQuery.setJdbcDriver("com.mysql.jdbc.Driver");
+        birt2020ConfigAndQuery.setJdbcDriver("com.mysql.cj.jdbc.Driver");
         birt2020ConfigAndQuery.setJdbcUrl("jdbc:mysql://himdlxbirt01:3306/ndsreport_new"); //For 2010
         birt2020ConfigAndQuery.setJdbcLogin("readonly");
         birt2020ConfigAndQuery.setJdbcPassword("readonly");

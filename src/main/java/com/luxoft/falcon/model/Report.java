@@ -34,7 +34,6 @@ public class Report {
     }
 
 
-    //    @Getter
     private String name;
     public String getName() {
         return (name == null ? "" : name);
@@ -57,16 +56,8 @@ public class Report {
         this.name = result.toUpperCase();
     }
 
-    //    @Getter
     private Integer iteration;
     public Integer getIteration() {
-//        try {
-//            if ((Integer) iteration == null) {
-//                return 1;
-//            }
-//        } catch (Exception e) {
-//            return 1;
-//        }
         return (iteration == null?1:iteration);
     }
     public void setIteration(String iteration) throws Exception {
@@ -95,16 +86,8 @@ public class Report {
     @Setter
     private Boolean useQueryLike = true;
 
-//    @Getter
     private Integer limit;
     public Integer getLimit() {
-//        try {
-//            if ((Integer) limit == null) {
-//                return 100;
-//            }
-//        } catch (Exception e) {
-//            return 100;
-//        }
         return (limit == null? 100: limit);
     }
     public void setLimit(String limit) {
@@ -115,7 +98,7 @@ public class Report {
         }
     }
 
-//    @Getter
+
     private String prevName;
     public String getPrevName() {
         return (prevName == null ? "" : prevName);
@@ -137,16 +120,9 @@ public class Report {
         this.prevName = result.toUpperCase();
     }
 
-//    @Getter
+
     private Integer prevIteration;
     public Integer getPrevIteration() {
-//        try {
-//            if ((Integer) iteration == null) {
-//                return 1;
-//            }
-//        } catch (Exception e) {
-//            return 1;
-//        }
         return (prevIteration == null?1:prevIteration);
     }
     public void setPrevIteration(String iteration) throws Exception {

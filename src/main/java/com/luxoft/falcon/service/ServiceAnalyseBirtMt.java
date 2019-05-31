@@ -52,7 +52,7 @@ public class ServiceAnalyseBirtMt extends Thread {
     private static BirtQueryToCheckGeneration birtQueryToCheckGeneration = BirtQueryToCheckGeneration.getInstance();
 
     private String queryLike = null;
-    private String queryAccurate = null;
+    private String queryIs = null;
     private int requestsCount;
 
 
@@ -82,15 +82,12 @@ public class ServiceAnalyseBirtMt extends Thread {
         try {
 
             con = DbConnectorBirt.connectDatabase(birt2010ConfigAndQuery);
-//            .getJdbcUrl(),
-//                    birt2010ConfigAndQuery.getJdbcLogin(),
-//                    birt2010ConfigAndQuery.getJdbcPassword());
 
             /* CHECK GENERATION */
             boolean isGen2010 = checkGeneration(birtQueryToCheckGeneration.getG2010(), report);
             boolean isGen2020 = checkGeneration(birtQueryToCheckGeneration.getG2020(), report);
 
-            List<ChecklistEntry> fillBirtErrors;// = new LinkedList<>();
+            List<ChecklistEntry> fillBirtErrors;
 
 
 
@@ -98,7 +95,7 @@ public class ServiceAnalyseBirtMt extends Thread {
             if (isGen2010) {
                 log.info("***************************** Look in Birt 2010 *****************");
                 queryLike = birt2010ConfigAndQuery.getQueryLike();
-                queryAccurate = birt2010ConfigAndQuery.getQueryIs();
+                queryIs = birt2010ConfigAndQuery.getQueryIs();
                 fillBirtErrors = analyseActual(checklist.getBirtSteps(), report, isGen2020?" (2010)":"");
                 /* Store items in report*/
                 report.addBirtSteps(fillBirtErrors);
@@ -108,20 +105,11 @@ public class ServiceAnalyseBirtMt extends Thread {
             if (isGen2020) {
                 log.info("***************************** Look in Birt 2020 *****************");
                 queryLike = birt2020ConfigAndQuery.getQueryLike();
-                queryAccurate = birt2020ConfigAndQuery.getQueryIs();
+                queryIs = birt2020ConfigAndQuery.getQueryIs();
                 fillBirtErrors = analyseActual(checklist.getBirtSteps(), report, isGen2010?" (2020)":"");
                 /* Store items in report*/
                 report.addBirtSteps(fillBirtErrors);
             }
-
-
-
-
-
-                /* CHECK FOR REGRESSION */
-                if (analyseRegression) {
-                    analyseRegression(report);
-                }
 
             /* Iterate over BIRTs is not processed*/
             if (!isGen2010 && !isGen2020) {
@@ -138,6 +126,15 @@ public class ServiceAnalyseBirtMt extends Thread {
                 }
                 report.setBirtSteps(emptyBirtErrors);
             }
+
+
+
+                /* CHECK FOR REGRESSION */
+                if (analyseRegression) {
+                    analyseRegression(report);
+                }
+
+
 
 
             resultSet.close();
@@ -189,7 +186,7 @@ public class ServiceAnalyseBirtMt extends Thread {
             pstmt = con.prepareStatement(queryLike);
             pstmt.setString(1, "%" + report.getName() + "%R" + report.getIteration());
         } else {
-            pstmt = con.prepareStatement(queryAccurate);
+            pstmt = con.prepareStatement(queryIs);
             pstmt.setString(1, report.getName() + "_R" + report.getIteration());
         }
         pstmt.setInt(3, report.getLimit());
@@ -217,18 +214,19 @@ public class ServiceAnalyseBirtMt extends Thread {
 
                 /* Check is it possible to aggregate all rows to one
                  * with simplified name of PON*/
-                Boolean aggregateBirtSteps = Boolean.TRUE;
+                Boolean aggregateBirtSteps = Boolean.FALSE;// = Boolean.TRUE;
                 String resultOfCheckFirstRow = null;
                 Boolean firstRow = Boolean.TRUE;
+
                 StringBuilder ponNamesAggregated = new StringBuilder();
                 ChecklistEntry tempChecklistEntry =
                         new ChecklistEntry(errorToCheck + generation);
+
                 while (resultSet.next()) {
+
 
                     String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
                     String ponName = resultSet.getString(mainConfig.getBIRT_TASK_COL_NAME());
-//                        String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
-
 
                     if (firstRow) {
                         resultOfCheckFirstRow = resultOfTest;
@@ -243,17 +241,26 @@ public class ServiceAnalyseBirtMt extends Thread {
                         } else {
                             tempChecklistEntry.setResultOfCheckIsNOK(Boolean.FALSE);
                         }
-                        firstRow = Boolean.FALSE;
+
                     }
-                    if (resultOfTest.toUpperCase().equals(resultOfCheckFirstRow)) {
+                    if (resultOfTest.toUpperCase().equals(resultOfCheckFirstRow) ) {
+                        /* Store the name of PON to aggregate it if all are equal! */
                         ponNamesAggregated.append("&nbsp;");
                         ponNamesAggregated.append(ponName);
                         ponNamesAggregated.append("&nbsp;\n");
+
+                        if (resultSet.isLast() && !firstRow){
+                            aggregateBirtSteps = Boolean.TRUE;
+                        }
+                        firstRow = Boolean.FALSE;
                         continue;
+                    } else {
+                        aggregateBirtSteps = Boolean.FALSE;
+                        break;
                     }
-                    aggregateBirtSteps = Boolean.FALSE;
-                    break;
                 }
+
+
 
                 if (aggregateBirtSteps) {
                     /* It is possible to aggregate steps to one! */
@@ -269,12 +276,46 @@ public class ServiceAnalyseBirtMt extends Thread {
                         String testName = resultSet.getString(mainConfig.getBIRT_TEST_COL_NAME());
                         String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
 
+                        String exitCode =
+                                "Exit code = " +
+                                (resultSet.getString(mainConfig.getEXIT_CODE_COL_NAME()) == null
+                                ?"FINISHED"
+                                :"FAILED")+
+                                "<br/>\n";
+                        String analyzedFlag =
+                                "Analyzed = " +
+                                (resultSet.getString(mainConfig.getANAlYZED_FLAG_COL_NAME()).equals("1")?"TRUE":"FALSE") +
+                                "<br/>\n";
+                        String startTime =
+                                "Start time = " +
+                                resultSet.getString(mainConfig.getSTART_TIME_COL_NAME()) +
+                                "<br/>\n";
+                        String endTime =
+                                "End time = " +
+                                resultSet.getString(mainConfig.getEND_TIME_COL_NAME()) +
+                                "<br/>\n";
+                        String failureDescription =
+                                (resultSet.getString(mainConfig.getFAILURE_DESC_COL_NAME()) != null
+                                ?"Failure description = " +
+                                resultSet.getString(mainConfig.getFAILURE_DESC_COL_NAME()) +
+                                "<br/>\n"
+                                 :"");
+
+
+
+
                         ChecklistEntry entry =
                                 new ChecklistEntry(testName + generation);
 
                         entry.setStepIsChecked(Boolean.TRUE);
                         entry.setFullQuery(fullQuery);
                         entry.setFullNameOfPon(fullName);
+                        entry.setFactTestParameters(
+                                exitCode +
+                                analyzedFlag +
+                                startTime +
+                                endTime +
+                                failureDescription);
 
                         /*Save result of check as string and as boolean value */
                         entry.setResultOfCheckText(resultOfTest);
@@ -338,7 +379,7 @@ public class ServiceAnalyseBirtMt extends Thread {
                     pstmt = con.prepareStatement(queryLike);
                     pstmt.setString(1, "%" + nameToCheck.trim() + "%R" + report.getPrevIteration());
                 } else {
-                    pstmt = con.prepareStatement(queryAccurate);
+                    pstmt = con.prepareStatement(queryIs);
                     pstmt.setString(1, nameToCheck.trim() + "_R" + report.getPrevIteration());
                 }
                 pstmt.setString(2, entry.getNameOfErrorToCheckFor());

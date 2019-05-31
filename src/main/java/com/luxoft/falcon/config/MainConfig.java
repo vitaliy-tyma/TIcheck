@@ -86,5 +86,15 @@ public final class MainConfig {
         return this.configIsLoaded;
     }
 
+    @Getter @Setter
+    private String EXIT_CODE_COL_NAME;
+    @Getter @Setter
+    private String ANAlYZED_FLAG_COL_NAME;
+    @Getter @Setter
+    private String START_TIME_COL_NAME;
+    @Getter @Setter
+    private String END_TIME_COL_NAME;
+    @Getter @Setter
+    private String FAILURE_DESC_COL_NAME;
 
 }

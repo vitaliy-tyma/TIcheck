@@ -43,7 +43,7 @@
             SPIDER
         </SOURCE_NAME_SPIDER>
         <SPIDER_TASK_COL_NAME>
-            Task
+            TASK_NAME
         </SPIDER_TASK_COL_NAME>
         <SPIDER_JAVA_CLASS_ERROR_COL_NAME>
             JAVA_CLASS_ERROR
@@ -53,7 +53,7 @@
             BIRT
         </SOURCE_NAME_BIRT>
         <BIRT_TASK_COL_NAME>
-            Task
+            TASK_NAME
         </BIRT_TASK_COL_NAME>
         <BIRT_TEST_COL_NAME>
             TEST_NAME
@@ -61,6 +61,29 @@
         <BIRT_TEST_RESULT_NAME>
             TEST_RESULT
         </BIRT_TEST_RESULT_NAME>
+
+        <BIRT_EXIT_CODE_NAME>
+            EXITCODE
+        </BIRT_EXIT_CODE_NAME>
+
+        <BIRT_ANALYZED_FLAG_NAME>
+            ANALYZED
+        </BIRT_ANALYZED_FLAG_NAME>
+
+        <BIRT_START_TIME_NAME>
+            STARTTIME
+        </BIRT_START_TIME_NAME>
+
+        <BIRT_END_TIME_NAME>
+            ENDTIME
+        </BIRT_END_TIME_NAME>
+
+        <BIRT_FAILURE_DESC_NAME>
+            FAILUREDESCRIPTION
+        </BIRT_FAILURE_DESC_NAME>
+
+
+
         <SOURCE_NAME_NDS>
             NDS
         </SOURCE_NAME_NDS>
@@ -72,23 +95,37 @@
         <jdbcLogin>readonly</jdbcLogin>
         <jdbcPassword>readonly</jdbcPassword>
         <queryLike>
-             SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR
+             SELECT
+             ftel.task AS TASK_NAME,
+             ftel.revision AS REVISION,
+             fcel.java_class_error AS JAVA_CLASS_ERROR
+
              FROM spider_bmd.full_task_error_list ftel
+
              JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id
+
              WHERE ftel.task LIKE ?
-             AND ftel.revision = ?
-             AND fcel.java_class_error = ?
-             ORDER BY Task, Revision, JAVA_CLASS_ERROR
+             AND REVISION = ?
+             AND JAVA_CLASS_ERROR = ?
+
+             ORDER BY TASK_NAME, REVISION, JAVA_CLASS_ERROR
              LIMIT ?
         </queryLike>
         <queryIs>
-             SELECT ftel.task AS Task, ftel.revision AS Revision, fcel.java_class_error AS JAVA_CLASS_ERROR
+             SELECT
+             ftel.task AS TASK_NAME,
+             ftel.revision AS REVISION,
+             fcel.java_class_error AS JAVA_CLASS_ERROR
+
              FROM spider_bmd.full_task_error_list ftel
+
              JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id
+
              WHERE ftel.task = ?
-             AND ftel.revision = ?
-             AND fcel.java_class_error = ?
-             ORDER BY Task, Revision, JAVA_CLASS_ERROR
+             AND REVISION = ?
+             AND JAVA_CLASS_ERROR = ?
+
+             ORDER BY TASK_NAME, REVISION, JAVA_CLASS_ERROR
              LIMIT ?
         </queryIs>
     </SPIDER>
@@ -99,25 +136,53 @@
         <jdbcLogin>readonly</jdbcLogin>
         <jdbcPassword>readonly</jdbcPassword>
 	    <queryLike>
-            SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult
-            TEST_RESULT FROM ndsreport.test t
+            SELECT
+            s.testsuitename AS TASK_NAME,
+            td.name AS TEST_NAME,
+            tr.testresult TEST_RESULT,
+
+            tr.exitcode AS EXITCODE,
+            s.analyzed AS ANALYZED,
+            tr.starttime AS STARTTIME,
+            tr.endtime AS ENDTIME,
+            tr.failuredescription AS FAILUREDESCRIPTION
+
+            FROM ndsreport.test t
+
             JOIN ndsreport.testsuite s ON s.id = t.testsuite_id
             JOIN ndsreport.testresult tr ON tr.id = t.testresult_id
             JOIN ndsreport.testdescription td ON td.id = t.testdescription_id
+
             WHERE s.testsuitename LIKE ?
             AND td.name = ?
-            ORDER BY TASK, TEST_NAME
+            /*AND tr.exitcode IS null*/
+
+            ORDER BY TASK_NAME, TEST_NAME
             LIMIT ?
 	    </queryLike>
         <queryIs>
-            SELECT s.testsuitename AS Task, td.name AS TEST_NAME, tr.testresult TEST_RESULT
+            SELECT
+            s.testsuitename AS TASK_NAME,
+            td.name AS TEST_NAME,
+            tr.testresult TEST_RESULT,
+
+            tr.exitcode AS EXITCODE,
+            s.analyzed AS ANALYZED,
+            tr.starttime AS STARTTIME,
+            tr.endtime AS ENDTIME,
+            tr.failuredescription AS FAILUREDESCRIPTION
+
             FROM ndsreport.test t
+
             JOIN ndsreport.testsuite s ON s.id = t.testsuite_id
             JOIN ndsreport.testresult tr ON tr.id = t.testresult_id
             JOIN ndsreport.testdescription td ON td.id = t.testdescription_id
+
             WHERE s.testsuitename = ?
             AND td.name = ?
-            ORDER BY TASK, TEST_NAME
+            /*AND tr.exitcode IS null*/
+
+            ORDER BY TASK_NAME, TEST_NAME
             LIMIT ?
         </queryIs>
         <queryCheckGeneration>
@@ -132,23 +197,49 @@
         <jdbcLogin>readonly</jdbcLogin>
         <jdbcPassword>readonly</jdbcPassword>
         <queryLike>
-            SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT
+            SELECT
+            s.name AS TASK_NAME,
+            t.name AS TEST_NAME,
+            tr.result TEST_RESULT,
+
+            tr.exit_code AS EXITCODE,
+            s.is_analyzed AS ANALYZED,
+            tr.start_date_time AS STARTTIME,
+            tr.end_date_time AS ENDTIME,
+            tr.exception AS FAILUREDESCRIPTION
+
             FROM ndsreport_new.tests_results tr
+
             JOIN ndsreport_new.suites s ON s.id = tr.suite_id
             JOIN ndsreport_new.tests t ON t.id = tr.test_id
+
             WHERE s.name LIKE ?
             AND t.name = ?
-            ORDER BY TASK, TEST_NAME
+
+            ORDER BY TASK_NAME, TEST_NAME
             LIMIT ?
         </queryLike>
         <queryIs>
-            SELECT s.name AS Task, t.name AS TEST_NAME, tr.result TEST_RESULT
+            SELECT
+            s.name AS TASK_NAME,
+            t.name AS TEST_NAME,
+            tr.result TEST_RESULT,
+
+            tr.exitcode AS EXITCODE,
+            s.analyzed AS ANALYZED,
+            tr.starttime AS STARTTIME,
+            tr.endtime AS ENDTIME,
+            tr.failuredescription AS FAILUREDESCRIPTION
+
             FROM ndsreport_new.tests_results tr
+
             JOIN ndsreport_new.suites s ON s.id = tr.suite_id
             JOIN ndsreport_new.tests t ON t.id = tr.test_id
+
             WHERE s.name = ?
             AND t.name = ?
-            ORDER BY TASK, TEST_NAME
+
+            ORDER BY TASK_NAME, TEST_NAME
             LIMIT ?
         </queryIs>
         <queryCheckGeneration>

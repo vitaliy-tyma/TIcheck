@@ -23,13 +23,13 @@ public class ReportToHtml {
 
         result.append("<table border=1 width = 95%>\n");
         result.append("<tr>\n");
-        result.append("<th>#<br/>#</th>\n");
-        result.append("<th>Full name (iteration)</th>\n");
-        result.append("<th>Step</th>\n");
-        result.append("<th>Checked</th>\n");
-        result.append("<th>Result</th>\n");
-        result.append("<th>Query</th>\n");
-        result.append("<th>Regression</th>\n");
+        result.append("<th width=2%>#<br/>#</th>\n");
+        result.append("<th width=20%>Full name (iteration)</th>\n");
+        result.append("<th width=50%>Step</th>\n");
+        result.append("<th width=10%>Checked</th>\n");
+        result.append("<th width=10%>Result</th>\n");
+        result.append("<th width=2%>Query</th>\n");
+        result.append("<th width=10%>Regression</th>\n");
         result.append("</tr>\n");
 
 
@@ -101,15 +101,46 @@ public class ReportToHtml {
 
 
             //Show whether the step has been checked or not
-            if (entry.getStepIsChecked()) {
-                result.append(
-                        String.format("<td align=center><font color = green>%s</font></td>\n",
-                                entry.getStepIsChecked()));
+            if (entry.getFactTestParameters() == null) {
+                if (entry.getStepIsChecked()) {
+                    result.append(
+                            String.format("<td align=center><font color = green>%s</font></td>\n",
+                                    entry.getStepIsChecked()));
+                } else {
+                    result.append(
+                            String.format("<td align=center><font color = red>%s</font></td>\n",
+                                    entry.getStepIsChecked()));
+                }
             } else {
-                result.append(
-                        String.format("<td align=center><font color = red>%s</font></td>\n",
-                                entry.getStepIsChecked()));
+
+
+
+                if (entry.getStepIsChecked()) {
+                    result.append(
+                            String.format("<td align=center><font color = green>" +
+                                            "<div class=\"tooltip_for_query\">%s" +
+                                            "<span class=\"tooltiptext\">%s</span>" +
+                                            "</div></font></td>\n",
+                                    entry.getStepIsChecked(),
+                                    entry.getFactTestParameters()));
+//                    result.append(
+//                            String.format("<td align=center><font color = green>%s</font></td>\n",
+//                                    entry.getStepIsChecked()));
+                } else {
+                    result.append(
+                            String.format("<td align=center><font color = red>" +
+                                            "<div class=\"tooltip_for_query\">%s" +
+                                            "<span class=\"tooltiptext\">%s</span>" +
+                                            "</div></font></td>\n",
+                                    entry.getStepIsChecked(),
+                                    entry.getFactTestParameters()));
+//                    result.append(
+//                            String.format("<td align=center><font color = red>%s</font></td>\n",
+//                                    entry.getStepIsChecked()));
+                }
             }
+
+
 
 
             //Show result and TEST if it is not OK or NOK in the tooltip

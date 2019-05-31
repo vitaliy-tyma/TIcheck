@@ -62,4 +62,9 @@ public class ChecklistEntry {
     @Getter
     @Setter
     private String aggregatedNames;
+
+    @Getter
+    @Setter
+    private String factTestParameters;
+
 }

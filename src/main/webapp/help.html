@@ -5,7 +5,7 @@
 <h1>AUTOMATED CHECKLIST ANALYSER v.0.3.0</h1>
 <h2>HELP</h2>
 </div>
-<table align="center" width=50%>
+<table align="center" width=600px>
     <tr><td>
 
         <div>
@@ -52,6 +52,22 @@ In the Regression column result of regression check is shown in the following wa
             for SPIDER - regression is "Yes" - see the name of previous PON the tooltip;
             for BIRT - regression is "Not found" - see the name of previous PON the tooltip;
         If result is OK for BIRT - regression is "Yes" - see the name of previous PON the tooltip.
+
+Before querying the BIRT DBs check is accomplished:
+        1) if PON is detected in 2010 only, request is sent only to 2010
+        2) if PON is detected in 2020 only, request is sent only to 2020
+        3) if PON is detected in both DBs, requests are being sent to both DBs
+           (and suffix (2010) or (2020) is added to the test name)
+        4) is PON is not detected at all - Not found result is shown.
+
+
+If for some PON FACT tests were run for several times, then in the "Checked" column
+        the following values will be shown in tooltip:
+        Exit code (if NULL it meant that FACT test has been finished correctly!)
+        Analyzed Flag
+        Start time
+        End time
+        Failure description
 
         <b><font color="red">
         Important note: if PON has several iterations and, in worse case

@@ -154,10 +154,13 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
 
 
-                /* Ir ResultSet is not empty - check all rows and create new items in List of Spider Errors*/
+                /* If ResultSet is not empty - check all rows and
+                 * create new items in List of Spider Errors*/
                 while (resultSet.next()) {
-                    String fullName = resultSet.getString(mainConfig.getSPIDER_TASK_COL_NAME());
-                    String error = resultSet.getString(mainConfig.getSPIDER_JAVA_CLASS_ERROR_COL_NAME());
+                    String fullName = resultSet
+                            .getString(mainConfig.getSPIDER_TASK_COL_NAME());
+                    String error = resultSet
+                            .getString(mainConfig.getSPIDER_JAVA_CLASS_ERROR_COL_NAME());
 
 
                     fillSpiderErrors.add(
