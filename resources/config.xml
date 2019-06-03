@@ -105,8 +105,9 @@
              JOIN spider_bmd.full_compiler_error_list fcel ON ftel.java_class_error_id = fcel.id
 
              WHERE ftel.task LIKE ?
-             AND REVISION = ?
-             AND JAVA_CLASS_ERROR = ?
+             /*AND (REVISION = ? or true)*/
+            AND REVISION = ?
+            AND JAVA_CLASS_ERROR = ?
 
              ORDER BY TASK_NAME, REVISION, JAVA_CLASS_ERROR
              LIMIT ?
@@ -143,8 +144,8 @@
 
             tr.exitcode AS EXITCODE,
             s.analyzed AS ANALYZED,
-            tr.starttime AS STARTTIME,
-            tr.endtime AS ENDTIME,
+            tr.starttime AS STARTTIME,/*s for suite, tr for test results*/
+            tr.endtime AS ENDTIME,/*s for suite, tr for test results*/
             tr.failuredescription AS FAILUREDESCRIPTION
 
             FROM ndsreport.test t
@@ -155,7 +156,7 @@
 
             WHERE s.testsuitename LIKE ?
             AND td.name = ?
-            /*AND tr.exitcode IS null*/
+            /*AND tr.exitcode IS null*//*NOT USED*/
 
             ORDER BY TASK_NAME, TEST_NAME
             LIMIT ?
@@ -168,8 +169,8 @@
 
             tr.exitcode AS EXITCODE,
             s.analyzed AS ANALYZED,
-            tr.starttime AS STARTTIME,
-            tr.endtime AS ENDTIME,
+            tr.starttime AS STARTTIME,/*s for suite, tr for test results*/
+            tr.endtime AS ENDTIME,/*s for suite, tr for test results*/
             tr.failuredescription AS FAILUREDESCRIPTION
 
             FROM ndsreport.test t
@@ -180,7 +181,7 @@
 
             WHERE s.testsuitename = ?
             AND td.name = ?
-            /*AND tr.exitcode IS null*/
+            /*AND tr.exitcode IS null*//*NOT USED*/
 
             ORDER BY TASK_NAME, TEST_NAME
             LIMIT ?
@@ -204,8 +205,8 @@
 
             tr.exit_code AS EXITCODE,
             s.is_analyzed AS ANALYZED,
-            tr.start_date_time AS STARTTIME,
-            tr.end_date_time AS ENDTIME,
+            tr.start_date_time AS STARTTIME,/*s for suite, tr for test results*/
+            tr.end_date_time AS ENDTIME,/*s for suite, tr for test results*/
             tr.exception AS FAILUREDESCRIPTION
 
             FROM ndsreport_new.tests_results tr
@@ -225,11 +226,11 @@
             t.name AS TEST_NAME,
             tr.result TEST_RESULT,
 
-            tr.exitcode AS EXITCODE,
-            s.analyzed AS ANALYZED,
-            tr.starttime AS STARTTIME,
-            tr.endtime AS ENDTIME,
-            tr.failuredescription AS FAILUREDESCRIPTION
+            tr.exit_code AS EXITCODE,
+            s.is_analyzed AS ANALYZED,
+            tr.start_date_time AS STARTTIME,/*s for suite, tr for test results*/
+            tr.end_date_time AS ENDTIME,/*s for suite, tr for test results*/
+            tr.exception AS FAILUREDESCRIPTION
 
             FROM ndsreport_new.tests_results tr
 

@@ -198,8 +198,11 @@ public class ServletAnalyse extends HttpServlet {
 
             /* Error handling in case of input parameters problems*/
         } catch (Exception e) {
-            log.error(e.getMessage());
-            report.addLogOfErrors(e.getMessage());
+//            log.error(e.getMessage());
+            log.error(e.toString());
+            log.error(String.valueOf(e));
+//            report.addLogOfErrors(e.getMessage());
+            report.addLogOfErrors(this.getClass().getName() + e.toString());
             result.append("<html>\nError while processing ServiceAnalyse<br/>\n");
             result.append(report.getLogOfErrors());
             result.append("\n<html>");
@@ -274,7 +277,7 @@ public class ServletAnalyse extends HttpServlet {
             report.setNdsSteps(analyseNdsMt.getSteps());
             requestsCount += analyseNdsMt.getRequestsCount();
         } catch (Exception e) {
-            report.addLogOfErrors(e.getMessage());
+            report.addLogOfErrors(e.toString());
         }
     }
 

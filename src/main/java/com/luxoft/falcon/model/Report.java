@@ -157,7 +157,7 @@ public class Report {
     private LinkedList<String> logOfErrors = new LinkedList<>();
 
     public void addLogOfErrors(String string) {
-        this.logOfErrors.add("<br>" + string + "<br/>\n");
+        this.logOfErrors.add("" + string + "<br/>\n");
     }
 
 

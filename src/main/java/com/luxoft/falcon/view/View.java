@@ -32,6 +32,7 @@ public class View {
         } else {
             result.append(getSummaryDataUnderForm(report));
             result.append(getFinalPartOfTheForm());
+            result.append(showErrorLog(report));
             result.append(ReportToHtml.getDataFromReport(report));
         }
 
@@ -57,6 +58,7 @@ public class View {
         result.append("<link href=\"lib/css/TIcheck.css\" rel=\"stylesheet\" type=\"text/css\">\n");
         result.append("<link href=\"lib/css/tooltip.css\" rel=\"stylesheet\" type=\"text/css\">\n");
         result.append("<link href=\"lib/css/tableRowsColor.css\" rel=\"stylesheet\" type=\"text/css\">\n");
+        result.append("<link rel=\"shortcut icon\" href=\"lib/img/favicon.ico\" type=\"image/x-icon\">");
         result.append("<style>\n");
         result.append("</style>\n");
         result.append("</head>\n");
@@ -64,27 +66,26 @@ public class View {
         return result.toString();
     }
 
-    private static String getTitle(String nameOfChecklist, Report report){
+    private static String getTitle(String nameOfChecklist, Report report) {
         StringBuilder result = new StringBuilder();
 
-        result.append((nameOfChecklist != null && nameOfChecklist != "")? "[" + nameOfChecklist:"");
+        result.append((nameOfChecklist != null && nameOfChecklist != "") ? "[" + nameOfChecklist : "");
 
         result.append(
                 (report.getName() != null && report.getName() != "")
-                        ? " for " + report.getName() + ":" + report.getIteration() :"");
+                        ? " for " + report.getName() + ":" + report.getIteration() : "");
 
         result.append(
                 (report.getPrevName() != null && report.getPrevName() != "")
-                        ? " / " + report.getPrevName() + ":" + report.getPrevIteration() :"");
+                        ? " / " + report.getPrevName() + ":" + report.getPrevIteration() : "");
 
-        result.append((nameOfChecklist != null && nameOfChecklist != "")? "] - " :"");
+        result.append((nameOfChecklist != null && nameOfChecklist != "") ? "] - " : "");
 
 
         result.append("Automated checklist analyser\n");
 
         return result.toString();
     }
-
 
 
     /* Display the first part of the body*/
@@ -340,7 +341,7 @@ public class View {
         result.append("\n<tr>\n<td colspan = 5 align = center>\n");
 
         /* Show time, requests count and date time */
-        result.append("\n<br/>\n<div align = left>\n");
+        result.append("\n<div align = left>\n");
 
         DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         Date date = new Date();
@@ -353,23 +354,6 @@ public class View {
         result.append("</div>\n");
 
 
-        /*Show error log if it exists*/
-        if (report.getLogOfErrors().size() != 0) {
-            result.append("<br/>\n<div align = left>\n");
-            result.append("<details>\n<summary>\n<u><b>\nSee log of errors while checklist analysis</b></u>\n</summary>\n");
-            result.append(
-                    String.format(
-                            "\n<div><p>\n<font color=red>%s</font></p>\n</div>\n",
-                            report.getLogOfErrors()
-                                    .toString()
-                                    .replace("[", "")
-                                    .replace("]", "")));
-            result.append("</details>\n");
-            result.append("</div>\n");
-
-
-        }
-
         result.append("</td>\n");
         result.append("</tr>\n");
 
@@ -377,6 +361,26 @@ public class View {
         return result.toString();
     }
 
+
+    private static String showErrorLog(Report report) {
+
+        StringBuilder result = new StringBuilder();
+        /*Show error log if it exists*/
+        if (report.getLogOfErrors().size() != 0) {
+            result.append("<br/>\n<div align = left>\n");
+            result.append("<details>\n<summary>\n<u><b>\n<font color = red>SEE THE LOG OF ERRORS WHILE CHECKLIST ANALYSIS</font></b></u>\n</summary>\n");
+            result.append(
+                    String.format(
+                            "\n<div><p>\n<font color=red>, %s</font></p>\n</div>\n",
+                            report.getLogOfErrors()
+                                    .toString()
+                                    .replace("[", "")
+                                    .replace("]", "")));
+            result.append("</details>\n");
+            result.append("</div>\n<br/>\n");
+        }
+        return result.toString();
+    }
 
     private static boolean checkReportForErrors(List<ChecklistEntry> steps) {
         for (ChecklistEntry entry : steps) {

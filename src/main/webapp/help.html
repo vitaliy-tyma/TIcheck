@@ -23,6 +23,9 @@ Status   Name    Iteration
 Actual   PON943  1
 Previous PON928  1
 <a href="http://172.30.136.166:8080/TIcheck/analyse?pon_name=PON943&pon_iteration=1&use_query_like=on&regression_check=on&prev_pon_name=PON928&prev_pon_iteration=1&use_query_like_for_prev=on&checklists=TIwithNoNDS&limit=100">PON943/1 to PON928/1</a>
+Note: also reverse order may be used for demonstration purpose
+<a href="http://172.30.136.166:8080/TIcheck/analyse?pon_name=PON928&pon_iteration=1&use_query_like=on&regression_check=on&prev_pon_name=PON943&prev_pon_iteration=1&use_query_like_for_prev=on&checklists=TIwithNoNDS&limit=100">PON928/1 to PON943/1</a>
+
 
 Actual   PONB6A  1
 Previous PONB2F  1
@@ -57,9 +60,12 @@ Before querying the BIRT DBs check is accomplished:
         1) if PON is detected in 2010 only, request is sent only to 2010
         2) if PON is detected in 2020 only, request is sent only to 2020
         3) if PON is detected in both DBs, requests are being sent to both DBs
-           (and suffix (2010) or (2020) is added to the test name)
-        4) is PON is not detected at all - Not found result is shown.
+           Note: suffix (2010) or (2020) is added to the test name for valid results.
+        4) is PON is not detected at all - "Not found" is shown in the result column.
 
+If limit value is less then total count of records, extracted from the DBs,
+        then error log will be stored and displayed under the main form (total quantity of values will be shown).
+        Note: please choose the greater value for the Limit.
 
 If for some PON FACT tests were run for several times, then in the "Checked" column
         the following values will be shown in tooltip:
@@ -103,13 +109,15 @@ If for some PON FACT tests were run for several times, then in the "Checked" col
     <h3>TODO plans:</h3>
     <pre>
 
-        1) automatic deploy with Docker and Jenkins.
-        2) automatic tests run before maven package.
-        3) automatic refresh of configs after requesting is in development.
-        4) make AJAX for PON name detection and result displaying
-        5) make Api for other apps
-        <font color="red">6) BIRT - clarify with exitcode parameter!!!</font>
-        7) test DBs processing - location differs
+        1) Test DBs processing - location in SPIDER is DBPROD_test!
+<font color="red">2) Solve the issue with the multiple iterations (FAST select functionality)</font>
+        3) automatic deploy with Docker and Jenkins.
+        4) automatic tests run before maven package.
+        5) log-files to file redirect - monitor via WEB-interface.
+        6) make AJAX service for PON name detection and result displaying.
+        7) make RESTful API for other apps.
+        8) DoS protection - users activity control.
+        9) configs reload after requesting (is in development - view to add).
     </pre>
 
 </div>

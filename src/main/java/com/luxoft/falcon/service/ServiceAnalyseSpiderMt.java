@@ -42,10 +42,12 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
     private static MainConfig mainConfig = MainConfig.getInstance();
     private static SpiderConfigAndQuery spiderConfigAndQuery = SpiderConfigAndQuery.getInstance();
-    private static Connection con = null;
-    private static PreparedStatement pstmt = null;
-    private static ResultSet resultSet = null;
-    private static int requestsCount;
+    private Connection con = null;
+    private PreparedStatement pstmt = null;
+    private ResultSet resultSet = null;
+    private PreparedStatement pstmtCount = null;
+    private ResultSet resultSetCount = null;
+    private int requestsCount;
 
 
     public ServiceAnalyseSpiderMt(Checklist checklist, Report report, Boolean analyseRegression){
@@ -90,14 +92,22 @@ public class ServiceAnalyseSpiderMt extends Thread {
             pstmt.close();
             con.close();
         } catch (Exception e) {
-            log.error(e.getMessage());
-            report.addLogOfErrors(e.getMessage());
+            log.error(e.toString());
+            report.addLogOfErrors(this.getClass().getName() + e.toString());
         } finally {
             if (resultSet != null) {
                 resultSet = null;
             }
+            if (resultSetCount != null) {
+                resultSetCount = null;
+            }
+
             if (pstmt != null) {
                 pstmt = null;
+            }
+
+            if (pstmtCount != null) {
+                pstmtCount = null;
             }
             if (con != null) {
                 con = null;
@@ -113,7 +123,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
 
 
-    private static List<ChecklistEntry> analyseActual(List<String> steps, Report report) throws SQLException {
+    private List<ChecklistEntry> analyseActual(List<String> steps, Report report) throws SQLException {
         List<ChecklistEntry> fillSpiderErrors = new LinkedList<>();
 
         if (report.getUseQueryLike()) {
@@ -134,6 +144,16 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
                 resultSet = pstmt.executeQuery();
                 requestsCount++;
+
+            pstmtCount =
+                    con.prepareStatement(
+                            " SELECT COUNT(*) AS COUNTER FROM " +
+                                    fullQuery
+                                            .split("ORDER BY", 2)[0]
+                                            .split("FROM", 2)[1]
+                    );
+            resultSetCount = pstmtCount.executeQuery();
+            requestsCount++;
 
                 log.debug(String.format("************************* Spider query has been executed (%s)", fullQuery));
 
@@ -157,6 +177,25 @@ public class ServiceAnalyseSpiderMt extends Thread {
                 /* If ResultSet is not empty - check all rows and
                  * create new items in List of Spider Errors*/
                 while (resultSet.next()) {
+                    /* Check that LIMIT is not exceeded! */
+                    if (resultSet.isLast()) {
+                        while (resultSetCount.next()) {
+                            if (Integer.valueOf(resultSetCount.getString("COUNTER"))
+                                    > report.getLimit()) {
+
+                                report.addLogOfErrors("QUERY LIMIT " +
+                                        report.getLimit().toString() +
+                                        " has been exceeded - results count is " +
+                                        resultSetCount.getString("COUNTER") +
+                                        " rows " +
+                                        "for SPIDER error \"" +
+                                        errorToCheck +
+                                        "\"!"
+                                );
+                            }
+                        }
+                    }
+
                     String fullName = resultSet
                             .getString(mainConfig.getSPIDER_TASK_COL_NAME());
                     String error = resultSet
@@ -172,6 +211,8 @@ public class ServiceAnalyseSpiderMt extends Thread {
                                     fullName,
                                     "NOK"));
 
+
+
                     log.debug(String.format("************************* Spider resultSet item (%s) processed !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", fullName));
                 }
         }
@@ -181,7 +222,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
 
     /* Make regression analysis*/
-    private static void analyseRegression(Report report) throws SQLException {
+    private void analyseRegression(Report report) throws SQLException {
 
             for (ChecklistEntry entry : report.getSpiderSteps()) {
 
@@ -197,7 +238,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
                         report.addLogOfErrors(
                                 String.format("Regression check - error while converting names - work with %s. Error is [%s]",
                                         nameToCheck,
-                                        e.getMessage()));
+                                        e.toString()));
                     }
 
 
@@ -229,7 +270,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
                     if (!resultSet.isBeforeFirst()) {
                         entry.setIsRegression("Yes");
-                        entry.setFullNameOfRegressionPon(nameToCheck);
+                        entry.setFullNameOfRegressionPon("No records have been found for<br/>" + nameToCheck);
 
                     }
 
@@ -241,7 +282,7 @@ public class ServiceAnalyseSpiderMt extends Thread {
 
                         if (restOfOriginalName.equals(restOfPrevName)) {
                             entry.setIsRegression("No");
-                            entry.setFullNameOfRegressionPon(nameToCheck);
+                            entry.setFullNameOfRegressionPon("No records for<br/>" + nameToCheck);
                         }
 
                     }
