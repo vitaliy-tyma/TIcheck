@@ -1,5 +1,6 @@
 package com.luxoft.falcon.view;
 
+import com.luxoft.falcon.config.MainConfig;
 import com.luxoft.falcon.model.ChecklistEntry;
 import com.luxoft.falcon.model.ChecklistsList;
 import com.luxoft.falcon.model.ChecklistsListEntry;
@@ -13,6 +14,7 @@ import java.util.List;
 
 
 public class View {
+    private static MainConfig mainConfig = MainConfig.getInstance();
 
     /* MAIN METHOD*/
     public static String getHTML(
@@ -266,6 +268,14 @@ public class View {
                         "Analyse\n" +
                         "</button>\n");
 
+        result.append(
+                String.format(
+                        "<input %s\n" +
+                                "type=\"checkbox\"\n" +
+                                "name=\"limit_on_off\"\n" +
+                                "title=\"Check if limit setting is affecting results\"\n" +
+                                "tabindex=\"32\">\n",
+                        report.getLimitControl()?"checked":""));
 
         boolean limit10 = false;
         boolean limit100 = false;
@@ -295,17 +305,20 @@ public class View {
                                 "name = \"limit\"\n" +
                                 "form=\"checklist\"\n" +
                                 "style=\"width: 120px\"\n" +
-                                "tabindex=\"32\">\n" +
+                                "tabindex=\"33\">\n" +
                                 "            <option value = \"10\" %s>10</option>\n" +
                                 "            <option value = \"100\" %s>100 (Default)</option>\n" +
                                 "            <option value = \"1000\" %s>1000</option>\n" +
                                 "            <option value = \"10000\" %s>10000</option>\n" +
-                                "         </select> Limit request output\n",
+                                "         </select> Limit request &nbsp;\n",
 
                         (limit10 ? "selected" : ""),
                         (limit100 ? "selected" : ""),
                         (limit1000 ? "selected" : ""),
                         (limit10000 ? "selected" : "")));
+
+
+
 
         result.append("</td>\n");
         result.append("</tr>\n");
@@ -347,9 +360,10 @@ public class View {
         Date date = new Date();
         result.append(
                 String.format(
-                        "Elapsed: %s seconds; Requests Count: %s; Request time: %s",
+                        "Elapsed: %s seconds; Requests Count: %s; Limit control: %s; Request time: %s",
                         report.getElapsedTime(),
                         report.getRequestsCount(),
+                        report.getLimitControl()?"ON":"OFF",
                         dateFormat.format(date)));
         result.append("</div>\n");
 

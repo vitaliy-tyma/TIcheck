@@ -152,6 +152,11 @@ public class ReadXML {
                                     replace("\n", "").trim().
                                     toUpperCase().
                                     equals("YES")));
+                    mainConfig.setLIMIT_CONTROL_NAME(
+                            (eElement.getElementsByTagName(
+                                    "LIMIT_CONTROL_NAME").
+                                    item(0).getTextContent().
+                                    replace("\n", "").trim()));
                     mainConfig.setCHECKLIST_NAME(
                             eElement.getElementsByTagName(
                                     "CHECKLIST_NAME").

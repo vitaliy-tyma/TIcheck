@@ -176,7 +176,9 @@ public class Report {
     private int requestsCount;
 
 
-
+    @Getter
+    @Setter
+    private Boolean limitControl = Boolean.TRUE;
 
 
     public void clear() {

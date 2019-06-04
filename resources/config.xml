@@ -7,6 +7,9 @@
         <CHECKLIST_NAME>
             name
         </CHECKLIST_NAME>
+        <LIMIT_CONTROL_NAME>
+            limit_on_off
+        </LIMIT_CONTROL_NAME>
 
         <PON_NAME_REQUEST>
             pon_name

@@ -215,16 +215,17 @@ public class ServiceAnalyseBirtMt extends Thread {
             resultSet = pstmt.executeQuery();
             requestsCount++;
 
-
-            pstmtCount =
-                    con.prepareStatement(
-                            " SELECT COUNT(*) AS COUNTER FROM " +
-                                    fullQuery
-                                            .split("ORDER BY", 2)[0]
-                                            .split("FROM", 2)[1]
-                    );
-            resultSetCount = pstmtCount.executeQuery();
-            requestsCount++;
+            if (report.getLimitControl()) {
+                pstmtCount =
+                        con.prepareStatement(
+                                " SELECT COUNT(*) AS COUNTER FROM " +
+                                        fullQuery
+                                                .split("ORDER BY", 2)[0]
+                                                .split("FROM", 2)[1]
+                        );
+                resultSetCount = pstmtCount.executeQuery();
+                requestsCount++;
+            }
 
             log.debug(String.format("************************* Birt query has been executed (%s)", fullQuery));
             /*If response is empty = store only one item for the step with NOT FOUND description*/
@@ -251,26 +252,27 @@ public class ServiceAnalyseBirtMt extends Thread {
 
                 while (resultSet.next()) {
                     /* Check that LIMIT is not exceeded! */
-                    if (resultSet.isLast()) {
-                        while (resultSetCount.next()) {
-                            if (Integer.valueOf(resultSetCount.getString("COUNTER"))
-                                    > report.getLimit()) {
+                    if (report.getLimitControl()) {
+                        if (resultSet.isLast()) {
+                            while (resultSetCount.next()) {
+                                if (Integer.valueOf(resultSetCount.getString("COUNTER"))
+                                        > report.getLimit()) {
 
-                                report.addLogOfErrors("QUERY LIMIT " +
-                                        report.getLimit().toString() +
-                                        " has been exceeded - results count is " +
-                                        resultSetCount.getString("COUNTER") +
-                                        " rows!" +
-                                        "for BIRT test \"" +
-                                        errorToCheck +
-                                        " " +
-                                        generation +
-                                        "\"!"
-                                );
+                                    report.addLogOfErrors("QUERY LIMIT " +
+                                            report.getLimit().toString() +
+                                            " has been exceeded - results count is " +
+                                            resultSetCount.getString("COUNTER") +
+                                            " rows!" +
+                                            "for BIRT test \"" +
+                                            errorToCheck +
+                                            " " +
+                                            generation +
+                                            "\"!"
+                                    );
+                                }
                             }
                         }
                     }
-
                     String resultOfTest = resultSet.getString(mainConfig.getBIRT_TEST_RESULT_NAME());
                     String ponName = resultSet.getString(mainConfig.getBIRT_TASK_COL_NAME());
 

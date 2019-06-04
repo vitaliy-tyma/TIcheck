@@ -145,16 +145,17 @@ public class ServiceAnalyseSpiderMt extends Thread {
                 resultSet = pstmt.executeQuery();
                 requestsCount++;
 
-            pstmtCount =
-                    con.prepareStatement(
-                            " SELECT COUNT(*) AS COUNTER FROM " +
-                                    fullQuery
-                                            .split("ORDER BY", 2)[0]
-                                            .split("FROM", 2)[1]
-                    );
-            resultSetCount = pstmtCount.executeQuery();
-            requestsCount++;
-
+                if (report.getLimitControl()) {
+                    pstmtCount =
+                            con.prepareStatement(
+                                    " SELECT COUNT(*) AS COUNTER FROM " +
+                                            fullQuery
+                                                    .split("ORDER BY", 2)[0]
+                                                    .split("FROM", 2)[1]
+                            );
+                    resultSetCount = pstmtCount.executeQuery();
+                    requestsCount++;
+                }
                 log.debug(String.format("************************* Spider query has been executed (%s)", fullQuery));
 
 
@@ -178,24 +179,25 @@ public class ServiceAnalyseSpiderMt extends Thread {
                  * create new items in List of Spider Errors*/
                 while (resultSet.next()) {
                     /* Check that LIMIT is not exceeded! */
-                    if (resultSet.isLast()) {
-                        while (resultSetCount.next()) {
-                            if (Integer.valueOf(resultSetCount.getString("COUNTER"))
-                                    > report.getLimit()) {
+                    if (report.getLimitControl()) {
+                        if (resultSet.isLast()) {
+                            while (resultSetCount.next()) {
+                                if (Integer.valueOf(resultSetCount.getString("COUNTER"))
+                                        > report.getLimit()) {
 
-                                report.addLogOfErrors("QUERY LIMIT " +
-                                        report.getLimit().toString() +
-                                        " has been exceeded - results count is " +
-                                        resultSetCount.getString("COUNTER") +
-                                        " rows " +
-                                        "for SPIDER error \"" +
-                                        errorToCheck +
-                                        "\"!"
-                                );
+                                    report.addLogOfErrors("QUERY LIMIT " +
+                                            report.getLimit().toString() +
+                                            " has been exceeded - results count is " +
+                                            resultSetCount.getString("COUNTER") +
+                                            " rows " +
+                                            "for SPIDER error \"" +
+                                            errorToCheck +
+                                            "\"!"
+                                    );
+                                }
                             }
                         }
                     }
-
                     String fullName = resultSet
                             .getString(mainConfig.getSPIDER_TASK_COL_NAME());
                     String error = resultSet

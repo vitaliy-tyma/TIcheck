@@ -83,6 +83,10 @@ public class ServletAnalyse extends HttpServlet {
                 httpServletRequest.getParameter(mainConfig.getCHECKLISTS_REGRESSION());
         httpServletRequest.setAttribute(mainConfig.getCHECKLISTS_REGRESSION(), regressionCheck);
 
+        final String limitControl =
+                httpServletRequest.getParameter(mainConfig.getLIMIT_CONTROL_NAME());
+        httpServletRequest.setAttribute(mainConfig.getLIMIT_CONTROL_NAME(), limitControl);
+
 
         long start = System.currentTimeMillis();
         log.info("****************************************** CHECKLIST IS BEING PROCESSED *****************************************");
@@ -111,10 +115,20 @@ public class ServletAnalyse extends HttpServlet {
                 report.setName(ponName);
                 report.setIteration(ponIteration);
                 report.setLimit(limitValue);
+
+                if (limitControl == null) {
+                    report.setLimitControl(Boolean.FALSE);
+                } else {
+                    if (limitControl.toUpperCase().equals("ON")){
+                        report.setLimitControl(Boolean.TRUE);
+                    } else {
+                        report.setLimitControl(Boolean.FALSE);
+                    }
+                }
                 if (useQueryLike == null) {
                     report.setUseQueryLike(Boolean.FALSE);
                 } else {
-                    if (useQueryLike.equals("on")) {
+                    if (useQueryLike.toUpperCase().equals("ON")) {
                         report.setUseQueryLike(Boolean.TRUE);
                     } else {
                         report.setUseQueryLike(Boolean.FALSE);

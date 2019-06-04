@@ -97,4 +97,7 @@ public final class MainConfig {
     @Getter @Setter
     private String FAILURE_DESC_COL_NAME;
 
+    @Getter @Setter
+    private String LIMIT_CONTROL_NAME;
+
 }
